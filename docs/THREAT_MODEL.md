@@ -1,6 +1,6 @@
-# Disignum — Security & Threat Model
+# Signify — Security & Threat Model
 
-This document outlines the security architecture and threat model for Disignum in accordance with secure AI engineering best practices and Hackathon Requirement 10: *"Keep API secrets on the server. Never commit credentials or expose them in client-side code."*
+This document outlines the security architecture and threat model for Signify in accordance with secure AI engineering best practices and Hackathon Requirement 10: *"Keep API secrets on the server. Never commit credentials or expose them in client-side code."*
 
 ---
 
@@ -18,7 +18,7 @@ This document outlines the security architecture and threat model for Disignum i
    │
 [ Trust Boundary: TLS / HTTPS / Localhost ]
    │
-[ Disignum Backend Proxy (FastAPI) ]
+[ Signify Backend Proxy (FastAPI) ]
    ├─► Validates Request Schemas & Consent Headers
    ├─► Secure Server-Side Env Vars (VERBX_API_KEY)
    ├─► SQLite Audit Store (Records events without raw biometric media)
@@ -32,7 +32,7 @@ This document outlines the security architecture and threat model for Disignum i
 
 ## 2. STRIDE Threat Analysis
 
-| Threat | Description | Disignum Mitigation |
+| Threat | Description | Signify Mitigation |
 | :--- | :--- | :--- |
 | **Spoofing** | Attacker impersonates a valid user or injects fraudulent landmark streams. | Landmark inputs are validated against anatomical hand coordinate constraints (21 landmarks, bounded coordinates $[0, 1]$, valid bone length ratios). |
 | **Tampering** | Modifying speech transcripts or sign dictionary metadata. | Sign dictionary is immutable and version-controlled. Transcripts can be edited intentionally only by the user in the UI with explicit user confirmation. |

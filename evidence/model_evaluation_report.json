@@ -1,6 +1,6 @@
 {
   "timestamp": "2026-10-18T18:48:39Z",
-  "model_name": "Disignum-ISL-GeometricNormalizer-v1.0",
+  "model_name": "Signify-ISL-GeometricNormalizer-v1.0",
   "total_test_samples": 250,
   "macro_f1_score": 0.8305,
   "mean_latency_ms": 0.17,

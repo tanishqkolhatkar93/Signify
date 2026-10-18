@@ -1,6 +1,6 @@
-# Disignum — Data Provenance & Ethics Specification
+# Signify — Data Provenance & Ethics Specification
 
-This document details the origins, licensing, consent standards, and validation methodologies for all sign language references and evaluation datasets used in **Disignum**.
+This document details the origins, licensing, consent standards, and validation methodologies for all sign language references and evaluation datasets used in **Signify**.
 
 ---
 
@@ -9,7 +9,7 @@ This document details the origins, licensing, consent standards, and validation 
 * **ISO 639-3 Code:** `ins`
 * **Linguistic Community:** Deaf and hard-of-hearing community of India (~6 million+ signers).
 * **Scope Definition:** The current version targets an essential conversational, courtesy, and emergency vocabulary of 12 distinct lexical signs.
-* **Disclaimer:** Disignum explicitly does NOT claim universal sign translation, continuous grammar translation, or complete coverage of ISL dialects.
+* **Disclaimer:** Signify explicitly does NOT claim universal sign translation, continuous grammar translation, or complete coverage of ISL dialects.
 
 ---
 
@@ -32,7 +32,7 @@ This document details the origins, licensing, consent standards, and validation 
 ---
 
 ## 3. Filming Consent and Biometric Ethics
-Disignum strictly adheres to Hackathon Requirement 6: *"Obtain consent from anyone filmed."*
+Signify strictly adheres to Hackathon Requirement 6: *"Obtain consent from anyone filmed."*
 
 ### Zero Video Retention Policy
 1. **Volatile Processing:** Camera frames captured via the HTML5 `getUserMedia` API are passed directly into client-side MediaPipe WASM tensors in browser memory.

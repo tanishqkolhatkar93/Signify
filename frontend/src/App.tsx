@@ -77,7 +77,7 @@ export const App: React.FC = () => {
             </span>
             <h1 className="hero-title">Communication Without Barriers.</h1>
             <p className="hero-subtitle">
-              Disignum bridges deaf and hearing communicators through an intelligent, uncertainty-aware assistant connecting verified <strong>Indian Sign Language (ISL)</strong> with multilingual speech and text in both directions.
+              Signify bridges deaf and hearing communicators through an intelligent, uncertainty-aware assistant connecting verified <strong>Indian Sign Language (ISL)</strong> with multilingual speech and text in both directions.
             </p>
 
             <div className="hero-highlights">
@@ -123,7 +123,7 @@ export const App: React.FC = () => {
       <footer className="site-footer">
         <div className="footer-container">
           <p>
-            <strong>Disignum</strong> • AI Sign-Language Communication System. Designed for Agentic AI Hackathon 2026 powered by Ziro.Digital.
+            <strong>Signify</strong> • AI Sign-Language Communication System. Designed for Agentic AI Hackathon 2026 powered by Ziro.Digital.
           </p>
           <p className="text-xs text-muted">
             Linguistic Grounding: Indian Sign Language (ISL) Standard Dictionary (ISLRTC) • Audio/Translation: VerbX / Vocaline Architecture.

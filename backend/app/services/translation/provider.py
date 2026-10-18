@@ -52,7 +52,7 @@ class MockTranslationProvider(BaseTranslationProvider):
     Grounds translations in authenticated ISL glosses and conversational phrases.
     """
     def __init__(self):
-        self.provider_name = "Disignum-Local-Translation-Engine (Mock Mode)"
+        self.provider_name = "Signify-Local-Translation-Engine (Mock Mode)"
 
     async def translate(self, request: TranslationRequest) -> TranslationResponse:
         text_clean = request.text.strip().lower()

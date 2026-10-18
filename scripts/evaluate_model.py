@@ -141,7 +141,7 @@ def generate_perturbed_hand(pose_type: str) -> HandLandmarks:
 
 def run_evaluation():
     print("=================================================================")
-    print("      DISIGNUM — GESTURE RECOGNITION BENCHMARK EVALUATION       ")
+    print("       SIGNIFY — GESTURE RECOGNITION BENCHMARK EVALUATION       ")
     print("=================================================================")
     
     classes_to_test = [

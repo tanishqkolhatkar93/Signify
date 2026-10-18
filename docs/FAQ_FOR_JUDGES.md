@@ -1,11 +1,11 @@
-# Disignum — Technical Judge FAQ
+# Signify — Technical Judge FAQ
 
-This document prepares concise, honest, and technically accurate responses to likely judge questions for **Disignum** (VerbX / IvishAI Problem Statement 3: AI Sign-Language Communication).
+This document prepares concise, honest, and technically accurate responses to likely judge questions for **Signify** (VerbX / IvishAI Problem Statement 3: AI Sign-Language Communication).
 
 ---
 
 ### Q1: What exactly makes this an AI agent rather than a simple script connecting three APIs?
-**Answer:** An AI agent is defined by autonomous, state-driven perception, decision-making, and goal-directed action under uncertainty. Disignum implements a typed Finite State Machine orchestrator managing 12 discrete lifecycle states (`IDLE`, `CONSENT_REQUIRED`, `CAPTURING`, `RECOGNIZING`, `UNCERTAIN`, `TRANSCRIBING`, `TRANSLATING`, `AWAITING_CONFIRMATION`, `GENERATING_SPEECH`, `GENERATING_SIGN_OUTPUT`, `COMPLETED`, `FAILED`). It dynamically evaluates input sensor validity, calculates geometric landmark vectors, validates calibrated confidence margins against rejection thresholds, enforces temporal smoothing, resolves bilingual translation routes, and commits an auditable event trail to SQLite.
+**Answer:** An AI agent is defined by autonomous, state-driven perception, decision-making, and goal-directed action under uncertainty. Signify implements a typed Finite State Machine orchestrator managing 12 discrete lifecycle states (`IDLE`, `CONSENT_REQUIRED`, `CAPTURING`, `RECOGNIZING`, `UNCERTAIN`, `TRANSCRIBING`, `TRANSLATING`, `AWAITING_CONFIRMATION`, `GENERATING_SPEECH`, `GENERATING_SIGN_OUTPUT`, `COMPLETED`, `FAILED`). It dynamically evaluates input sensor validity, calculates geometric landmark vectors, validates calibrated confidence margins against rejection thresholds, enforces temporal smoothing, resolves bilingual translation routes, and commits an auditable event trail to SQLite.
 
 ---
 
@@ -18,7 +18,7 @@ This document prepares concise, honest, and technically accurate responses to li
 ---
 
 ### Q3: Does VerbX recognize sign language natively?
-**Answer:** No. VerbX is a conversational and multilingual voice/text intelligence platform providing STT (Vocaline), TTS, translation, and speech-to-speech interpretation across 76 languages. It does not provide native computer vision gesture recognition. Disignum engineers the vision, landmark normalization, gesture classifier, and agent orchestrator to bridge sign language with VerbX's multilingual speech stack.
+**Answer:** No. VerbX is a conversational and multilingual voice/text intelligence platform providing STT (Vocaline), TTS, translation, and speech-to-speech interpretation across 76 languages. It does not provide native computer vision gesture recognition. Signify engineers the vision, landmark normalization, gesture classifier, and agent orchestrator to bridge sign language with VerbX's multilingual speech stack.
 
 ---
 
@@ -43,7 +43,7 @@ This document prepares concise, honest, and technically accurate responses to li
 ---
 
 ### Q7: How do you reject unknown gestures?
-**Answer:** Disignum enforces two rejection criteria:
+**Answer:** Signify enforces two rejection criteria:
 1. **Confidence Threshold:** If the highest candidate score is below $0.72$, the system rejects it.
 2. **Margin Separation:** If the top score is below $0.85$ and the runner-up margin is $< 0.08$, the sign is classified as ambiguous.
 When rejected, the orchestrator enters the `UNCERTAIN` state, resets the temporal stability buffer, and informs the user: *"Unrecognized sign — please hold steady in clear lighting."* It strictly prevents false speech synthesis.
@@ -51,12 +51,12 @@ When rejected, the orchestrator enters the `UNCERTAIN` state, resets the tempora
 ---
 
 ### Q8: How does the reverse communication route work?
-**Answer:** When a hearing person speaks, speech is transcribed to text and translated into Hindi. The orchestrator normalizes the transcript and performs synonym keyword matching against verified ISL dictionary keys. If a match is found (e.g., "Thank you" -> `isl_thank_you`), the verified ISL demonstration clip and hand configuration guide are displayed. If no match exists, Disignum preserves the text transcript and displays an explicit limitation notice.
+**Answer:** When a hearing person speaks, speech is transcribed to text and translated into Hindi. The orchestrator normalizes the transcript and performs synonym keyword matching against verified ISL dictionary keys. If a match is found (e.g., "Thank you" -> `isl_thank_you`), the verified ISL demonstration clip and hand configuration guide are displayed. If no match exists, Signify preserves the text transcript and displays an explicit limitation notice.
 
 ---
 
 ### Q9: What happens when translation fails or credentials are missing?
-**Answer:** Disignum employs the Provider Pattern. When `PROVIDER_MODE=verbx` and an API key is present, the system makes authenticated requests to `one.verbxeco.com`. If credentials are omitted or network drops, the system transparently falls back to the deterministic local mock provider and browser Web Speech Synthesis. The UI clearly labels the fallback mode.
+**Answer:** Signify employs the Provider Pattern. When `PROVIDER_MODE=verbx` and an API key is present, the system makes authenticated requests to `one.verbxeco.com`. If credentials are omitted or network drops, the system transparently falls back to the deterministic local mock provider and browser Web Speech Synthesis. The UI clearly labels the fallback mode.
 
 ---
 
@@ -110,3 +110,4 @@ When rejected, the orchestrator enters the `UNCERTAIN` state, resets the tempora
 
 ### Q17: Which features were tested using real APIs and which use mocks?
 **Answer:** The provider architecture has been tested in both modes. In local development without committed production keys, it operates in transparent Mock/Local mode with browser Web Speech Synthesis and Vocaline simulation. When `VERBX_API_KEY` is provided in `.env`, the system connects to the official endpoints at `https://one.verbxeco.com/api/v1`. Both pathways are covered by automated unit tests.
+

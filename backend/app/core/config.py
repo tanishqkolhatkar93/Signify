@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     ENVIRONMENT: str = "development"
     BACKEND_HOST: str = "127.0.0.1"
     BACKEND_PORT: int = 8000
-    DATABASE_URL: str = f"sqlite:///{ROOT_DIR / 'backend' / 'disignum.db'}"
+    DATABASE_URL: str = f"sqlite:///{ROOT_DIR / 'backend' / 'signify.db'}"
     CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000"
     
     # Provider Settings
@@ -35,7 +35,7 @@ class Settings(BaseSettings):
     REQUIRE_EXPLICIT_CONSENT: bool = True
     
     # Model Metadata
-    MODEL_NAME: str = "Disignum-ISL-GeometricNormalizer-v1.0"
+    MODEL_NAME: str = "Signify-ISL-GeometricNormalizer-v1.0"
     SUPPORTED_SIGN_LANGUAGE: str = "Indian Sign Language (ISL)"
     SUPPORTED_LANGUAGES: list[str] = ["en", "hi"]
 

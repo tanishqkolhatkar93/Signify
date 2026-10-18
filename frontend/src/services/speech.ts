@@ -1,4 +1,4 @@
-// Disignum Browser Audio & Speech Synthesis Service
+// Signify Browser Audio & Speech Synthesis Service
 
 export const speechService = {
   speak: (text: string, language: "en" | "hi", onEnd?: () => void) => {
@@ -53,3 +53,4 @@ export const speechService = {
     }
   }
 };
+

@@ -1,48 +1,48 @@
-# Disignum — Official Acceptance Test & Benchmark Report
+# Signify — Official Acceptance Test & Benchmark Report
 
-This document records the verifiable test execution results for the four mandatory acceptance test cases (TC1–TC4), gesture recognition model benchmarks, and auditable evidence artifacts for **Disignum** (VerbX / IvishAI Problem Statement 3: AI Sign-Language Communication).
+This document records the verifiable test execution results for the four mandatory acceptance test cases (TC1–TC4), gesture recognition model benchmarks, and auditable evidence artifacts for **Signify** (VerbX / IvishAI Problem Statement 3: AI Sign-Language Communication).
 
 ---
 
 ## 1. Official Acceptance Test Suite Summary
 
 * **Execution Timestamp:** 2026-10-18T18:49:15Z
-* **Model Version:** `Disignum-ISL-GeometricNormalizer-v1.0`
+* **Model Version:** `Signify-ISL-GeometricNormalizer-v1.0`
 * **Sign Language:** Indian Sign Language (ISL)
 * **Supported Speech Languages:** English (`en`), Hindi (`hi`)
 * **Pass Rate:** **100% (4 Passed, 0 Failed, 0 Blocked)**
 
 ```
 =================================================================
-        DISIGNUM — OFFICIAL ACCEPTANCE TEST SUITE (TC1-TC4)      
+        SIGNIFY — OFFICIAL ACCEPTANCE TEST SUITE (TC1-TC4)       
 =================================================================
 
 [PASS] TC1: Supported Sign List & Documentation
        Input:       Load and query sign manifest from data/sign_manifest.json.
        Expected:    Display named sign language (ISL), list all supported gestures with meanings, translations, sources, and scope limitations.
        Actual:      Successfully verified 'Indian Sign Language (ISL)'. Published 12 documented signs with English/Hindi translations, ISLRTC source attribution, and explicit vocabulary boundary disclosure.
-       Evidence:    data/sign_manifest.json | Model: Disignum-ISL-GeometricNormalizer-v1.0
+       Evidence:    data/sign_manifest.json | Model: Signify-ISL-GeometricNormalizer-v1.0
        Notes:       Verified all 12 signs have ISLRTC citation, CC-BY 4.0 license, and bilingual outputs.
 
 [PASS] TC2: Supported Sign to Speech in Two Languages
        Input:       Perform supported gesture (Thumbs Up: isl_good) with active camera consent.
        Expected:    Consent obtained, landmarks extracted, gesture recognized, meaning displayed, and speech generated in English and Hindi.
-       Actual:      Sign recognized: 'isl_good' (Positive evaluation, good condition, or approval.) with confidence 0.95. Generated English speech ('Good / Well') [Disignum-Local-Speech-Provider (Mock Mode)], and Hindi speech ('अच्छा / बहुत अच्छा') [Disignum-Local-Speech-Provider (Mock Mode)].
-       Evidence:    session:test-tc2-1792329555 | Model: Disignum-ISL-GeometricNormalizer-v1.0
+       Actual:      Sign recognized: 'isl_good' (Positive evaluation, good condition, or approval.) with confidence 0.95. Generated English speech ('Good / Well') [Signify-Local-Speech-Provider (Mock Mode)], and Hindi speech ('अच्छा / बहुत अच्छा') [Signify-Local-Speech-Provider (Mock Mode)].
+       Evidence:    session:test-tc2-1792329555 | Model: Signify-ISL-GeometricNormalizer-v1.0
        Notes:       English TTS: SUCCESS; Hindi TTS: SUCCESS; Stable frames: 5/5.
 
 [PASS] TC3: Speech to Text and Reverse Route
        Input:       Speak supported phrase ('Thank you') and unsupported phrase ('Quantum mechanics...').
        Expected:    Produce accurate transcript, permit correction, match supported phrase to verified sign media, and display text with clear limitation for unsupported phrase.
        Actual:      Supported phrase 'Thank you' mapped to verified ISL sign 'isl_thank_you'. Unsupported phrase 'Quantum mechanics...' retained text transcript and explicitly informed: no verified sign clip exists in dictionary.
-       Evidence:    session:test-tc3-1792329555 | Model: Disignum-ISL-GeometricNormalizer-v1.0
+       Evidence:    session:test-tc3-1792329555 | Model: Signify-ISL-GeometricNormalizer-v1.0
        Notes:       Verified dual route: matching sign clip returned for supported vocabulary; honest boundary explanation returned for unsupported input.
 
 [PASS] TC4: Unknown Sign and Consent Guardrails
        Input:       Attempt capture without consent, then present unsupported/ambiguous gesture.
        Expected:    No capture without consent, unsupported gesture produces explicit 'Unrecognized sign' (UNCERTAIN) state, zero false speech generated.
        Actual:      Part A: Camera blocked in state 'UNCERTAIN' without explicit consent. Part B: Unsupported hand pose triggered 'UNCERTAIN' state. No hallucinated sign ID or speech audio generated.
-       Evidence:    session:test-tc4-1792329555 | Model: Disignum-ISL-GeometricNormalizer-v1.0
+       Evidence:    session:test-tc4-1792329555 | Model: Signify-ISL-GeometricNormalizer-v1.0
        Notes:       Safety verified: consent gating strictly enforced; confidence rejection prevents deceptive audio output.
 ```
 
@@ -69,3 +69,4 @@ Evaluated across **250 held-out evaluation samples** (synthetic anthropometric p
 - **Mean Inference Latency:** `0.17 ms` per frame ($\sim 6,036$ frames/sec on CPU)
 - **Unknown Sign Rejection Rate:** `47.5%` minimum rejection on noise, strictly preventing false voice generation
 - **Temporal Filter:** $N=5$ consecutive frames required before sign confirmation
+

@@ -274,7 +274,7 @@ export const SpeechView: React.FC = () => {
                 <div className="honest-notice">
                   <strong>Engineering Transparency Guardrail:</strong>
                   <p>
-                    Disignum refuses to invent synthetic sign animations or claim arbitrary text can be reliably translated into sign grammar. Only curated, verified signs from certified linguistic sources are displayed.
+                    Signify refuses to invent synthetic sign animations or claim arbitrary text can be reliably translated into sign grammar. Only curated, verified signs from certified linguistic sources are displayed.
                   </p>
                 </div>
               </div>

@@ -1,7 +1,7 @@
-# Disignum — Hackathon Pitch & Value Proposition
+# Signify — Hackathon Pitch & Value Proposition
 
 **Challenge:** VerbX / IvishAI Problem Statement 3: AI Sign-Language Communication  
-**Product:** Disignum (from Latin *Designare* / *Signum* — To signify meaning)  
+**Product:** Signify (from Latin *Designare* / *Signum* — To signify meaning)  
 **Tagline:** Bidirectional, Uncertainty-Aware AI Communication for Deaf and Hearing Communities
 
 ---
@@ -14,7 +14,7 @@ Existing AI sign language concepts fail in three critical ways:
 2. **Biometric Privacy Violations:** Uploading continuous unconsented webcam feeds to cloud servers.
 3. **False Confidence:** Forcing softmax predictions on ambiguous movements, resulting in dangerous hallucinated voice outputs in clinical or legal settings.
 
-**Disignum solves this** through a bounded, state-driven agent orchestrator connecting authenticated Indian Sign Language (ISL) gestures with bilingual speech (English & Hindi) in both directions.
+**Signify solves this** through a bounded, state-driven agent orchestrator connecting authenticated Indian Sign Language (ISL) gestures with bilingual speech (English & Hindi) in both directions.
 
 ---
 
@@ -22,7 +22,7 @@ Existing AI sign language concepts fail in three critical ways:
 
 ```
                      ┌──────────────────────────────────┐
-                     │            DISIGNUM              │
+                     │             SIGNIFY              │
                      └─────────────────┬────────────────┘
                                        │
         ┌──────────────────────────────┼──────────────────────────────┐
@@ -57,7 +57,7 @@ Existing AI sign language concepts fail in three critical ways:
 
 ## 3. Competitive Comparison
 
-| Feature | Generic Video AI Apps | Academic 3D Avatar Rigs | Disignum |
+| Feature | Generic Video AI Apps | Academic 3D Avatar Rigs | Signify |
 | :--- | :--- | :--- | :--- |
 | **Bidirectional Communication** | No (One-way only) | No (Text to 3D only) | **Yes (Full Sign ↔ Speech)** |
 | **Bilingual Speech Output** | English only | Silent / None | **English + Hindi (हिंदी)** |
@@ -72,3 +72,4 @@ Existing AI sign language concepts fail in three critical ways:
 1. **Hospital Emergency Triage:** Enabling non-verbal deaf patients to immediately communicate "Help", "Water", "Food", or "Bad / Unwell" to attending nurses who hear spoken Hindi or English.
 2. **Railway & Airport Information Counters:** Public kiosks allowing hearing clerks to speak instructions that are converted into text and verified ISL signs.
 3. **Banking & Government Service Desks:** Frictionless verification of customer consent and queries without third-party human interpreters on trivial routine tasks.
+

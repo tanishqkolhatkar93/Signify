@@ -13,7 +13,7 @@ from backend.app.services.tests.runner import test_runner
 
 async def main():
     print("=================================================================")
-    print("        DISIGNUM — OFFICIAL ACCEPTANCE TEST SUITE (TC1-TC4)      ")
+    print("        SIGNIFY — OFFICIAL ACCEPTANCE TEST SUITE (TC1-TC4)       ")
     print("=================================================================\n")
     
     records = await test_runner.run_all_tests()

@@ -30,7 +30,7 @@ class MockSpeechProvider(BaseSpeechProvider):
     without fabricating live external API status.
     """
     def __init__(self):
-        self.provider_name = "Disignum-Local-Speech-Provider (Mock Mode)"
+        self.provider_name = "Signify-Local-Speech-Provider (Mock Mode)"
 
     async def transcribe(self, request: TranscribeRequest) -> TranscribeResponse:
         # If explicit mock input text is provided (from test fixtures or UI test harness)

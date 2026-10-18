@@ -57,7 +57,7 @@ export const TestEvidenceView: React.FC = () => {
     downloadAnchor.setAttribute("href", dataStr);
     downloadAnchor.setAttribute(
       "download",
-      `disignum_acceptance_audit_${Date.now()}.json`
+      `signify_acceptance_audit_${Date.now()}.json`
     );
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();

@@ -1,4 +1,4 @@
-# Disignum — AI Sign-Language Communication
+# Signify — AI Sign-Language Communication
 
 > **Agentic AI Hackathon 2026** • Powered by Ziro.Digital  
 > **Partner:** VerbX / IvishAI | **Problem Statement 3:** AI Sign-Language Communication  
@@ -13,7 +13,7 @@
 
 ## 1. Product Overview
 
-**Disignum** (from Latin *Designare* / *Signum* — to signify and convey meaning) is an intelligent, uncertainty-aware sign-language communication system. It bridges deaf and hard-of-hearing individuals with hearing communicators through bidirectional, multilingual AI assistance.
+**Signify** (from Latin *Designare* / *Signum* — to signify and convey meaning) is an intelligent, uncertainty-aware sign-language communication system. It bridges deaf and hard-of-hearing individuals with hearing communicators through bidirectional, multilingual AI assistance.
 
 ### Three Primary Experiences
 1. **Sign to Speech (Deaf → Hearing):** Local camera landmark extraction, calibrated geometric gesture classification in Indian Sign Language (ISL), and bilingual speech output in **English** and **Hindi (हिंदी)**.
@@ -24,7 +24,7 @@
 
 ## 2. Official Mandatory Requirements Matrix
 
-| Requirement | Implementation in Disignum | Evidence / Verification |
+| Requirement | Implementation in Signify | Evidence / Verification |
 | :--- | :--- | :--- |
 | **1. Publish supported signs list** | 12 authenticated Indian Sign Language signs with full metadata, meaning, and source citations. | `data/sign_manifest.json`, Sign Dictionary UI, TC1 |
 | **2. Recognize sign & speak in 2 languages** | Local geometric normalizer outputs spoken audio in **English** and **Hindi (हिंदी)**. | `backend/app/services/speech/`, Sign to Speech UI, TC2 |
@@ -36,7 +36,7 @@
 | **8. Demonstrate all four test cases** | Automated and interactive verification for TC1, TC2, TC3, and TC4. | `scripts/run_acceptance_tests.py`, TC1–TC4 |
 | **9. Working application & test evidence** | Fully functional FastAPI backend + React Vite frontend with reproducible test runner. | `dist/`, SQLite test records |
 | **10. Keep API secrets on server** | All keys stored in server-side `.env`. Zero secrets exposed in Vite bundle. | `THREAT_MODEL.md`, `.gitignore` |
-| **11. Honest, auditable test records** | SQLite database records inputs, expected outputs, actual outputs, and model versions. | `backend/disignum.db`, `TEST_REPORT.md` |
+| **11. Honest, auditable test records** | SQLite database records inputs, expected outputs, actual outputs, and model versions. | `backend/signify.db`, `TEST_REPORT.md` |
 | **12. Human approval for consequential actions**| Explicit consent modals and confirmation gates for all sensitive operations. | `agent.py`, `ConsentModal.tsx` |
 
 ---
@@ -79,8 +79,8 @@ Evaluated across **250 held-out evaluation samples** with anthropometric variati
 ### 1. Repository Setup & Environment Configuration
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/disignum.git
-cd disignum
+git clone https://github.com/your-username/signify.git
+cd signify
 
 # Configure environment variables
 cp .env.example .env
@@ -137,3 +137,4 @@ python -m pytest backend/app/tests/test_backend.py -v
 
 - **Sign Language Linguistic Definitions:** Based on standard publications by the **Indian Sign Language Research and Training Centre (ISLRTC)**, Department of Empowerment of Persons with Disabilities, Ministry of Social Justice and Empowerment, Government of India.
 - **License:** [Creative Commons Attribution 4.0 International (CC-BY 4.0)](https://creativecommons.org/licenses/by/4.0/).
+

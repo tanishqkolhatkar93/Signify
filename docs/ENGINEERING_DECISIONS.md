@@ -1,6 +1,6 @@
-# Disignum — Engineering Decisions & Architectural Rationale
+# Signify — Engineering Decisions & Architectural Rationale
 
-This document establishes the architectural principles and technical decisions behind **Disignum**, an AI Sign-Language Communication system built for the VerbX / IvishAI Problem Statement 3 (Agentic AI Hackathon 2026).
+This document establishes the architectural principles and technical decisions behind **Signify**, an AI Sign-Language Communication system built for the VerbX / IvishAI Problem Statement 3 (Agentic AI Hackathon 2026).
 
 ---
 
@@ -118,7 +118,7 @@ This document establishes the architectural principles and technical decisions b
 * **Options Considered:**
   1. External PostgreSQL/MySQL instance requiring cloud setup and credentials.
   2. Embedded SQLite with SQLAlchemy / SQLModel.
-* **Chosen Approach:** SQLite database (`disignum.db`) with test execution records and orchestrator event logs.
+* **Chosen Approach:** SQLite database (`signify.db`) with test execution records and orchestrator event logs.
 * **Rationale:** Zero setup friction, instantaneous automated tests, atomic transactions, easily exportable audit trail.
 * **Trade-offs:** Single-writer limitation; not suited for high-concurrency multi-tenant distributed clusters.
 * **Revisit Criteria:** Transition to PostgreSQL when deploying multi-region multi-tenant production instances.

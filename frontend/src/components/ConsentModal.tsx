@@ -78,3 +78,4 @@ export const ConsentModal: React.FC<ConsentModalProps> = ({ isOpen, onGrant, onD
     </div>
   );
 };
+

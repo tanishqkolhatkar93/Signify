@@ -1,6 +1,6 @@
-# Disignum — System Architecture
+# Signify — System Architecture
 
-**Disignum** (from Latin *Designare* / *Signum* — to signify and convey meaning) is an intelligent, uncertainty-aware sign-language communication system. It bridges deaf and hard-of-hearing individuals with hearing communicators through bidirectional, multilingual AI assistance.
+**Signify** (from Latin *Designare* / *Signum* — to signify and convey meaning) is an intelligent, uncertainty-aware sign-language communication system. It bridges deaf and hard-of-hearing individuals with hearing communicators through bidirectional, multilingual AI assistance.
 
 ---
 
@@ -125,6 +125,6 @@ stateDiagram-v2
 ## 4. Privacy and Security Guardrails
 - **Zero Video Stream Transmission**: Raw video frames never leave client volatile memory.
 - **Client Secrets Protection**: No API keys in Vite bundle; all external provider requests are authenticated via the FastAPI backend proxy.
-- **Audit Logging**: State transitions, recognition scores, and test assertions are recorded in SQLite (`disignum.db`) without storing biometric facial imagery.
+- **Audit Logging**: State transitions, recognition scores, and test assertions are recorded in SQLite (`signify.db`) without storing biometric facial imagery.
 - **Consequential Actions**: External sharing or reporting requires explicit modal confirmation.
 

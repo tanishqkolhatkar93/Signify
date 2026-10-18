@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI):
     # Shutdown logic if any
 
 app = FastAPI(
-    title="Disignum API — AI Sign-Language Communication",
+    title="Signify API — AI Sign-Language Communication",
     description="Backend services and state-driven agent orchestrator connecting Indian Sign Language (ISL) gestures with multilingual speech and text.",
     version="1.0.0",
     lifespan=lifespan
@@ -49,7 +49,7 @@ app.include_router(tests.router, prefix="/api/v1")
 @app.get("/")
 def root():
     return {
-        "service": "Disignum Backend API",
+        "service": "Signify Backend API",
         "version": "1.0.0",
         "docs": "/docs",
         "status": "OPERATIONAL"

@@ -11,7 +11,7 @@ def get_health():
     manifest = dictionary_service.get_manifest()
     return {
         "status": "healthy",
-        "app_name": "Disignum",
+        "app_name": "Signify",
         "challenge": "VerbX / IvishAI PS 3: AI Sign-Language Communication",
         "sign_language": manifest.sign_language,
         "supported_signs_count": len(manifest.signs),

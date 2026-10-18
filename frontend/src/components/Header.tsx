@@ -22,7 +22,7 @@ export const Header: React.FC<HeaderProps> = ({
             <span className="brand-symbol">◈</span>
           </div>
           <div>
-            <h1 className="brand-title">Disignum</h1>
+            <h1 className="brand-title">Signify</h1>
             <p className="brand-subtitle">AI Sign-Language Communication • Indian Sign Language (ISL)</p>
           </div>
         </div>
@@ -82,3 +82,4 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
+

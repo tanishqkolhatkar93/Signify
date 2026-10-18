@@ -39,7 +39,7 @@ htmlcov/
 # Database
 *.sqlite3
 *.db
-backend/disignum.db
+backend/signify.db
 
 # Environment variables & secrets
 .env

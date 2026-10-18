@@ -146,3 +146,4 @@ for fname, content in SVGS.items():
     p = SIGN_DIR / fname
     p.write_text(content.strip(), encoding="utf-8")
     print(f"Wrote {p}")
+
