@@ -1,0 +1,152 @@
+{
+  "timestamp": "2026-10-18T18:48:39Z",
+  "model_name": "Disignum-ISL-GeometricNormalizer-v1.0",
+  "total_test_samples": 250,
+  "macro_f1_score": 0.8305,
+  "mean_latency_ms": 0.17,
+  "unknown_rejection_accuracy": 0.475,
+  "confidence_threshold": 0.72,
+  "temporal_window_frames": 5,
+  "per_class_metrics": {
+    "isl_good": {
+      "precision": 1.0,
+      "recall": 0.9,
+      "f1": 0.947,
+      "support": 30
+    },
+    "isl_bad": {
+      "precision": 0.967,
+      "recall": 0.967,
+      "f1": 0.967,
+      "support": 30
+    },
+    "isl_stop": {
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0,
+      "support": 30
+    },
+    "isl_yes": {
+      "precision": 0.824,
+      "recall": 0.467,
+      "f1": 0.596,
+      "support": 30
+    },
+    "isl_no": {
+      "precision": 0.933,
+      "recall": 0.933,
+      "f1": 0.933,
+      "support": 30
+    },
+    "isl_food": {
+      "precision": 0.536,
+      "recall": 1.0,
+      "f1": 0.698,
+      "support": 30
+    },
+    "isl_water": {
+      "precision": 0.833,
+      "recall": 1.0,
+      "f1": 0.909,
+      "support": 30
+    },
+    "UNKNOWN_SIGN": {
+      "precision": 0.792,
+      "recall": 0.475,
+      "f1": 0.594,
+      "support": 40
+    }
+  },
+  "confusion_matrix": [
+    [
+      27,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      3
+    ],
+    [
+      0,
+      29,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      30,
+      0,
+      0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      14,
+      0,
+      15,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      28,
+      0,
+      2,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      30,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      30,
+      0
+    ],
+    [
+      0,
+      1,
+      0,
+      3,
+      2,
+      11,
+      4,
+      19
+    ]
+  ],
+  "labels": [
+    "isl_good",
+    "isl_bad",
+    "isl_stop",
+    "isl_yes",
+    "isl_no",
+    "isl_food",
+    "isl_water",
+    "UNKNOWN_SIGN"
+  ]
+}

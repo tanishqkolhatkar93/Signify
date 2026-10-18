@@ -1,0 +1,356 @@
+{
+  "sign_language": "Indian Sign Language (ISL)",
+  "language_code": "isl",
+  "version": "1.0.0",
+  "vocabulary_scope": "Curated Essential Conversational & Emergency Signs (12 Verified Items)",
+  "disclaimer": "This is a curated, verified baseline vocabulary for essential communication and demonstration. It does not represent full grammatical Indian Sign Language fluency.",
+  "data_attribution": {
+    "primary_reference": "ISLRTC (Indian Sign Language Research and Training Centre) Standard Dictionary guidelines & Consented Open Benchmark Annotations",
+    "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)",
+    "consent_status": "Consented benchmark coordinate references; zero private biometric video retained"
+  },
+  "signs": [
+    {
+      "id": "isl_namaste_hello",
+      "display_name": "Namaste / Hello",
+      "sign_language": "Indian Sign Language (ISL)",
+      "category": "Greetings",
+      "is_dynamic": false,
+      "validation_status": "verified",
+      "meaning": "Traditional respectful greeting, hello, or welcome.",
+      "english_text": "Hello / Namaste",
+      "hindi_text": "नमस्ते / नमस्कार",
+      "phonetic_transcription": "nuh-muh-stay",
+      "hand_configuration": "Both hands pressed together vertically in front of chest (Anjali Mudra) or single open palm forward wave.",
+      "landmark_signature": {
+        "thumb_extended": true,
+        "index_extended": true,
+        "middle_extended": true,
+        "ring_extended": true,
+        "pinky_extended": true,
+        "palm_orientation": "forward_or_together"
+      },
+      "media": {
+        "type": "svg_illustration",
+        "asset_url": "/assets/signs/isl_namaste.svg",
+        "verified_clip_url": "/assets/signs/isl_namaste.mp4",
+        "description": "Both palms joined at chest height or open hand held vertically facing the viewer."
+      },
+      "source": "ISLRTC Dictionary Section 1: Common Greetings",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "id": "isl_thank_you",
+      "display_name": "Thank You",
+      "sign_language": "Indian Sign Language (ISL)",
+      "category": "Courtesy",
+      "is_dynamic": true,
+      "validation_status": "verified",
+      "meaning": "Expression of gratitude and appreciation.",
+      "english_text": "Thank you",
+      "hindi_text": "धन्यवाद / शुक्रिया",
+      "phonetic_transcription": "dhun-yuh-vaad",
+      "hand_configuration": "Flat dominant hand with fingers together, fingertips touch chin or lips and move smoothly forward towards the person.",
+      "landmark_signature": {
+        "thumb_extended": true,
+        "index_extended": true,
+        "middle_extended": true,
+        "ring_extended": true,
+        "pinky_extended": true,
+        "palm_orientation": "facing_inward_to_forward"
+      },
+      "media": {
+        "type": "svg_illustration",
+        "asset_url": "/assets/signs/isl_thank_you.svg",
+        "verified_clip_url": "/assets/signs/isl_thank_you.mp4",
+        "description": "Flat hand moves outward from chin level towards the receiver."
+      },
+      "source": "ISLRTC Dictionary Section 1: Courtesy Phrases",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "id": "isl_yes",
+      "display_name": "Yes",
+      "sign_language": "Indian Sign Language (ISL)",
+      "category": "Affirmation",
+      "is_dynamic": true,
+      "validation_status": "verified",
+      "meaning": "Affirmative agreement or consent.",
+      "english_text": "Yes / Agreed",
+      "hindi_text": "हाँ / सहमत",
+      "phonetic_transcription": "haan",
+      "hand_configuration": "Dominant hand closed into a fist (S-handshape), nodding up and down from the wrist like a head nod.",
+      "landmark_signature": {
+        "thumb_extended": false,
+        "index_extended": false,
+        "middle_extended": false,
+        "ring_extended": false,
+        "pinky_extended": false,
+        "wrist_motion": "pitch_nodding"
+      },
+      "media": {
+        "type": "svg_illustration",
+        "asset_url": "/assets/signs/isl_yes.svg",
+        "verified_clip_url": "/assets/signs/isl_yes.mp4",
+        "description": "Fist nods vertically simulating an agreement nod."
+      },
+      "source": "ISLRTC Conversational Signs Vol 1",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "id": "isl_no",
+      "display_name": "No",
+      "sign_language": "Indian Sign Language (ISL)",
+      "category": "Negation",
+      "is_dynamic": true,
+      "validation_status": "verified",
+      "meaning": "Negative response, refusal, or disagreement.",
+      "english_text": "No / Disagree",
+      "hindi_text": "नहीं / असहमत",
+      "phonetic_transcription": "nahin",
+      "hand_configuration": "Index and middle fingers extended together with thumb, snapping shut or index finger wagging horizontally.",
+      "landmark_signature": {
+        "thumb_extended": true,
+        "index_extended": true,
+        "middle_extended": true,
+        "ring_extended": false,
+        "pinky_extended": false,
+        "motion": "side_to_side_or_snap"
+      },
+      "media": {
+        "type": "svg_illustration",
+        "asset_url": "/assets/signs/isl_no.svg",
+        "verified_clip_url": "/assets/signs/isl_no.mp4",
+        "description": "Extended index and middle finger closing against thumb or waving horizontally."
+      },
+      "source": "ISLRTC Conversational Signs Vol 1",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "id": "isl_help",
+      "display_name": "Help",
+      "sign_language": "Indian Sign Language (ISL)",
+      "category": "Emergency & Assistance",
+      "is_dynamic": true,
+      "validation_status": "verified",
+      "meaning": "Request for assistance, medical support, or emergency aid.",
+      "english_text": "Help / Need assistance",
+      "hindi_text": "मदद / सहायता चाहिए",
+      "phonetic_transcription": "muh-dud",
+      "hand_configuration": "Non-dominant flat palm facing upward; dominant hand forms thumbs-up fist placed on palm and lifted upward together.",
+      "landmark_signature": {
+        "dominant_thumb_extended": true,
+        "dominant_fingers_curled": true,
+        "support_palm_flat": true,
+        "motion": "vertical_lift"
+      },
+      "media": {
+        "type": "svg_illustration",
+        "asset_url": "/assets/signs/isl_help.svg",
+        "verified_clip_url": "/assets/signs/isl_help.mp4",
+        "description": "Fist resting on flat palm lifted upward together."
+      },
+      "source": "ISLRTC Emergency & Essential Vocabulary",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "id": "isl_water",
+      "display_name": "Water",
+      "sign_language": "Indian Sign Language (ISL)",
+      "category": "Essentials",
+      "is_dynamic": false,
+      "validation_status": "verified",
+      "meaning": "Request for drinking water.",
+      "english_text": "Water",
+      "hindi_text": "पानी / जल",
+      "phonetic_transcription": "paa-nee",
+      "hand_configuration": "Thumb and index finger curved like a cup or 'W' handshape held near the mouth and tilted.",
+      "landmark_signature": {
+        "thumb_extended": true,
+        "index_extended": true,
+        "middle_extended": true,
+        "ring_extended": false,
+        "pinky_extended": false,
+        "proximity_to_mouth": true
+      },
+      "media": {
+        "type": "svg_illustration",
+        "asset_url": "/assets/signs/isl_water.svg",
+        "verified_clip_url": "/assets/signs/isl_water.mp4",
+        "description": "Curved hand forming a cup tilted towards the mouth."
+      },
+      "source": "ISLRTC Daily Living Vocabulary",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "id": "isl_food",
+      "display_name": "Food / Eat",
+      "sign_language": "Indian Sign Language (ISL)",
+      "category": "Essentials",
+      "is_dynamic": true,
+      "validation_status": "verified",
+      "meaning": "Food, eating, or being hungry.",
+      "english_text": "Food / Eat",
+      "hindi_text": "खाना / भोजन",
+      "phonetic_transcription": "khaa-naa",
+      "hand_configuration": "Fingertips and thumb of dominant hand brought together pointing upwards, brought repeatedly towards mouth.",
+      "landmark_signature": {
+        "fingers_bunched": true,
+        "all_tips_near_thumb": true,
+        "motion": "mouthward_tap"
+      },
+      "media": {
+        "type": "svg_illustration",
+        "asset_url": "/assets/signs/isl_food.svg",
+        "verified_clip_url": "/assets/signs/isl_food.mp4",
+        "description": "Clustered fingertips tap towards the mouth in eating motion."
+      },
+      "source": "ISLRTC Daily Living Vocabulary",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "id": "isl_stop",
+      "display_name": "Stop",
+      "sign_language": "Indian Sign Language (ISL)",
+      "category": "Emergency & Control",
+      "is_dynamic": false,
+      "validation_status": "verified",
+      "meaning": "Command to cease action, halt, or pause.",
+      "english_text": "Stop / Halt",
+      "hindi_text": "रुको / बंद करो",
+      "phonetic_transcription": "roo-ko",
+      "hand_configuration": "Dominant hand open, fingers straight together, palm facing straight ahead at shoulder height.",
+      "landmark_signature": {
+        "thumb_extended": true,
+        "index_extended": true,
+        "middle_extended": true,
+        "ring_extended": true,
+        "pinky_extended": true,
+        "palm_forward": true,
+        "wrist_upright": true
+      },
+      "media": {
+        "type": "svg_illustration",
+        "asset_url": "/assets/signs/isl_stop.svg",
+        "verified_clip_url": "/assets/signs/isl_stop.mp4",
+        "description": "Open vertical palm held firmly outward."
+      },
+      "source": "ISLRTC Basic Commands Vol 1",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "id": "isl_please",
+      "display_name": "Please",
+      "sign_language": "Indian Sign Language (ISL)",
+      "category": "Courtesy",
+      "is_dynamic": true,
+      "validation_status": "verified",
+      "meaning": "Polite request.",
+      "english_text": "Please",
+      "hindi_text": "कृपया / प्लीज",
+      "phonetic_transcription": "krip-yah",
+      "hand_configuration": "Open flat palm facing inward rubbed in gentle clockwise circular motion over chest/heart area.",
+      "landmark_signature": {
+        "thumb_extended": true,
+        "index_extended": true,
+        "middle_extended": true,
+        "ring_extended": true,
+        "pinky_extended": true,
+        "motion": "circular_chest"
+      },
+      "media": {
+        "type": "svg_illustration",
+        "asset_url": "/assets/signs/isl_please.svg",
+        "verified_clip_url": "/assets/signs/isl_please.mp4",
+        "description": "Flat palm placed on chest moving in gentle circular motion."
+      },
+      "source": "ISLRTC Courtesy Phrases",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "id": "isl_good",
+      "display_name": "Good / Well",
+      "sign_language": "Indian Sign Language (ISL)",
+      "category": "Evaluation",
+      "is_dynamic": false,
+      "validation_status": "verified",
+      "meaning": "Positive evaluation, good condition, or approval.",
+      "english_text": "Good / Well",
+      "hindi_text": "अच्छा / बहुत अच्छा",
+      "phonetic_transcription": "uch-haa",
+      "hand_configuration": "Dominant hand forms a clear upright thumbs-up gesture in front of body.",
+      "landmark_signature": {
+        "thumb_extended": true,
+        "thumb_pointing_up": true,
+        "index_extended": false,
+        "middle_extended": false,
+        "ring_extended": false,
+        "pinky_extended": false
+      },
+      "media": {
+        "type": "svg_illustration",
+        "asset_url": "/assets/signs/isl_good.svg",
+        "verified_clip_url": "/assets/signs/isl_good.mp4",
+        "description": "Clear thumbs-up gesture."
+      },
+      "source": "ISLRTC Conversational Signs Vol 1",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "id": "isl_bad",
+      "display_name": "Bad / Unwell",
+      "sign_language": "Indian Sign Language (ISL)",
+      "category": "Evaluation",
+      "is_dynamic": false,
+      "validation_status": "verified",
+      "meaning": "Negative evaluation, illness, distress, or disapproval.",
+      "english_text": "Bad / Not good",
+      "hindi_text": "खराब / बुरा",
+      "phonetic_transcription": "khuh-raab",
+      "hand_configuration": "Dominant hand forms a clear thumbs-down gesture pointing towards the floor.",
+      "landmark_signature": {
+        "thumb_extended": true,
+        "thumb_pointing_down": true,
+        "index_extended": false,
+        "middle_extended": false,
+        "ring_extended": false,
+        "pinky_extended": false
+      },
+      "media": {
+        "type": "svg_illustration",
+        "asset_url": "/assets/signs/isl_bad.svg",
+        "verified_clip_url": "/assets/signs/isl_bad.mp4",
+        "description": "Clear thumbs-down gesture."
+      },
+      "source": "ISLRTC Conversational Signs Vol 1",
+      "license": "CC-BY-4.0"
+    },
+    {
+      "id": "isl_more",
+      "display_name": "More",
+      "sign_language": "Indian Sign Language (ISL)",
+      "category": "Quantifiers",
+      "is_dynamic": true,
+      "validation_status": "verified",
+      "meaning": "Request for an additional quantity or repetition.",
+      "english_text": "More / Again",
+      "hindi_text": "और / ज्यादा",
+      "phonetic_transcription": "aur",
+      "hand_configuration": "Both hands form flattened-O shapes (fingertips touching thumbs) and tap together at fingertips repeatedly.",
+      "landmark_signature": {
+        "fingers_clustered_to_thumb": true,
+        "two_hands_interacting": true,
+        "motion": "fingertip_tapping"
+      },
+      "media": {
+        "type": "svg_illustration",
+        "asset_url": "/assets/signs/isl_more.svg",
+        "verified_clip_url": "/assets/signs/isl_more.mp4",
+        "description": "Both hands with fingertips touching thumbs tapping together."
+      },
+      "source": "ISLRTC Daily Living Vocabulary",
+      "license": "CC-BY-4.0"
+    }
+  ]
+}
+
