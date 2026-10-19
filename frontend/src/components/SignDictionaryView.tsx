@@ -1,16 +1,17 @@
 import React, { useState } from "react";
-import { Search, Volume2, ShieldCheck, BookOpen, PlusCircle, CheckCircle2, X } from "lucide-react";
-import type { SignItem, SignManifest } from "../types";
+import { Search, Volume2, ShieldCheck, BookOpen, PlusCircle, CheckCircle2, X, User } from "lucide-react";
+import type { SignItem, SignManifest, UserProfile } from "../types";
 import { speechService } from "../services/speech";
 import { api } from "../services/api";
 
 interface SignDictionaryViewProps {
   manifest: SignManifest | null;
   signs: SignItem[];
+  currentUser?: UserProfile | null;
   onSignImported?: () => void;
 }
 
-export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest, signs, onSignImported }) => {
+export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest, signs, currentUser, onSignImported }) => {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
@@ -80,7 +81,13 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
           </div>
           <button
             className="btn btn-secondary flex items-center gap-2 text-sm"
-            onClick={() => setShowImportModal(true)}
+            onClick={() => {
+              if (!currentUser) {
+                alert("Please sign in with Google to contribute verified ISL vocabulary entries.");
+                return;
+              }
+              setShowImportModal(true);
+            }}
             title="Import reviewed sign vocabulary without modifying code"
           >
             <PlusCircle size={15} />
@@ -220,6 +227,11 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
 
               <div className="card-source-footer">
                 <span title={sign.source}>{sign.source}</span>
+                {sign.contributed_by && (
+                  <span className="text-indigo-400 font-mono text-[10px]" title={`Contributed by ${sign.contributed_by}`}>
+                    by {sign.contributed_by}
+                  </span>
+                )}
                 <span>{sign.license}</span>
               </div>
             </div>
@@ -241,9 +253,16 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
               <PlusCircle size={18} className="text-emerald-400" />
               Import Reviewed Vocabulary Entry
             </h3>
-            <p className="text-xs text-slate-400 mb-4">
+            <p className="text-xs text-slate-400 mb-3">
               Paste a validated ISL sign specification in JSON format to dynamically register it into the SQLite dictionary database without modifying code.
             </p>
+
+            {currentUser && (
+              <div className="flex items-center gap-2 mb-4 px-3 py-2 bg-indigo-950/40 border border-indigo-500/30 rounded text-xs text-indigo-300">
+                <User size={14} className="text-indigo-400" />
+                <span>Authenticated Contributor: <strong>{currentUser.name}</strong> ({currentUser.email})</span>
+              </div>
+            )}
 
             <form onSubmit={handleImportSubmit}>
               <textarea

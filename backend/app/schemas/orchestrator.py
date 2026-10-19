@@ -50,6 +50,8 @@ class OrchestratorContext(BaseModel):
     reverse_match_found: bool = False
     reverse_sign_media: Optional[Dict[str, Any]] = None
     confidence: Optional[float] = None
+    user_id: Optional[str] = None
+    user_email: Optional[str] = None
     last_error: Optional[str] = None
     event_history: List[OrchestratorEvent] = []
 
@@ -58,4 +60,6 @@ class TransitionRequest(BaseModel):
     action: WorkflowAction
     payload: Optional[Dict[str, Any]] = None
     user_consented: Optional[bool] = None
+    user_id: Optional[str] = None
+    user_email: Optional[str] = None
 

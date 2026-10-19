@@ -58,6 +58,21 @@ export const api = {
     return res;
   },
   getCurrentUser: () => request<UserProfile>("/auth/me"),
+  updateCalibration: (data: any) =>
+    request<UserProfile>("/auth/profile", {
+      method: "PATCH",
+      body: JSON.stringify(data)
+    }),
+  saveConversation: (data: { transcript: string; title?: string; translation?: string; matched_sign_id?: string }) =>
+    request<any>("/auth/conversations", {
+      method: "POST",
+      body: JSON.stringify(data)
+    }),
+  listConversations: () => request<any[]>("/auth/conversations"),
+  deleteConversation: (id: string) =>
+    request<any>(`/auth/conversations/${id}`, {
+      method: "DELETE"
+    }),
   logout: () => {
     localStorage.removeItem("signify_auth_token");
   },

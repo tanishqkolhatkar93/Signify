@@ -131,7 +131,7 @@ def test_acceptance_test_runner_all_pass():
     asyncio.run(_run())
 
 def test_google_auth_and_user_session():
-    from unittest.mock import patch
+    from unittest.mock import patch, AsyncMock
 
     async def _run():
         transport = ASGITransport(app=app)
@@ -153,7 +153,9 @@ def test_google_auth_and_user_session():
                 "email_verified": True
             }
 
-            with patch("backend.app.services.auth.google_auth.google_auth_service.verify_google_credential", return_value=mock_google_payload):
+            with patch("backend.app.services.auth.google_auth.google_auth_service.verify_google_credential", new_callable=AsyncMock) as mock_verify:
+                mock_verify.return_value = mock_google_payload
+
                 res_login = await client.post("/api/v1/auth/google", json={
                     "credential": "mock-real-google-credential-token"
                 })
@@ -177,4 +179,43 @@ def test_google_auth_and_user_session():
                 res_status = await client.get("/api/v1/auth/status", headers={"Authorization": f"Bearer {token}"})
                 assert res_status.status_code == 200
                 assert res_status.json()["authenticated"] is True
+
+                # 5. Test Personal Signer Calibration Profile Update
+                res_cal = await client.patch("/api/v1/auth/profile", json={
+                    "dominant_hand": "left",
+                    "signing_speed": "fast",
+                    "preferred_language": "hi"
+                }, headers={"Authorization": f"Bearer {token}"})
+                assert res_cal.status_code == 200
+                cal_data = res_cal.json()
+                assert cal_data["dominant_hand"] == "left"
+                assert cal_data["signing_speed"] == "fast"
+                assert cal_data["preferred_language"] == "hi"
+
+                # 6. Test Saving Private Conversation Transcript
+                res_conv = await client.post("/api/v1/auth/conversations", json={
+                    "title": "Hospital Emergency Dialogue",
+                    "transcript": "Doctor asking for symptoms",
+                    "translation": "मरीज़ को डॉक्टर की मदद चाहिए",
+                    "matched_sign_id": "isl_need_help"
+                }, headers={"Authorization": f"Bearer {token}"})
+                assert res_conv.status_code == 200
+                conv_data = res_conv.json()
+                assert conv_data["title"] == "Hospital Emergency Dialogue"
+
+                # 7. List Conversations for the authenticated user
+                res_list = await client.get("/api/v1/auth/conversations", headers={"Authorization": f"Bearer {token}"})
+                assert res_list.status_code == 200
+                items = res_list.json()
+                assert len(items) >= 1
+                assert items[0]["title"] == "Hospital Emergency Dialogue"
+
+                # 8. Test State Transition with Cryptographic Identity Binding
+                res_trans = await client.post("/api/v1/orchestrator/transition", json={
+                    "action": "GRANT_CONSENT",
+                    "session_id": "test-auth-session"
+                }, headers={"Authorization": f"Bearer {token}"})
+                assert res_trans.status_code == 200
+                ctx = res_trans.json()
+                assert ctx["user_email"] == "tanishq.user@gmail.com"
     asyncio.run(_run())

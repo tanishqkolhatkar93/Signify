@@ -11,7 +11,7 @@ import {
   Eye,
   Sliders
 } from "lucide-react";
-import type { RecognitionResult, HandLandmarks, SignItem } from "../types";
+import type { RecognitionResult, HandLandmarks, SignItem, UserProfile } from "../types";
 import { api } from "../services/api";
 import { speechService } from "../services/speech";
 
@@ -19,12 +19,14 @@ interface SignToSpeechViewProps {
   consentGranted: boolean;
   onRequestConsent: () => void;
   signs?: SignItem[];
+  currentUser?: UserProfile | null;
 }
 
 export const SignToSpeechView: React.FC<SignToSpeechViewProps> = ({
   consentGranted,
   onRequestConsent,
-  signs: _signs
+  signs: _signs,
+  currentUser
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -59,7 +61,11 @@ export const SignToSpeechView: React.FC<SignToSpeechViewProps> = ({
         videoRef.current.play();
       }
       setIsCapturing(true);
-      await api.orchestratorTransition("GRANT_CONSENT", {}, "live-session");
+      await api.orchestratorTransition(
+        "GRANT_CONSENT",
+        { user_id: currentUser?.id, user_email: currentUser?.email },
+        "live-session"
+      );
     } catch (err: any) {
       console.warn("Camera device access not available or blocked:", err);
       setCameraError(
@@ -86,7 +92,8 @@ export const SignToSpeechView: React.FC<SignToSpeechViewProps> = ({
     setSimulatedPose(poseType);
     setRecognition(null);
 
-    // Generate mock hands
+    // Generate mock hands (respecting user's calibrated dominant hand)
+    const userHand = currentUser?.dominant_hand || "Right";
     const hands: HandLandmarks[] = [];
     const points: any[] = [{ x: 0.5, y: 0.8, z: 0.0 }]; // Wrist
 
@@ -102,7 +109,7 @@ export const SignToSpeechView: React.FC<SignToSpeechViewProps> = ({
         points.push({ x: bx, y: 0.72, z: 0.08 });
         points.push({ x: bx, y: 0.74, z: 0.1 });
       }
-      hands.push({ handedness: "Right", landmarks: points });
+      hands.push({ handedness: userHand, landmarks: points });
     } else if (poseType === "open_palm") {
       points.push({ x: 0.42, y: 0.7, z: 0.0 });
       points.push({ x: 0.36, y: 0.62, z: 0.0 });
@@ -115,7 +122,7 @@ export const SignToSpeechView: React.FC<SignToSpeechViewProps> = ({
         points.push({ x: bx, y: 0.4, z: 0.0 });
         points.push({ x: bx, y: 0.3, z: 0.0 });
       }
-      hands.push({ handedness: "Right", landmarks: points });
+      hands.push({ handedness: userHand, landmarks: points });
     } else if (poseType === "closed_fist") {
       points.push({ x: 0.46, y: 0.72, z: 0.0 });
       points.push({ x: 0.48, y: 0.68, z: 0.0 });

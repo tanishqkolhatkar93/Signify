@@ -3,11 +3,25 @@ import uuid
 import httpx
 import jwt
 from datetime import datetime, timedelta
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 from backend.app.core.config import settings
-from backend.app.core.database import SessionLocal, UserRecord
-from backend.app.schemas.auth import UserProfile, AuthResponse
+from backend.app.core.database import SessionLocal, UserRecord, ConversationRecord
+from backend.app.schemas.auth import UserProfile, AuthResponse, ConversationItem
+
+def record_to_user_profile(rec: UserRecord) -> UserProfile:
+    return UserProfile(
+        id=rec.id,
+        email=rec.email,
+        name=rec.name,
+        given_name=rec.given_name,
+        family_name=rec.family_name,
+        picture=rec.picture,
+        role=rec.role or "signer",
+        dominant_hand=rec.dominant_hand or "right",
+        signing_speed=rec.signing_speed or "normal",
+        preferred_language=rec.preferred_language or "en"
+    )
 
 class GoogleAuthService:
     def __init__(self):
@@ -82,6 +96,9 @@ class GoogleAuthService:
                     family_name=family_name,
                     picture=picture,
                     role="signer",
+                    dominant_hand="right",
+                    signing_speed="normal",
+                    preferred_language="en",
                     created_at=datetime.utcnow(),
                     last_login=datetime.utcnow()
                 )
@@ -89,15 +106,33 @@ class GoogleAuthService:
                 db.commit()
                 db.refresh(user)
 
-            return UserProfile(
-                id=user.id,
-                email=user.email,
-                name=user.name,
-                given_name=user.given_name,
-                family_name=user.family_name,
-                picture=user.picture,
-                role=user.role
-            )
+            return record_to_user_profile(user)
+        finally:
+            db.close()
+
+    def update_user_calibration(
+        self,
+        user_id: str,
+        dominant_hand: Optional[str] = None,
+        signing_speed: Optional[str] = None,
+        preferred_language: Optional[str] = None
+    ) -> UserProfile:
+        db = SessionLocal()
+        try:
+            user = db.query(UserRecord).filter(UserRecord.id == user_id).first()
+            if not user:
+                raise ValueError("User not found.")
+
+            if dominant_hand in ["right", "left"]:
+                user.dominant_hand = dominant_hand
+            if signing_speed in ["slow", "normal", "fast"]:
+                user.signing_speed = signing_speed
+            if preferred_language in ["en", "hi"]:
+                user.preferred_language = preferred_language
+
+            db.commit()
+            db.refresh(user)
+            return record_to_user_profile(user)
         finally:
             db.close()
 
@@ -124,19 +159,84 @@ class GoogleAuthService:
             try:
                 rec = db.query(UserRecord).filter(UserRecord.id == user_id).first()
                 if rec:
-                    return UserProfile(
-                        id=rec.id,
-                        email=rec.email,
-                        name=rec.name,
-                        given_name=rec.given_name,
-                        family_name=rec.family_name,
-                        picture=rec.picture,
-                        role=rec.role
-                    )
+                    return record_to_user_profile(rec)
                 return None
             finally:
                 db.close()
         except jwt.PyJWTError:
             return None
+
+    # Conversation Management
+    def save_conversation(
+        self,
+        user_id: str,
+        transcript: str,
+        title: Optional[str] = None,
+        translation: Optional[str] = None,
+        matched_sign_id: Optional[str] = None
+    ) -> ConversationItem:
+        db = SessionLocal()
+        try:
+            conv_id = f"conv_{uuid.uuid4().hex[:12]}"
+            effective_title = title or (transcript[:40] + "..." if len(transcript) > 40 else transcript)
+            rec = ConversationRecord(
+                id=conv_id,
+                user_id=user_id,
+                title=effective_title,
+                transcript=transcript,
+                translation=translation,
+                matched_sign_id=matched_sign_id,
+                created_at=datetime.utcnow()
+            )
+            db.add(rec)
+            db.commit()
+            db.refresh(rec)
+            return ConversationItem(
+                id=rec.id,
+                user_id=rec.user_id,
+                title=rec.title,
+                transcript=rec.transcript,
+                translation=rec.translation,
+                matched_sign_id=rec.matched_sign_id,
+                created_at=rec.created_at
+            )
+        finally:
+            db.close()
+
+    def list_conversations(self, user_id: str) -> List[ConversationItem]:
+        db = SessionLocal()
+        try:
+            records = db.query(ConversationRecord).filter(
+                ConversationRecord.user_id == user_id
+            ).order_by(ConversationRecord.created_at.desc()).all()
+            return [
+                ConversationItem(
+                    id=r.id,
+                    user_id=r.user_id,
+                    title=r.title,
+                    transcript=r.transcript,
+                    translation=r.translation,
+                    matched_sign_id=r.matched_sign_id,
+                    created_at=r.created_at
+                )
+                for r in records
+            ]
+        finally:
+            db.close()
+
+    def delete_conversation(self, user_id: str, conv_id: str) -> bool:
+        db = SessionLocal()
+        try:
+            rec = db.query(ConversationRecord).filter(
+                ConversationRecord.id == conv_id,
+                ConversationRecord.user_id == user_id
+            ).first()
+            if rec:
+                db.delete(rec)
+                db.commit()
+                return True
+            return False
+        finally:
+            db.close()
 
 google_auth_service = GoogleAuthService()

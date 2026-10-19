@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Mic,
   MicOff,
@@ -8,13 +8,21 @@ import {
   Languages,
   Sparkles,
   AlertCircle,
-  HelpCircle
+  HelpCircle,
+  Bookmark,
+  History,
+  Trash2,
+  X
 } from "lucide-react";
-import type { ReverseMatchResponse } from "../types";
+import type { ReverseMatchResponse, UserProfile, ConversationItem } from "../types";
 import { api } from "../services/api";
 import { speechService } from "../services/speech";
 
-export const SpeechView: React.FC = () => {
+interface SpeechViewProps {
+  currentUser?: UserProfile | null;
+}
+
+export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser }) => {
   const [isRecording, setIsRecording] = useState(false);
   const [sourceLang, setSourceLang] = useState<"en" | "hi">("en");
   const [transcript, setTranscript] = useState("");
@@ -22,6 +30,12 @@ export const SpeechView: React.FC = () => {
   const [isTranslating, setIsTranslating] = useState(false);
   const [copied, setCopied] = useState(false);
   const [reverseResult, setReverseResult] = useState<ReverseMatchResponse | null>(null);
+
+  // Saved conversations state
+  const [savedConversations, setSavedConversations] = useState<ConversationItem[]>([]);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [savingDialogue, setSavingDialogue] = useState(false);
+  const [saveToast, setSaveToast] = useState<string | null>(null);
 
   const samplePhrases = [
     { label: "How are you?", text: "How are you doing today?" },
@@ -33,6 +47,24 @@ export const SpeechView: React.FC = () => {
     { label: "Water", text: "I need some water please" },
     { label: "Unsupported (Astrophysics)", text: "Quantum mechanics and gravitational astrophysics" }
   ];
+
+  // Load saved conversations if user is authenticated
+  const loadConversations = async () => {
+    if (currentUser) {
+      try {
+        const items = await api.listConversations();
+        setSavedConversations(items);
+      } catch (e) {
+        console.warn("Could not load conversations:", e);
+      }
+    } else {
+      setSavedConversations([]);
+    }
+  };
+
+  useEffect(() => {
+    loadConversations();
+  }, [currentUser]);
 
   const handleSimulateSpeech = async (spokenText: string) => {
     setTranscript(spokenText);
@@ -92,6 +124,39 @@ export const SpeechView: React.FC = () => {
     speechService.speak(text, lang);
   };
 
+  const handleSaveDialogue = async () => {
+    if (!currentUser) {
+      alert("Please sign in with Google to save private conversation transcripts to your account.");
+      return;
+    }
+    if (!transcript.trim()) return;
+
+    setSavingDialogue(true);
+    try {
+      await api.saveConversation({
+        transcript,
+        translation,
+        matched_sign_id: reverseResult?.matched_sign?.id
+      });
+      setSaveToast("Saved to your account history!");
+      loadConversations();
+      setTimeout(() => setSaveToast(null), 3000);
+    } catch (err: any) {
+      alert(`Save error: ${err.message}`);
+    } finally {
+      setSavingDialogue(false);
+    }
+  };
+
+  const handleDeleteConversation = async (convId: string) => {
+    try {
+      await api.deleteConversation(convId);
+      setSavedConversations((prev) => prev.filter((c) => c.id !== convId));
+    } catch (err: any) {
+      alert(`Delete error: ${err.message}`);
+    }
+  };
+
   return (
     <div className="view-container">
       <div className="view-header">
@@ -102,17 +167,30 @@ export const SpeechView: React.FC = () => {
           </p>
         </div>
 
-        <div className="lang-selector-group">
-          <Languages size={16} />
-          <span>Spoken Language:</span>
-          <select
-            value={sourceLang}
-            onChange={(e) => setSourceLang(e.target.value as "en" | "hi")}
-            className="lang-select"
-          >
-            <option value="en">English (en-US)</option>
-            <option value="hi">Hindi (hi-IN - हिंदी)</option>
-          </select>
+        <div className="flex items-center gap-3">
+          {currentUser && (
+            <button
+              className="btn btn-secondary flex items-center gap-2 text-xs"
+              onClick={() => setShowHistoryModal(true)}
+              title="View your saved private dialogues"
+            >
+              <History size={15} />
+              <span>Saved History ({savedConversations.length})</span>
+            </button>
+          )}
+
+          <div className="lang-selector-group">
+            <Languages size={16} />
+            <span>Spoken Language:</span>
+            <select
+              value={sourceLang}
+              onChange={(e) => setSourceLang(e.target.value as "en" | "hi")}
+              className="lang-select"
+            >
+              <option value="en">English (en-US)</option>
+              <option value="hi">Hindi (hi-IN - हिंदी)</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -164,10 +242,24 @@ export const SpeechView: React.FC = () => {
               <label htmlFor="transcript-input" className="font-bold text-sm">
                 Live Speech Transcript (Editable):
               </label>
-              <button className="copy-btn" onClick={copyTranscript} title="Copy Transcript">
-                {copied ? <Check size={14} className="text-teal" /> : <Copy size={14} />}
-                <span>{copied ? "Copied" : "Copy"}</span>
-              </button>
+              <div className="flex items-center gap-2">
+                {transcript && (
+                  <button
+                    className="btn-secondary flex items-center gap-1 text-xs py-1 px-2"
+                    onClick={handleSaveDialogue}
+                    disabled={savingDialogue}
+                    title="Save dialogue to your Google account history"
+                  >
+                    <Bookmark size={13} className="text-emerald-400" />
+                    <span>{savingDialogue ? "Saving..." : "Save Dialogue"}</span>
+                  </button>
+                )}
+
+                <button className="copy-btn" onClick={copyTranscript} title="Copy Transcript">
+                  {copied ? <Check size={14} className="text-teal" /> : <Copy size={14} />}
+                  <span>{copied ? "Copied" : "Copy"}</span>
+                </button>
+              </div>
             </div>
 
             <textarea
@@ -178,6 +270,13 @@ export const SpeechView: React.FC = () => {
               placeholder="Spoken words will appear here. Deaf or hearing users can edit or type corrections directly..."
               className="transcript-textarea"
             />
+
+            {saveToast && (
+              <div className="p-2 my-2 text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded flex items-center gap-2">
+                <Check size={14} />
+                <span>{saveToast}</span>
+              </div>
+            )}
 
             {transcript && (
               <div className="transcript-footer">
@@ -295,6 +394,73 @@ export const SpeechView: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* Saved Dialogues History Modal */}
+      {showHistoryModal && (
+        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative text-slate-200 max-h-[85vh] flex flex-col">
+            <button
+              onClick={() => setShowHistoryModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+            >
+              <X size={20} />
+            </button>
+
+            <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+              <History size={18} className="text-emerald-400" />
+              Saved Private Conversation History
+            </h3>
+            <p className="text-xs text-slate-400 mb-4">
+              Stored securely under your Google account ({currentUser?.email}) in SQLite database.
+            </p>
+
+            <div className="overflow-y-auto flex-1 space-y-3 pr-1">
+              {savedConversations.length === 0 ? (
+                <div className="text-center py-8 text-slate-500 text-xs">
+                  No saved conversations found. Use "Save Dialogue" in the Speech view to preserve critical discussions.
+                </div>
+              ) : (
+                savedConversations.map((item) => (
+                  <div key={item.id} className="p-3 rounded-lg bg-slate-950 border border-slate-800 relative group">
+                    <div className="flex justify-between items-start gap-2 mb-1">
+                      <span className="text-xs font-semibold text-white">{item.title}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-slate-500">
+                          {new Date(item.created_at).toLocaleDateString()}
+                        </span>
+                        <button
+                          onClick={() => handleDeleteConversation(item.id)}
+                          className="text-slate-500 hover:text-red-400"
+                          title="Delete entry"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
+                    </div>
+                    <p className="text-xs text-slate-300 font-mono bg-slate-900/60 p-2 rounded mb-1">
+                      {item.transcript}
+                    </p>
+                    {item.translation && (
+                      <p className="text-xs text-teal-300 font-mono bg-teal-950/40 p-2 rounded">
+                        Translation: {item.translation}
+                      </p>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="pt-4 border-t border-slate-800 flex justify-end">
+              <button
+                className="btn btn-secondary text-xs"
+                onClick={() => setShowHistoryModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

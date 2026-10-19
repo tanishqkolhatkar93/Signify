@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Header
 from typing import List, Optional
 from backend.app.schemas.sign import (
     SignManifest,
@@ -35,8 +35,19 @@ def export_signs():
     return dictionary_service.get_manifest()
 
 @router.post("/import", response_model=SignImportResponse)
-def import_signs(req: SignImportRequest):
-    return dictionary_service.import_signs(req)
+def import_signs(
+    req: SignImportRequest,
+    authorization: Optional[str] = Header(None)
+):
+    contributor = None
+    if authorization and authorization.startswith("Bearer "):
+        token = authorization.split(" ")[1]
+        from backend.app.services.auth.google_auth import google_auth_service
+        user = google_auth_service.verify_access_token(token)
+        if user:
+            contributor = f"{user.name} ({user.email})"
+
+    return dictionary_service.import_signs(req, contributor=contributor)
 
 @router.post("/reverse-match", response_model=ReverseMatchResponse)
 def reverse_match(req: ReverseMatchRequest):

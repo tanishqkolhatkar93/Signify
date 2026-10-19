@@ -201,7 +201,7 @@ class SignDictionaryService:
         finally:
             db.close()
 
-    def import_signs(self, request: SignImportRequest) -> SignImportResponse:
+    def import_signs(self, request: SignImportRequest, contributor: Optional[str] = None) -> SignImportResponse:
         db = SessionLocal()
         total = len(request.signs)
         imported = 0
@@ -216,12 +216,16 @@ class SignDictionaryService:
                         update_dict = sign_item_to_record_dict(item)
                         for k, v in update_dict.items():
                             setattr(existing, k, v)
+                        if contributor:
+                            existing.contributed_by = contributor
                         existing.updated_at = datetime.utcnow()
                         updated += 1
                     else:
                         skipped.append(item.id)
                 else:
                     new_rec = SignItemRecord(**sign_item_to_record_dict(item))
+                    if contributor:
+                        new_rec.contributed_by = contributor
                     db.add(new_rec)
                     imported += 1
 

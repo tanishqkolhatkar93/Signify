@@ -43,7 +43,11 @@ export const App: React.FC = () => {
     setConsentGranted(true);
     setConsentModalOpen(false);
     try {
-      await api.orchestratorTransition("GRANT_CONSENT", {}, "live-session");
+      await api.orchestratorTransition(
+        "GRANT_CONSENT",
+        { user_id: currentUser?.id, user_email: currentUser?.email },
+        "live-session"
+      );
     } catch (e) {
       console.warn("Failed to notify backend of consent:", e);
     }
@@ -53,7 +57,11 @@ export const App: React.FC = () => {
     setConsentGranted(false);
     setConsentModalOpen(false);
     try {
-      await api.orchestratorTransition("DENY_CONSENT", {}, "live-session");
+      await api.orchestratorTransition(
+        "DENY_CONSENT",
+        { user_id: currentUser?.id, user_email: currentUser?.email },
+        "live-session"
+      );
     } catch (e) {
       console.warn("Failed to notify backend of consent denial:", e);
     }
@@ -104,15 +112,17 @@ export const App: React.FC = () => {
               consentGranted={consentGranted}
               onRequestConsent={() => setConsentModalOpen(true)}
               signs={signs}
+              currentUser={currentUser}
             />
           )}
 
-          {activeTab === "speech-route" && <SpeechView />}
+          {activeTab === "speech-route" && <SpeechView currentUser={currentUser} />}
 
           {activeTab === "dictionary" && (
             <SignDictionaryView
               manifest={manifest}
               signs={signs}
+              currentUser={currentUser}
               onSignImported={async () => {
                 const refreshed = await api.getManifest();
                 setManifest(refreshed);

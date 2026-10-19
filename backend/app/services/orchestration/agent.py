@@ -59,6 +59,8 @@ class CommunicationAgentOrchestrator:
             db = SessionLocal()
             record = AuditEventRecord(
                 session_id=ctx.session_id,
+                user_id=ctx.user_id,
+                user_email=ctx.user_email,
                 from_state=from_state.value,
                 to_state=to_state.value,
                 action=action.value,
@@ -77,6 +79,10 @@ class CommunicationAgentOrchestrator:
 
     async def handle_transition(self, req: TransitionRequest) -> OrchestratorContext:
         ctx = self.get_context(req.session_id)
+        if req.user_id:
+            ctx.user_id = req.user_id
+        if req.user_email:
+            ctx.user_email = req.user_email
         action = req.action
         payload = req.payload or {}
 

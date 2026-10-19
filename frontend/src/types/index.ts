@@ -26,6 +26,7 @@ export interface SignItem {
   media: SignMedia;
   source: string;
   license: string;
+  contributed_by?: string;
 }
 
 export interface SignManifest {
@@ -204,6 +205,25 @@ export interface UserProfile {
   family_name?: string;
   picture?: string;
   role: string;
+  dominant_hand?: "right" | "left";
+  signing_speed?: "slow" | "normal" | "fast";
+  preferred_language?: "en" | "hi";
+}
+
+export interface CalibrationUpdateRequest {
+  dominant_hand?: "right" | "left";
+  signing_speed?: "slow" | "normal" | "fast";
+  preferred_language?: "en" | "hi";
+}
+
+export interface ConversationItem {
+  id: string;
+  user_id: string;
+  title: string;
+  transcript: string;
+  translation?: string;
+  matched_sign_id?: string;
+  created_at: string;
 }
 
 export interface AuthResponse {

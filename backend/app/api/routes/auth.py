@@ -1,15 +1,27 @@
 from fastapi import APIRouter, HTTPException, Header
-from typing import Optional
+from typing import Optional, List
 from backend.app.schemas.auth import (
     GoogleAuthRequest,
     AuthResponse,
     UserProfile,
     AuthStatusResponse,
+    CalibrationUpdateRequest,
+    ConversationCreateRequest,
+    ConversationItem,
 )
 from backend.app.services.auth.google_auth import google_auth_service
 from backend.app.core.config import settings
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
+
+def get_authenticated_user(authorization: Optional[str]) -> UserProfile:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authentication required. Please sign in with Google.")
+    token = authorization.split(" ")[1]
+    user = google_auth_service.verify_access_token(token)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid or expired session token.")
+    return user
 
 @router.get("/status", response_model=AuthStatusResponse)
 def get_auth_status(authorization: Optional[str] = Header(None)):
@@ -44,12 +56,48 @@ async def google_login(req: GoogleAuthRequest):
 
 @router.get("/me", response_model=UserProfile)
 def get_current_user(authorization: Optional[str] = Header(None)):
-    if not authorization or not authorization.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing or malformed Authorization header")
+    return get_authenticated_user(authorization)
 
-    token = authorization.split(" ")[1]
-    user = google_auth_service.verify_access_token(token)
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid or expired session token")
+@router.patch("/profile", response_model=UserProfile)
+def update_profile_calibration(
+    req: CalibrationUpdateRequest,
+    authorization: Optional[str] = Header(None)
+):
+    user = get_authenticated_user(authorization)
+    try:
+        updated = google_auth_service.update_user_calibration(
+            user_id=user.id,
+            dominant_hand=req.dominant_hand,
+            signing_speed=req.signing_speed,
+            preferred_language=req.preferred_language
+        )
+        return updated
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
-    return user
+@router.post("/conversations", response_model=ConversationItem)
+def save_conversation(
+    req: ConversationCreateRequest,
+    authorization: Optional[str] = Header(None)
+):
+    user = get_authenticated_user(authorization)
+    return google_auth_service.save_conversation(
+        user_id=user.id,
+        transcript=req.transcript,
+        title=req.title,
+        translation=req.translation,
+        matched_sign_id=req.matched_sign_id
+    )
+
+@router.get("/conversations", response_model=List[ConversationItem])
+def list_conversations(authorization: Optional[str] = Header(None)):
+    user = get_authenticated_user(authorization)
+    return google_auth_service.list_conversations(user.id)
+
+@router.delete("/conversations/{conv_id}")
+def delete_conversation(conv_id: str, authorization: Optional[str] = Header(None)):
+    user = get_authenticated_user(authorization)
+    success = google_auth_service.delete_conversation(user.id, conv_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Conversation not found or not owned by user.")
+    return {"status": "success", "message": f"Conversation {conv_id} deleted."}

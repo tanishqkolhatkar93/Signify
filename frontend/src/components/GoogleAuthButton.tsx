@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { LogOut, CheckCircle2, ChevronDown, AlertCircle } from "lucide-react";
+import { LogOut, CheckCircle2, ChevronDown, AlertCircle, Settings, X, Hand, Zap, Languages } from "lucide-react";
 import type { UserProfile } from "../types";
 import { api } from "../services/api";
 
@@ -19,11 +19,34 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
     import.meta.env.VITE_GOOGLE_CLIENT_ID || ""
   );
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [calibrationModalOpen, setCalibrationModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [gisLoaded, setGisLoaded] = useState(false);
+  const [savingCalibration, setSavingCalibration] = useState(false);
+
+  // Calibration Form State
+  const [dominantHand, setDominantHand] = useState<"right" | "left">(
+    (currentUser?.dominant_hand as "right" | "left") || "right"
+  );
+  const [signingSpeed, setSigningSpeed] = useState<"slow" | "normal" | "fast">(
+    (currentUser?.signing_speed as "slow" | "normal" | "fast") || "normal"
+  );
+  const [preferredLanguage, setPreferredLanguage] = useState<"en" | "hi">(
+    (currentUser?.preferred_language as "en" | "hi") || "en"
+  );
+
   const googleBtnRef = useRef<HTMLDivElement>(null);
 
-  // Check auth session and fetch Google Client ID from backend if needed
+  // Sync calibration state when currentUser changes
+  useEffect(() => {
+    if (currentUser) {
+      if (currentUser.dominant_hand) setDominantHand(currentUser.dominant_hand);
+      if (currentUser.signing_speed) setSigningSpeed(currentUser.signing_speed);
+      if (currentUser.preferred_language) setPreferredLanguage(currentUser.preferred_language);
+    }
+  }, [currentUser]);
+
+  // Check auth session and fetch Google Client ID from backend
   useEffect(() => {
     const initAuth = async () => {
       try {
@@ -45,7 +68,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
     initAuth();
   }, []);
 
-  // Poll or check for Google Identity Services script availability
+  // Poll for Google Identity Services script availability
   useEffect(() => {
     if (window.google?.accounts?.id) {
       setGisLoaded(true);
@@ -64,7 +87,6 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
   useEffect(() => {
     if (googleClientId && gisLoaded && googleBtnRef.current && !currentUser) {
       try {
-        // Clear previous button contents
         googleBtnRef.current.innerHTML = "";
 
         window.google.accounts.id.initialize({
@@ -105,6 +127,24 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
     setDropdownOpen(false);
   };
 
+  const handleSaveCalibration = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSavingCalibration(true);
+    try {
+      const updated = await api.updateCalibration({
+        dominant_hand: dominantHand,
+        signing_speed: signingSpeed,
+        preferred_language: preferredLanguage
+      });
+      onUserChange(updated);
+      setCalibrationModalOpen(false);
+    } catch (err: any) {
+      alert(`Failed to save calibration: ${err.message}`);
+    } finally {
+      setSavingCalibration(false);
+    }
+  };
+
   if (currentUser) {
     return (
       <div className="relative">
@@ -131,7 +171,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
         </button>
 
         {dropdownOpen && (
-          <div className="absolute right-0 mt-2 w-60 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl py-2 z-50 text-xs">
+          <div className="absolute right-0 mt-2 w-64 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl py-2 z-50 text-xs">
             <div className="px-3 py-2 border-b border-slate-800">
               <p className="font-bold text-white truncate">{currentUser.name}</p>
               <p className="text-[11px] text-slate-400 truncate">{currentUser.email}</p>
@@ -140,10 +180,32 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
               </span>
             </div>
 
-            <div className="px-3 py-2 text-[11px] text-slate-400 border-b border-slate-800">
-              <span className="block text-slate-500">User ID: {currentUser.id}</span>
-              <span className="block text-slate-500">Role: {currentUser.role}</span>
+            {/* Profile Calibration Summary */}
+            <div className="px-3 py-2 text-[11px] text-slate-400 border-b border-slate-800 space-y-1">
+              <div className="flex justify-between">
+                <span className="text-slate-500">Dominant Hand:</span>
+                <span className="font-medium text-slate-300 capitalize">{currentUser.dominant_hand || "Right"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Signing Speed:</span>
+                <span className="font-medium text-slate-300 capitalize">{currentUser.signing_speed || "Normal"}</span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-slate-500">Target Voice:</span>
+                <span className="font-medium text-slate-300 uppercase">{currentUser.preferred_language || "EN"}</span>
+              </div>
             </div>
+
+            <button
+              onClick={() => {
+                setCalibrationModalOpen(true);
+                setDropdownOpen(false);
+              }}
+              className="w-full px-3 py-2 flex items-center gap-2 text-indigo-400 hover:bg-slate-800 text-left transition-colors font-medium border-b border-slate-800"
+            >
+              <Settings size={14} />
+              <span>Signer Calibration & Settings</span>
+            </button>
 
             <button
               onClick={handleLogout}
@@ -152,6 +214,136 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
               <LogOut size={14} />
               <span>Sign Out</span>
             </button>
+          </div>
+        )}
+
+        {/* Signer Calibration Modal */}
+        {calibrationModalOpen && (
+          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl relative text-slate-200">
+              <button
+                onClick={() => setCalibrationModalOpen(false)}
+                className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              >
+                <X size={20} />
+              </button>
+
+              <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+                <Settings size={18} className="text-indigo-400" />
+                Signer Calibration & Profile Settings
+              </h3>
+              <p className="text-xs text-slate-400 mb-4">
+                Personalized settings saved to your Google identity in SQLite database for customized landmark normalization and speech output.
+              </p>
+
+              <form onSubmit={handleSaveCalibration} className="space-y-4">
+                {/* Dominant Hand */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-2 flex items-center gap-1.5">
+                    <Hand size={14} className="text-emerald-400" />
+                    Dominant Signing Hand:
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      className={`p-2 rounded-lg border text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+                        dominantHand === "right"
+                          ? "bg-indigo-600/30 border-indigo-500 text-indigo-300"
+                          : "bg-slate-800 border-slate-700 text-slate-400"
+                      }`}
+                      onClick={() => setDominantHand("right")}
+                    >
+                      Right-Handed (Default)
+                    </button>
+                    <button
+                      type="button"
+                      className={`p-2 rounded-lg border text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+                        dominantHand === "left"
+                          ? "bg-indigo-600/30 border-indigo-500 text-indigo-300"
+                          : "bg-slate-800 border-slate-700 text-slate-400"
+                      }`}
+                      onClick={() => setDominantHand("left")}
+                    >
+                      Left-Handed (Inverted Spatial)
+                    </button>
+                  </div>
+                </div>
+
+                {/* Signing Speed */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-2 flex items-center gap-1.5">
+                    <Zap size={14} className="text-amber-400" />
+                    Signing Speed / Temporal Tolerance:
+                  </label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {(["slow", "normal", "fast"] as const).map((spd) => (
+                      <button
+                        key={spd}
+                        type="button"
+                        className={`p-2 rounded-lg border text-xs font-semibold capitalize text-center transition-all ${
+                          signingSpeed === spd
+                            ? "bg-amber-600/30 border-amber-500 text-amber-300"
+                            : "bg-slate-800 border-slate-700 text-slate-400"
+                        }`}
+                        onClick={() => setSigningSpeed(spd)}
+                      >
+                        {spd === "slow" ? "Slow / Learner" : spd === "normal" ? "Normal" : "Fast / Fluent"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Preferred Spoken Voice */}
+                <div>
+                  <label className="block text-xs font-bold text-slate-300 mb-2 flex items-center gap-1.5">
+                    <Languages size={14} className="text-cyan-400" />
+                    Preferred Voice Output Language:
+                  </label>
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      className={`p-2 rounded-lg border text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+                        preferredLanguage === "en"
+                          ? "bg-cyan-600/30 border-cyan-500 text-cyan-300"
+                          : "bg-slate-800 border-slate-700 text-slate-400"
+                      }`}
+                      onClick={() => setPreferredLanguage("en")}
+                    >
+                      English (en-US)
+                    </button>
+                    <button
+                      type="button"
+                      className={`p-2 rounded-lg border text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
+                        preferredLanguage === "hi"
+                          ? "bg-cyan-600/30 border-cyan-500 text-cyan-300"
+                          : "bg-slate-800 border-slate-700 text-slate-400"
+                      }`}
+                      onClick={() => setPreferredLanguage("hi")}
+                    >
+                      Hindi (हिंदी - hi-IN)
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-3 border-t border-slate-800">
+                  <button
+                    type="button"
+                    className="btn btn-secondary text-xs"
+                    onClick={() => setCalibrationModalOpen(false)}
+                    disabled={savingCalibration}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    className="btn btn-primary text-xs"
+                    disabled={savingCalibration}
+                  >
+                    {savingCalibration ? "Saving Preferences..." : "Save Preferences"}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
         )}
       </div>
