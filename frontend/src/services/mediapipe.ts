@@ -90,3 +90,4 @@ export function convertToAppHandLandmarks(result: HandLandmarkerResult): HandLan
     };
   });
 }
+

@@ -91,16 +91,18 @@ class MockTranslationProvider(BaseTranslationProvider):
             status="SUCCESS"
         )
 
+import uuid
+
 class VerbXTranslationProvider(BaseTranslationProvider):
     """
-    Official VerbX Multilingual Translation Integration (one.verbxeco.com).
-    Supports 76 languages including English and Hindi with enterprise glossaries.
+    Official VerbX Multilingual Translation Integration (api.verbxeco.com).
+    Uses verbx-langshift model supporting English, Hindi, and 76 languages.
     """
     def __init__(self, api_key: str = settings.VERBX_API_KEY, base_url: str = settings.VERBX_API_BASE_URL):
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
         self.fallback = MockTranslationProvider()
-        self.provider_name = "VerbX-Translation-Platform (one.verbxeco.com)"
+        self.provider_name = "VerbX-Langshift (api.verbxeco.com)"
 
     async def translate(self, request: TranslationRequest) -> TranslationResponse:
         if not self.api_key or self.api_key == "your_verbx_api_key_here":
@@ -110,20 +112,23 @@ class VerbXTranslationProvider(BaseTranslationProvider):
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
                 headers = {
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json"
+                    "x-api-key": self.api_key,
+                    "X-VerbX-Shell": "saas",
+                    "Content-Type": "application/json",
+                    "Idempotency-Key": str(uuid.uuid4()),
                 }
                 payload = {
                     "text": request.text,
-                    "source_language": request.source_language,
-                    "target_language": request.target_language
+                    "source_lang": request.source_language.lower(),
+                    "target_lang": request.target_language.lower(),
                 }
-                res = await client.post(f"{self.base_url}/translate", json=payload, headers=headers)
+                res = await client.post(f"{self.base_url}/v1/translate", json=payload, headers=headers)
                 if res.status_code == 200:
                     data = res.json()
+                    translated = data.get("text") or data.get("translated_text") or request.text
                     return TranslationResponse(
                         original_text=request.text,
-                        translated_text=data.get("translated_text", request.text),
+                        translated_text=translated,
                         source_language=request.source_language,
                         target_language=request.target_language,
                         provider_name=self.provider_name,
@@ -131,7 +136,7 @@ class VerbXTranslationProvider(BaseTranslationProvider):
                         status="SUCCESS"
                     )
                 else:
-                    logger.warning(f"VerbX Translation HTTP {res.status_code}. Using fallback.")
+                    logger.warning(f"VerbX Translation HTTP {res.status_code}: {res.text}. Using fallback.")
                     return await self.fallback.translate(request)
         except Exception as e:
             logger.error(f"Error reaching VerbX Translation: {e}. Using fallback.")

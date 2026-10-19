@@ -1,4 +1,5 @@
 import os
+import uuid
 import base64
 import logging
 from abc import ABC, abstractmethod
@@ -68,14 +69,14 @@ class MockSpeechProvider(BaseSpeechProvider):
 
 class VerbXSpeechProvider(BaseSpeechProvider):
     """
-    Official VerbX / IvishAI Platform Speech Integration (https://one.verbxeco.com).
-    Calls Vocaline STT and VerbX Multilingual TTS when configured with valid API keys.
+    Official VerbX / IvishAI Platform Speech Integration (https://api.verbxeco.com).
+    Calls Vocaline STT and VerbX Multilingual TTS with authenticated API keys.
     """
     def __init__(self, api_key: str = settings.VERBX_API_KEY, base_url: str = settings.VERBX_API_BASE_URL):
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
         self.fallback_mock = MockSpeechProvider()
-        self.provider_name = "VerbX-Vocaline-Platform (one.verbxeco.com)"
+        self.provider_name = "VerbX-Vocaline-Platform (api.verbxeco.com)"
 
     async def transcribe(self, request: TranscribeRequest) -> TranscribeResponse:
         if not self.api_key or self.api_key == "your_verbx_api_key_here":
@@ -87,27 +88,29 @@ class VerbXSpeechProvider(BaseSpeechProvider):
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
                 headers = {
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json"
+                    "x-api-key": self.api_key,
+                    "X-VerbX-Shell": "saas",
+                    "Content-Type": "application/json",
+                    "Idempotency-Key": str(uuid.uuid4())
                 }
                 payload = {
-                    "audio": request.audio_base64,
-                    "language": request.language,
-                    "model": "vocaline-general"
+                    "audio_base64": request.audio_base64,
+                    "language": request.language or "en"
                 }
-                res = await client.post(f"{self.base_url}/stt/transcribe", json=payload, headers=headers)
+                res = await client.post(f"{self.base_url}/v1/stt", json=payload, headers=headers)
                 if res.status_code == 200:
                     data = res.json()
+                    transcript = data.get("text", "")
                     return TranscribeResponse(
-                        transcript=data.get("transcript", ""),
+                        transcript=transcript,
                         language=data.get("language", request.language),
                         confidence=float(data.get("confidence", 0.95)),
-                        provider_name=self.provider_name,
+                        provider_name="VerbX-Vocaline (api.verbxeco.com)",
                         is_mock=False,
                         status="SUCCESS"
                     )
                 else:
-                    logger.warning(f"VerbX STT returned status {res.status_code}. Using fallback.")
+                    logger.warning(f"VerbX STT returned status {res.status_code}: {res.text}. Using fallback.")
                     resp = await self.fallback_mock.transcribe(request)
                     resp.notes = f"VerbX API returned HTTP {res.status_code}. Using safe mock fallback."
                     return resp
@@ -125,28 +128,30 @@ class VerbXSpeechProvider(BaseSpeechProvider):
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
                 headers = {
-                    "Authorization": f"Bearer {self.api_key}",
-                    "Content-Type": "application/json"
+                    "x-api-key": self.api_key,
+                    "X-VerbX-Shell": "saas",
+                    "Content-Type": "application/json",
+                    "Idempotency-Key": str(uuid.uuid4())
                 }
                 payload = {
-                    "text": request.text,
-                    "target_language": request.language,
-                    "voice": "hi-IN-Standard" if request.language == "hi" else "en-US-Standard"
+                    "text": request.text
                 }
-                res = await client.post(f"{self.base_url}/tts/synthesize", json=payload, headers=headers)
+                res = await client.post(f"{self.base_url}/v1/tts", json=payload, headers=headers)
                 if res.status_code == 200:
-                    data = res.json()
+                    mime = res.headers.get("content-type", "audio/mpeg").split(";")[0]
+                    audio_b64 = base64.b64encode(res.content).decode("utf-8")
                     return SynthesizeResponse(
                         text=request.text,
                         language=request.language,
-                        audio_base64=data.get("audio_base64"),
-                        audio_url=data.get("audio_url"),
-                        audio_mime=data.get("mime_type", "audio/wav"),
-                        provider_name=self.provider_name,
+                        audio_base64=f"data:{mime};base64,{audio_b64}",
+                        audio_url=None,
+                        audio_mime=mime,
+                        provider_name="VerbX-TTS (api.verbxeco.com)",
                         is_mock=False,
                         status="SUCCESS"
                     )
                 else:
+                    logger.warning(f"VerbX TTS returned HTTP {res.status_code}: {res.text}. Using fallback.")
                     return await self.fallback_mock.synthesize(request)
         except Exception as e:
             logger.error(f"Error calling VerbX TTS: {e}. Using fallback.")
