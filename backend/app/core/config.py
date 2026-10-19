@@ -39,5 +39,11 @@ class Settings(BaseSettings):
     SUPPORTED_SIGN_LANGUAGE: str = "Indian Sign Language (ISL)"
     SUPPORTED_LANGUAGES: list[str] = ["en", "hi"]
 
+    # Authentication & Google OAuth
+    GOOGLE_CLIENT_ID: str = ""
+    JWT_SECRET: str = "signify-secret-key-2026-hackathon-token"
+    JWT_ALGORITHM: str = "HS256"
+    JWT_EXPIRES_MINUTES: int = 60 * 24 * 7
+
 settings = Settings()
 

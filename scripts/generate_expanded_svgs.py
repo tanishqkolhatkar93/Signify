@@ -167,3 +167,4 @@ for fname, content in NEW_SVGS.items():
     p = SIGN_DIR / fname
     p.write_text(content.strip(), encoding="utf-8")
     print(f"Generated {p.name}")
+

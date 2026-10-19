@@ -195,3 +195,27 @@ export interface ReverseMatchResponse {
   isl_grammar_note?: string;
   explanation: string;
 }
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  name: string;
+  given_name?: string;
+  family_name?: string;
+  picture?: string;
+  role: string;
+}
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+  user: UserProfile;
+  message: string;
+}
+
+export interface AuthStatusResponse {
+  authenticated: boolean;
+  user?: UserProfile;
+  google_client_id?: string;
+}
+

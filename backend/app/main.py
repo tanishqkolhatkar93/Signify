@@ -11,6 +11,7 @@ from backend.app.api.routes import (
     speech,
     translation,
     tests,
+    auth,
 )
 
 @asynccontextmanager
@@ -45,6 +46,7 @@ app.include_router(vision.router, prefix="/api/v1")
 app.include_router(speech.router, prefix="/api/v1")
 app.include_router(translation.router, prefix="/api/v1")
 app.include_router(tests.router, prefix="/api/v1")
+app.include_router(auth.router, prefix="/api/v1")
 
 @app.get("/")
 def root():

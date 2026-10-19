@@ -7,20 +7,31 @@ import type {
   OrchestratorContext,
   WorkflowAction,
   AcceptanceTestSummary,
-  TestRunRecord
+  TestRunRecord,
+  UserProfile,
+  AuthResponse,
+  AuthStatusResponse
 } from "../types";
 
 const API_BASE = "http://127.0.0.1:8000/api/v1";
 
 async function request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const url = `${API_BASE}${endpoint}`;
+  const token = localStorage.getItem("signify_auth_token");
+  
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+    ...(options.headers as Record<string, string> || {})
+  };
+
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   try {
     const res = await fetch(url, {
       ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...(options.headers || {})
-      }
+      headers
     });
     if (!res.ok) {
       const errBody = await res.text();
@@ -34,6 +45,35 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
 }
 
 export const api = {
+  // Authentication
+  getAuthStatus: () => request<AuthStatusResponse>("/auth/status"),
+  loginGoogle: async (credential: string) => {
+    const res = await request<AuthResponse>("/auth/google", {
+      method: "POST",
+      body: JSON.stringify({ credential })
+    });
+    if (res.access_token) {
+      localStorage.setItem("signify_auth_token", res.access_token);
+    }
+    return res;
+  },
+  loginDemo: async (email?: string, name?: string) => {
+    const res = await request<AuthResponse>("/auth/demo", {
+      method: "POST",
+      body: JSON.stringify({ email, name })
+    });
+    if (res.access_token) {
+      localStorage.setItem("signify_auth_token", res.access_token);
+    }
+    return res;
+  },
+  getCurrentUser: () => request<UserProfile>("/auth/me"),
+  logout: () => {
+    localStorage.removeItem("signify_auth_token");
+  },
+  getToken: () => localStorage.getItem("signify_auth_token"),
+
+  // Core Signify Services
   getHealth: () => request<any>("/health"),
   getManifest: () => request<SignManifest>("/signs/manifest"),
   listSigns: (category?: string, search?: string) => {

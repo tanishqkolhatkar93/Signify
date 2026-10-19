@@ -1,18 +1,26 @@
 import React from "react";
 import { ShieldCheck, Activity, Video, Mic, BookOpen, CheckCircle2 } from "lucide-react";
+import type { UserProfile } from "../types";
+import { GoogleAuthButton } from "./GoogleAuthButton";
 
 interface HeaderProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
   backendOnline: boolean;
   consentGranted: boolean;
+  currentUser: UserProfile | null;
+  onUserChange: (user: UserProfile | null) => void;
+  signCount?: number;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   activeTab,
   setActiveTab,
   backendOnline,
-  consentGranted
+  consentGranted,
+  currentUser,
+  onUserChange,
+  signCount = 28
 }) => {
   return (
     <header className="site-header">
@@ -27,7 +35,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </div>
 
-        <div className="status-badges">
+        <div className="status-badges flex items-center gap-3">
           <div className={`status-pill ${consentGranted ? "pill-consented" : "pill-neutral"}`}>
             <ShieldCheck size={14} />
             <span>{consentGranted ? "Camera Consented" : "Consent Required"}</span>
@@ -38,11 +46,14 @@ export const Header: React.FC<HeaderProps> = ({
             <span>{backendOnline ? "Backend Connected (FastAPI)" : "Connecting..."}</span>
           </div>
 
-          <div className="language-tags">
+          <div className="language-tags hidden sm:flex">
             <span className="lang-tag active">ISL</span>
             <span className="lang-tag">EN</span>
             <span className="lang-tag">HI (हिंदी)</span>
           </div>
+
+          {/* Google Authentication Component */}
+          <GoogleAuthButton currentUser={currentUser} onUserChange={onUserChange} />
         </div>
       </div>
 
@@ -68,7 +79,7 @@ export const Header: React.FC<HeaderProps> = ({
           onClick={() => setActiveTab("dictionary")}
         >
           <BookOpen size={16} />
-          <span>Sign Dictionary (12 ISL Signs)</span>
+          <span>Sign Dictionary ({signCount} ISL Signs)</span>
         </button>
 
         <button
@@ -82,4 +93,3 @@ export const Header: React.FC<HeaderProps> = ({
     </header>
   );
 };
-

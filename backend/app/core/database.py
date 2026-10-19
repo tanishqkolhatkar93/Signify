@@ -69,6 +69,20 @@ class AuditEventRecord(Base):
     status = Column(String(50), default="SUCCESS")
     created_at = Column(DateTime, default=datetime.utcnow)
 
+class UserRecord(Base):
+    __tablename__ = "users"
+
+    id = Column(String(100), primary_key=True, index=True)
+    google_id = Column(String(100), unique=True, index=True, nullable=True)
+    email = Column(String(255), unique=True, index=True)
+    name = Column(String(255))
+    given_name = Column(String(100), nullable=True)
+    family_name = Column(String(100), nullable=True)
+    picture = Column(String(500), nullable=True)
+    role = Column(String(50), default="user")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    last_login = Column(DateTime, default=datetime.utcnow)
+
 def init_db():
     Base.metadata.create_all(bind=engine)
 

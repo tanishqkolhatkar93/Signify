@@ -129,3 +129,39 @@ def test_acceptance_test_runner_all_pass():
         for r in records:
             assert r.status == "PASS", f"Test {r.test_id} failed: {r.actual_output}"
     asyncio.run(_run())
+
+def test_google_auth_and_user_session():
+    async def _run():
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            # 1. Check unauthenticated status
+            res = await client.get("/api/v1/auth/status")
+            assert res.status_code == 200
+            data = res.json()
+            assert data["authenticated"] is False
+
+            # 2. Perform demo Google Sign-in
+            res_login = await client.post("/api/v1/auth/demo", json={
+                "email": "tanishq.signer@gmail.com",
+                "name": "Tanishq Signer"
+            })
+            assert res_login.status_code == 200
+            auth_data = res_login.json()
+            assert auth_data["access_token"]
+            assert auth_data["user"]["email"] == "tanishq.signer@gmail.com"
+            assert auth_data["user"]["role"] == "signer"
+
+            token = auth_data["access_token"]
+
+            # 3. Verify user profile with token
+            res_me = await client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
+            assert res_me.status_code == 200
+            me_data = res_me.json()
+            assert me_data["email"] == "tanishq.signer@gmail.com"
+            assert me_data["name"] == "Tanishq Signer"
+
+            # 4. Verify auth status with token
+            res_status = await client.get("/api/v1/auth/status", headers={"Authorization": f"Bearer {token}"})
+            assert res_status.status_code == 200
+            assert res_status.json()["authenticated"] is True
+    asyncio.run(_run())

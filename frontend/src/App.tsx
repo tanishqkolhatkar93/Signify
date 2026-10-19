@@ -6,7 +6,7 @@ import { SpeechView } from "./components/SpeechView";
 import { SignDictionaryView } from "./components/SignDictionaryView";
 import { TestEvidenceView } from "./components/TestEvidenceView";
 import { api } from "./services/api";
-import type { SignItem, SignManifest } from "./types";
+import type { SignItem, SignManifest, UserProfile } from "./types";
 import { ShieldCheck, Languages, Sparkles } from "lucide-react";
 import "./App.css";
 
@@ -17,6 +17,7 @@ export const App: React.FC = () => {
   const [consentModalOpen, setConsentModalOpen] = useState(false);
   const [manifest, setManifest] = useState<SignManifest | null>(null);
   const [signs, setSigns] = useState<SignItem[]>([]);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
 
   // Initial health check and manifest loading
   useEffect(() => {
@@ -65,6 +66,9 @@ export const App: React.FC = () => {
         setActiveTab={setActiveTab}
         backendOnline={backendOnline}
         consentGranted={consentGranted}
+        currentUser={currentUser}
+        onUserChange={setCurrentUser}
+        signCount={signs.length || 28}
       />
 
       <main className="main-content">
