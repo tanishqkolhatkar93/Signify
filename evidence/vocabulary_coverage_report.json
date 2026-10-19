@@ -1,0 +1,427 @@
+{
+  "timestamp": "2026-10-19T06:20:23Z",
+  "sign_language": "Indian Sign Language (ISL)",
+  "language_code": "isl",
+  "manifest_version": "2.0.0",
+  "total_signs": 28,
+  "verified_count": 28,
+  "pending_count": 0,
+  "media_coverage_percent": 100.0,
+  "model_coverage_count": 8,
+  "supported_model_classes": [
+    "isl_food",
+    "isl_good",
+    "isl_water",
+    "isl_namaste_hello",
+    "isl_yes",
+    "isl_no",
+    "isl_bad",
+    "isl_stop"
+  ],
+  "source_attribution": {
+    "primary_reference": "ISLRTC (Indian Sign Language Research and Training Centre) Standard Dictionary guidelines & Consented Open Benchmark Annotations",
+    "license": "Creative Commons Attribution 4.0 International (CC-BY 4.0)",
+    "consent_status": "Consented benchmark coordinate references; zero private biometric video retained"
+  },
+  "categories": [
+    {
+      "name": "Courtesy",
+      "total_signs": 4,
+      "verified": 4,
+      "signs": [
+        {
+          "id": "isl_please",
+          "display_name": "Please",
+          "canonical_phrase": "please",
+          "sign_type": "word",
+          "meaning": "Polite request.",
+          "english": "Please",
+          "hindi": "\u0915\u0943\u092a\u092f\u093e / \u092a\u094d\u0932\u0940\u091c",
+          "isl_grammar": "Precedes or succeeds request with polite non-manual head nod.",
+          "has_media": true,
+          "model_ready": false
+        },
+        {
+          "id": "isl_sorry",
+          "display_name": "Sorry / Apologies",
+          "canonical_phrase": "sorry",
+          "sign_type": "word",
+          "meaning": "Expression of regret, apology, or sympathy.",
+          "english": "Sorry / Excuse me",
+          "hindi": "\u092e\u093e\u092b\u093c \u0915\u0940\u091c\u093f\u092f\u0947 / \u0938\u0949\u0930\u0940",
+          "isl_grammar": "Accompanied by non-manual regret markers: slight head bow and lowered brows.",
+          "has_media": true,
+          "model_ready": false
+        },
+        {
+          "id": "isl_thank_you",
+          "display_name": "Thank You",
+          "canonical_phrase": "thank you",
+          "sign_type": "phrase",
+          "meaning": "Expression of gratitude and appreciation.",
+          "english": "Thank you",
+          "hindi": "\u0927\u0928\u094d\u092f\u0935\u093e\u0926 / \u0936\u0941\u0915\u094d\u0930\u093f\u092f\u093e",
+          "isl_grammar": "Directional sign: originates at signer's face and directs towards recipient.",
+          "has_media": true,
+          "model_ready": false
+        },
+        {
+          "id": "isl_welcome",
+          "display_name": "Welcome",
+          "canonical_phrase": "welcome",
+          "sign_type": "word",
+          "meaning": "Warm reception or welcoming response to thank you.",
+          "english": "Welcome / You are welcome",
+          "hindi": "\u0938\u094d\u0935\u093e\u0917\u0924 \u0939\u0947 / \u0915\u094b\u0908 \u092c\u093e\u0924 \u0928\u0939\u0940\u0902",
+          "isl_grammar": "Inviting spatial motion accompanied by a warm smile.",
+          "has_media": true,
+          "model_ready": false
+        }
+      ]
+    },
+    {
+      "name": "Daily Needs",
+      "total_signs": 7,
+      "verified": 7,
+      "signs": [
+        {
+          "id": "isl_bad",
+          "display_name": "Bad / Unwell",
+          "canonical_phrase": "bad",
+          "sign_type": "word",
+          "meaning": "Negative evaluation, illness, distress, or disapproval.",
+          "english": "Bad / Not good",
+          "hindi": "\u0916\u0930\u093e\u092c / \u092c\u0941\u0930\u093e",
+          "isl_grammar": "Negative evaluative adjective accompanied by frown.",
+          "has_media": true,
+          "model_ready": true
+        },
+        {
+          "id": "isl_good",
+          "display_name": "Good / Well",
+          "canonical_phrase": "good",
+          "sign_type": "word",
+          "meaning": "Positive evaluation, good condition, or approval.",
+          "english": "Good / Well",
+          "hindi": "\u0905\u091a\u094d\u091b\u093e / \u092c\u0939\u0941\u0924 \u0905\u091a\u094d\u091b\u093e",
+          "isl_grammar": "Evaluative adjective.",
+          "has_media": true,
+          "model_ready": true
+        },
+        {
+          "id": "isl_more",
+          "display_name": "More",
+          "canonical_phrase": "more",
+          "sign_type": "word",
+          "meaning": "Request for an additional quantity or repetition.",
+          "english": "More / Again",
+          "hindi": "\u0914\u0930 / \u091c\u094d\u092f\u093e\u0926\u093e",
+          "isl_grammar": "Quantifier modifying preceding noun or standalone request.",
+          "has_media": true,
+          "model_ready": false
+        },
+        {
+          "id": "isl_no",
+          "display_name": "No",
+          "canonical_phrase": "no",
+          "sign_type": "word",
+          "meaning": "Negative response, refusal, or disagreement.",
+          "english": "No / Disagree",
+          "hindi": "\u0928\u0939\u0940\u0902 / \u0905\u0938\u0939\u092e\u0924",
+          "isl_grammar": "Negative particle accompanied by head shake.",
+          "has_media": true,
+          "model_ready": true
+        },
+        {
+          "id": "isl_stop",
+          "display_name": "Stop",
+          "canonical_phrase": "stop",
+          "sign_type": "word",
+          "meaning": "Command to cease action, halt, or pause.",
+          "english": "Stop / Halt",
+          "hindi": "\u0930\u0941\u0915\u094b / \u092c\u0902\u0926 \u0915\u0930\u094b",
+          "isl_grammar": "Imperative command; sudden emphatic halt.",
+          "has_media": true,
+          "model_ready": true
+        },
+        {
+          "id": "isl_water",
+          "display_name": "Water",
+          "canonical_phrase": "water",
+          "sign_type": "word",
+          "meaning": "Drinking water or being thirsty.",
+          "english": "Water",
+          "hindi": "\u092a\u093e\u0928\u0940 / \u091c\u0932",
+          "isl_grammar": "Can combine with 'WANT' or 'WHERE' in two-sign queries.",
+          "has_media": true,
+          "model_ready": true
+        },
+        {
+          "id": "isl_yes",
+          "display_name": "Yes",
+          "canonical_phrase": "yes",
+          "sign_type": "word",
+          "meaning": "Affirmative agreement or consent.",
+          "english": "Yes / Agreed",
+          "hindi": "\u0939\u093e\u0901 / \u0938\u0939\u092e\u0924",
+          "isl_grammar": "Affirmative particle accompanied by head nod.",
+          "has_media": true,
+          "model_ready": true
+        }
+      ]
+    },
+    {
+      "name": "Emergency",
+      "total_signs": 2,
+      "verified": 2,
+      "signs": [
+        {
+          "id": "isl_help",
+          "display_name": "Help / Assistance",
+          "canonical_phrase": "help",
+          "sign_type": "word",
+          "meaning": "Request for assistance, medical support, or emergency aid.",
+          "english": "Help / Need assistance",
+          "hindi": "\u092e\u0926\u0926 / \u0938\u0939\u093e\u092f\u0924\u093e \u091a\u093e\u0939\u093f\u090f",
+          "isl_grammar": "Directional verb: moving towards recipient means 'I help you'; moving towards self means 'You help me'.",
+          "has_media": true,
+          "model_ready": false
+        },
+        {
+          "id": "isl_need_help",
+          "display_name": "I need help",
+          "canonical_phrase": "i need help",
+          "sign_type": "phrase",
+          "meaning": "Urgent request for immediate emergency assistance.",
+          "english": "I need help / Please help me",
+          "hindi": "\u092e\u0941\u091d\u0947 \u092e\u0926\u0926 \u091a\u093e\u0939\u093f\u090f / \u0915\u0943\u092a\u092f\u093e \u0938\u0939\u093e\u092f\u0924\u093e \u0915\u0930\u0947\u0902",
+          "isl_grammar": "ISL Syntax: [ME] [HELP-TOWARDS-ME] [URGENT] (Directional verb incorporates beneficiary pronoun).",
+          "has_media": true,
+          "model_ready": false
+        }
+      ]
+    },
+    {
+      "name": "Family",
+      "total_signs": 3,
+      "verified": 3,
+      "signs": [
+        {
+          "id": "isl_family",
+          "display_name": "Family",
+          "canonical_phrase": "family",
+          "sign_type": "word",
+          "meaning": "Household group, relatives, or immediate family members.",
+          "english": "Family",
+          "hindi": "\u092a\u0930\u093f\u0935\u093e\u0930 / \u0915\u0941\u091f\u0941\u092e\u094d\u092c",
+          "isl_grammar": "Collective noun denoting inclusive social unit.",
+          "has_media": true,
+          "model_ready": false
+        },
+        {
+          "id": "isl_father",
+          "display_name": "Father / Dad",
+          "canonical_phrase": "father",
+          "sign_type": "word",
+          "meaning": "Male parent.",
+          "english": "Father / Dad",
+          "hindi": "\u092a\u093f\u0924\u093e\u091c\u0940 / \u092a\u093e\u092a\u093e",
+          "isl_grammar": "Noun: placed in topic position in family descriptions.",
+          "has_media": true,
+          "model_ready": false
+        },
+        {
+          "id": "isl_mother",
+          "display_name": "Mother / Mom",
+          "canonical_phrase": "mother",
+          "sign_type": "word",
+          "meaning": "Female parent.",
+          "english": "Mother / Mom",
+          "hindi": "\u092e\u093e\u0924\u093e\u091c\u0940 / \u092e\u093e\u0901",
+          "isl_grammar": "Noun: placed in topic position in sentence.",
+          "has_media": true,
+          "model_ready": false
+        }
+      ]
+    },
+    {
+      "name": "Food",
+      "total_signs": 3,
+      "verified": 3,
+      "signs": [
+        {
+          "id": "isl_food",
+          "display_name": "Food / Eat",
+          "canonical_phrase": "food",
+          "sign_type": "word",
+          "meaning": "Food, meals, eating, or being hungry.",
+          "english": "Food / Eat",
+          "hindi": "\u0916\u093e\u0928\u093e / \u092d\u094b\u091c\u0928",
+          "isl_grammar": "Noun and verb share same base handshape (FOOD vs EAT distinguished by repetition).",
+          "has_media": true,
+          "model_ready": true
+        },
+        {
+          "id": "isl_hungry",
+          "display_name": "Hungry",
+          "canonical_phrase": "hungry",
+          "sign_type": "phrase",
+          "meaning": "Feeling hunger or needing food.",
+          "english": "Hungry / I am hungry",
+          "hindi": "\u092d\u0942\u0916 \u0932\u0917\u0940 \u0939\u0948 / \u092d\u0942\u0916\u093e",
+          "isl_grammar": "Predicate adjective; often combined with [FOOD] [WANT].",
+          "has_media": true,
+          "model_ready": false
+        },
+        {
+          "id": "isl_tea",
+          "display_name": "Tea / Chai",
+          "canonical_phrase": "tea",
+          "sign_type": "word",
+          "meaning": "Hot tea beverage.",
+          "english": "Tea / Chai",
+          "hindi": "\u091a\u093e\u092f",
+          "isl_grammar": "Common conversational offering in Indian hospitality context.",
+          "has_media": true,
+          "model_ready": false
+        }
+      ]
+    },
+    {
+      "name": "Greetings",
+      "total_signs": 2,
+      "verified": 2,
+      "signs": [
+        {
+          "id": "isl_how_are_you",
+          "display_name": "How are you?",
+          "canonical_phrase": "how are you",
+          "sign_type": "phrase",
+          "meaning": "Inquiry regarding personal wellbeing and health.",
+          "english": "How are you?",
+          "hindi": "\u0906\u092a \u0915\u0948\u0938\u0947 \u0939\u0948\u0902? / \u0915\u094d\u092f\u093e \u0939\u093e\u0932 \u0939\u0948?",
+          "isl_grammar": "ISL Syntax: [YOU] [HOW?] (Wh-interrogative question structure; question particle occurs sentence-finally with non-manual furrowed eyebrows).",
+          "has_media": true,
+          "model_ready": false
+        },
+        {
+          "id": "isl_namaste_hello",
+          "display_name": "Namaste / Hello",
+          "canonical_phrase": "hello",
+          "sign_type": "word",
+          "meaning": "Traditional respectful greeting, hello, or welcome.",
+          "english": "Hello / Namaste",
+          "hindi": "\u0928\u092e\u0938\u094d\u0924\u0947 / \u0928\u092e\u0938\u094d\u0915\u093e\u0930",
+          "isl_grammar": "Used at opening of discourse; can be accompanied by polite head tilt.",
+          "has_media": true,
+          "model_ready": true
+        }
+      ]
+    },
+    {
+      "name": "Healthcare",
+      "total_signs": 3,
+      "verified": 3,
+      "signs": [
+        {
+          "id": "isl_doctor",
+          "display_name": "Doctor",
+          "canonical_phrase": "doctor",
+          "sign_type": "word",
+          "meaning": "Medical doctor or physician.",
+          "english": "Doctor",
+          "hindi": "\u0921\u0949\u0915\u094d\u091f\u0930 / \u091a\u093f\u0915\u093f\u0924\u094d\u0938\u0915",
+          "isl_grammar": "Noun: occurs in topic or locative questions (e.g. DOCTOR WHERE?).",
+          "has_media": true,
+          "model_ready": false
+        },
+        {
+          "id": "isl_hospital",
+          "display_name": "Hospital / Clinic",
+          "canonical_phrase": "hospital",
+          "sign_type": "word",
+          "meaning": "Hospital, clinic, or medical facility.",
+          "english": "Hospital / Clinic",
+          "hindi": "\u0905\u0938\u094d\u092a\u0924\u093e\u0932 / \u0915\u094d\u0932\u093f\u0928\u093f\u0915",
+          "isl_grammar": "Locative noun; commonly preceded by [GO] or followed by [WHERE?].",
+          "has_media": true,
+          "model_ready": false
+        },
+        {
+          "id": "isl_pain",
+          "display_name": "Pain / Sick",
+          "canonical_phrase": "pain",
+          "sign_type": "word",
+          "meaning": "Physical pain, hurt, ache, or illness.",
+          "english": "Pain / Sick / Hurt",
+          "hindi": "\u0926\u0930\u094d\u0926 / \u092c\u0940\u092e\u093e\u0930 / \u091a\u094b\u091f",
+          "isl_grammar": "Spatialized verb/noun: produced near body region experiencing pain (head for headache, stomach for stomachache).",
+          "has_media": true,
+          "model_ready": false
+        }
+      ]
+    },
+    {
+      "name": "Introductions",
+      "total_signs": 2,
+      "verified": 2,
+      "signs": [
+        {
+          "id": "isl_nice_to_meet_you",
+          "display_name": "Nice to meet you",
+          "canonical_phrase": "nice to meet you",
+          "sign_type": "phrase",
+          "meaning": "Courteous expression of pleasure upon meeting someone.",
+          "english": "Nice to meet you",
+          "hindi": "\u0906\u092a\u0938\u0947 \u092e\u093f\u0932\u0915\u0930 \u0916\u0941\u0936\u0940 \u0939\u0941\u0908",
+          "isl_grammar": "ISL Syntax: [MEET] [HAPPY] (Spatial classifier movement where two upright indices represent people converging).",
+          "has_media": true,
+          "model_ready": false
+        },
+        {
+          "id": "isl_what_is_your_name",
+          "display_name": "What is your name?",
+          "canonical_phrase": "what is your name",
+          "sign_type": "phrase",
+          "meaning": "Asking for someone's name or sign name.",
+          "english": "What is your name?",
+          "hindi": "\u0906\u092a\u0915\u093e \u0928\u093e\u092e \u0915\u094d\u092f\u093e \u0939\u0948?",
+          "isl_grammar": "ISL Syntax: [YOUR] [NAME] [WHAT?] (Wh-question: WHAT occurs at the end of the sentence with furrowed brows).",
+          "has_media": true,
+          "model_ready": false
+        }
+      ]
+    },
+    {
+      "name": "Travel",
+      "total_signs": 2,
+      "verified": 2,
+      "signs": [
+        {
+          "id": "isl_restroom",
+          "display_name": "Restroom / Toilet",
+          "canonical_phrase": "restroom",
+          "sign_type": "word",
+          "meaning": "Toilet, washroom, or bathroom facility.",
+          "english": "Restroom / Toilet / Washroom",
+          "hindi": "\u0936\u094c\u091a\u093e\u0932\u092f / \u0935\u0949\u0936\u0930\u0942\u092e",
+          "isl_grammar": "Often combined with [WHERE?] in travel environments.",
+          "has_media": true,
+          "model_ready": false
+        },
+        {
+          "id": "isl_where_location",
+          "display_name": "Where? / Location",
+          "canonical_phrase": "where",
+          "sign_type": "word",
+          "meaning": "Inquiry about physical location or direction.",
+          "english": "Where? / Location",
+          "hindi": "\u0915\u0939\u093e\u0901? / \u0915\u093f\u0938 \u0924\u0930\u092b?",
+          "isl_grammar": "ISL Wh-interrogative syntax: occurs at sentence end (e.g. [TRAIN] [WHERE?], [TOILET] [WHERE?]).",
+          "has_media": true,
+          "model_ready": false
+        }
+      ]
+    }
+  ]
+}

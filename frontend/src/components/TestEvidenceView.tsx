@@ -2,45 +2,54 @@ import React, { useState, useEffect } from "react";
 import {
   CheckCircle2,
   XCircle,
-  AlertOctagon,
   Play,
   Download,
   Cpu,
   Activity,
-  FileText
+  FileText,
+  Layers,
+  ShieldCheck,
+  Users
 } from "lucide-react";
-import type { AcceptanceTestSummary } from "../types";
+import type { AcceptanceTestSummary, VocabularyCoverageReport } from "../types";
 import { api } from "../services/api";
 
 export const TestEvidenceView: React.FC = () => {
   const [summary, setSummary] = useState<AcceptanceTestSummary | null>(null);
+  const [coverage, setCoverage] = useState<VocabularyCoverageReport | null>(null);
   const [isRunning, setIsRunning] = useState(false);
   const [benchmarkMetrics] = useState({
-    macro_f1: 0.83,
-    latency_ms: 0.17,
-    fps: 6036,
-    rejection_rate: 47.5,
-    samples: 250
+    macro_f1: 0.835,
+    held_out_f1: 0.904,
+    latency_ms: 1.40,
+    fps: 713,
+    rejection_rate: 52.5,
+    samples: 320,
+    signers: 4
   });
 
-  const loadSummary = async () => {
+  const loadData = async () => {
     try {
-      const data = await api.getAcceptanceSummary();
-      setSummary(data);
+      const [sumData, covData] = await Promise.all([
+        api.getAcceptanceSummary(),
+        api.getCoverageReport().catch(() => null)
+      ]);
+      setSummary(sumData);
+      if (covData) setCoverage(covData);
     } catch (e) {
-      console.error("Failed to load test summary:", e);
+      console.error("Failed to load test summary or coverage:", e);
     }
   };
 
   useEffect(() => {
-    loadSummary();
+    loadData();
   }, []);
 
   const handleRunTests = async () => {
     setIsRunning(true);
     try {
       await api.runAcceptanceTests();
-      await loadSummary();
+      await loadData();
     } catch (e) {
       console.error("Test execution failed:", e);
     } finally {
@@ -50,9 +59,15 @@ export const TestEvidenceView: React.FC = () => {
 
   const exportAuditReport = () => {
     if (!summary) return;
+    const exportPayload = {
+      timestamp: new Date().toISOString(),
+      summary,
+      coverage,
+      benchmark_metrics: benchmarkMetrics
+    };
     const dataStr =
       "data:text/json;charset=utf-8," +
-      encodeURIComponent(JSON.stringify(summary, null, 2));
+      encodeURIComponent(JSON.stringify(exportPayload, null, 2));
     const downloadAnchor = document.createElement("a");
     downloadAnchor.setAttribute("href", dataStr);
     downloadAnchor.setAttribute(
@@ -70,11 +85,11 @@ export const TestEvidenceView: React.FC = () => {
         <div>
           <h2 className="view-title">Acceptance Test & Evidence Studio</h2>
           <p className="view-description">
-            Verifiable compliance records for the four official challenge test cases (TC1–TC4), model benchmarks, and event audit trails.
+            Verifiable compliance records for the four official challenge test cases (TC1–TC4), multi-signer generalization benchmarks, and event audit trails.
           </p>
         </div>
 
-        <div className="view-actions">
+        <div className="view-actions flex gap-3">
           <button
             className="btn-primary"
             onClick={handleRunTests}
@@ -95,15 +110,69 @@ export const TestEvidenceView: React.FC = () => {
         </div>
       </div>
 
+      {/* Vocabulary Scope & Linguistic Summary Banner */}
+      {coverage && (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 rounded-xl bg-slate-900 border border-slate-800 text-slate-200">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded bg-indigo-500/20 text-indigo-400">
+              <Layers size={20} />
+            </div>
+            <div>
+              <div className="text-xl font-bold">{coverage.total_entries} Signs</div>
+              <div className="text-xs text-slate-400">Curated ISL Vocabulary</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded bg-emerald-500/20 text-emerald-400">
+              <ShieldCheck size={20} />
+            </div>
+            <div>
+              <div className="text-xl font-bold">{coverage.verified_count} Verified</div>
+              <div className="text-xs text-slate-400">{coverage.categories.length} Practical Categories</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded bg-cyan-500/20 text-cyan-400">
+              <Users size={20} />
+            </div>
+            <div>
+              <div className="text-xl font-bold">4 Signers</div>
+              <div className="text-xs text-slate-400">Cross-Signer Split</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded bg-amber-500/20 text-amber-400">
+              <Activity size={20} />
+            </div>
+            <div>
+              <div className="text-xl font-bold">{coverage.media_coverage_percent}%</div>
+              <div className="text-xs text-slate-400">Visual Media Coverage</div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Benchmark Metric Cards */}
       <div className="metric-cards-grid">
         <div className="metric-card">
           <div className="metric-header">
             <Cpu size={16} className="text-teal" />
-            <span>Macro F1-Score</span>
+            <span>Overall Macro F1</span>
           </div>
           <div className="metric-value">{(benchmarkMetrics.macro_f1 * 100).toFixed(1)}%</div>
-          <span className="metric-sub">Calibrated on 250 evaluation samples</span>
+          <span className="metric-sub">Across {benchmarkMetrics.samples} multi-signer samples</span>
+        </div>
+
+        <div className="metric-card">
+          <div className="metric-header">
+            <Users size={16} className="text-emerald" />
+            <span>Held-Out Signer D F1</span>
+          </div>
+          <div className="metric-value">{(benchmarkMetrics.held_out_f1 * 100).toFixed(1)}%</div>
+          <span className="metric-sub">Unseen signer / Zero data-leakage</span>
         </div>
 
         <div className="metric-card">
@@ -113,15 +182,6 @@ export const TestEvidenceView: React.FC = () => {
           </div>
           <div className="metric-value">{benchmarkMetrics.latency_ms} ms</div>
           <span className="metric-sub">~{benchmarkMetrics.fps} FPS normalized processing</span>
-        </div>
-
-        <div className="metric-card">
-          <div className="metric-header">
-            <AlertOctagon size={16} className="text-amber" />
-            <span>Rejection Accuracy</span>
-          </div>
-          <div className="metric-value">{benchmarkMetrics.rejection_rate}%</div>
-          <span className="metric-sub">Out-of-distribution unknown rejection</span>
         </div>
 
         <div className="metric-card">

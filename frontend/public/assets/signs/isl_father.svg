@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <rect width="200" height="200" rx="16" fill="#0A192F"/>
+  <!-- Cheek / mustache location indicator -->
+  <circle cx="100" cy="80" r="40" fill="none" stroke="#334155" stroke-width="2"/>
+  <path d="M85 95 Q100 105 115 95" stroke="#2DD4BF" stroke-width="4" fill="none" stroke-linecap="round"/>
+  <circle cx="120" cy="95" r="6" fill="#F59E0B"/>
+  <text x="100" y="180" font-family="sans-serif" font-size="12" fill="#94A3B8" text-anchor="middle" font-weight="bold">ISL: FATHER</text>
+</svg>

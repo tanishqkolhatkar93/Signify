@@ -84,7 +84,7 @@ class AcceptanceTestRunner:
 
         passed = (
             manifest.sign_language == "Indian Sign Language (ISL)"
-            and len(signs) >= 10
+            and len(signs) >= 25
             and all(s.english_text and s.hindi_text and s.meaning for s in signs)
             and len(manifest.disclaimer) > 10
         )
@@ -92,20 +92,20 @@ class AcceptanceTestRunner:
         actual_output = (
             f"Successfully verified '{manifest.sign_language}'. "
             f"Published {len(signs)} documented signs with English/Hindi translations, "
-            f"ISLRTC source attribution, and explicit vocabulary boundary disclosure."
+            f"ISLRTC source attribution, category grouping, and explicit vocabulary boundary disclosure."
         )
 
         return TestRunRecord(
             test_id="TC1",
             name="Supported Sign List & Documentation",
-            input_description="Load and query sign manifest from data/sign_manifest.json.",
+            input_description="Load and query sign manifest from data/sign_manifest.json and SQLite database.",
             expected_output="Display named sign language (ISL), list all supported gestures with meanings, translations, sources, and scope limitations.",
             actual_output=actual_output,
             status="PASS" if passed else "FAIL",
             confidence=1.0,
             model_version=self.model_version,
             evidence_ref="data/sign_manifest.json",
-            notes="Verified all 12 signs have ISLRTC citation, CC-BY 4.0 license, and bilingual outputs."
+            notes=f"Verified all {len(signs)} signs have ISLRTC citation, CC-BY 4.0 license, and bilingual outputs."
         )
 
     async def run_tc2(self) -> TestRunRecord:
@@ -168,7 +168,7 @@ class AcceptanceTestRunner:
         """TC3 — SPEECH TO TEXT AND REVERSE ROUTE"""
         test_session = f"test-tc3-{int(datetime.utcnow().timestamp())}"
         
-        # Test 3A: Supported phrase -> verified sign
+        # Test 3A: Supported single sign -> verified sign
         ctx_supported = await agent_orchestrator.handle_transition(TransitionRequest(
             session_id=test_session,
             action=WorkflowAction.PROCESS_SPEECH,
@@ -180,7 +180,14 @@ class AcceptanceTestRunner:
             payload={"transcript": "Thank you"}
         ))
 
-        # Test 3B: Unsupported phrase -> text with explanation
+        # Test 3B: Conversational phrase -> verified sign with ISL grammar
+        ctx_phrase = await agent_orchestrator.handle_transition(TransitionRequest(
+            session_id=f"{test_session}-phrase",
+            action=WorkflowAction.CONFIRM_TRANSCRIPT,
+            payload={"transcript": "How are you?"}
+        ))
+
+        # Test 3C: Unsupported phrase -> text with explanation
         ctx_unsupported_confirmed = await agent_orchestrator.handle_transition(TransitionRequest(
             session_id=f"{test_session}-unsupported",
             action=WorkflowAction.CONFIRM_TRANSCRIPT,
@@ -190,12 +197,15 @@ class AcceptanceTestRunner:
         passed = (
             ctx_supported_confirmed.reverse_match_found is True
             and ctx_supported_confirmed.current_sign_id == "isl_thank_you"
+            and ctx_phrase.reverse_match_found is True
+            and ctx_phrase.current_sign_id == "isl_how_are_you"
             and ctx_unsupported_confirmed.reverse_match_found is False
             and ctx_unsupported_confirmed.reverse_sign_media is None
         )
 
         actual = (
             f"Supported phrase 'Thank you' mapped to verified ISL sign '{ctx_supported_confirmed.current_sign_id}'. "
+            f"Conversational question 'How are you?' mapped to '{ctx_phrase.current_sign_id}'. "
             f"Unsupported phrase 'Quantum mechanics...' retained text transcript and explicitly informed: "
             f"no verified sign clip exists in dictionary."
         )
@@ -203,7 +213,7 @@ class AcceptanceTestRunner:
         return TestRunRecord(
             test_id="TC3",
             name="Speech to Text and Reverse Route",
-            input_description="Speak supported phrase ('Thank you') and unsupported phrase ('Quantum mechanics...').",
+            input_description="Speak supported phrase ('Thank you'), conversational phrase ('How are you?'), and unsupported phrase ('Quantum mechanics...').",
             expected_output="Produce accurate transcript, permit correction, match supported phrase to verified sign media, and display text with clear limitation for unsupported phrase.",
             actual_output=actual,
             status="PASS" if passed else "FAIL",

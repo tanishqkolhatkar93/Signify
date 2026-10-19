@@ -15,3 +15,4 @@ describe("Signify Frontend Architecture & Smoke Tests", () => {
     expect(typeof api.runAcceptanceTests).toBe("function");
   });
 });
+

@@ -7,9 +7,11 @@ export interface SignMedia {
 
 export interface SignItem {
   id: string;
+  canonical_phrase?: string;
   display_name: string;
   sign_language: string;
   category: string;
+  sign_type?: string; // "word" | "phrase" | "number" | "fingerspelling"
   is_dynamic: boolean;
   validation_status: string;
   meaning: string;
@@ -17,6 +19,9 @@ export interface SignItem {
   hindi_text: string;
   phonetic_transcription?: string;
   hand_configuration: string;
+  isl_grammar_structure?: string;
+  cultural_linguistic_notes?: string;
+  approved_synonyms?: string[];
   landmark_signature?: Record<string, any>;
   media: SignMedia;
   source: string;
@@ -31,6 +36,44 @@ export interface SignManifest {
   disclaimer: string;
   data_attribution: Record<string, string>;
   signs: SignItem[];
+}
+
+export interface CategoryCoverage {
+  category: string;
+  count: number;
+  verified_count: number;
+}
+
+export interface TypeCoverage {
+  sign_type: string;
+  count: number;
+}
+
+export interface VocabularyCoverageReport {
+  sign_language: string;
+  total_entries: number;
+  verified_count: number;
+  pending_count: number;
+  categories: CategoryCoverage[];
+  sign_types: TypeCoverage[];
+  media_coverage_percent: number;
+  model_coverage_count: number;
+  source_attribution: Record<string, string>;
+  disclaimer: string;
+}
+
+export interface SignImportRequest {
+  signs: SignItem[];
+  overwrite_existing?: boolean;
+}
+
+export interface SignImportResponse {
+  status: string;
+  total_submitted: number;
+  imported_count: number;
+  updated_count: number;
+  skipped_duplicates: string[];
+  message: string;
 }
 
 export interface LandmarkPoint {
@@ -149,5 +192,6 @@ export interface ReverseMatchResponse {
   matched: boolean;
   query_phrase: string;
   matched_sign?: SignItem;
+  isl_grammar_note?: string;
   explanation: string;
 }

@@ -16,13 +16,13 @@ def test_health_endpoint():
             data = res.json()
             assert data["status"] == "healthy"
             assert data["sign_language"] == "Indian Sign Language (ISL)"
-            assert data["supported_signs_count"] >= 10
+            assert data["supported_signs_count"] >= 25
     asyncio.run(_run())
 
 def test_sign_manifest_integrity():
     manifest = dictionary_service.get_manifest()
     assert manifest.sign_language == "Indian Sign Language (ISL)"
-    assert len(manifest.signs) >= 12
+    assert len(manifest.signs) >= 25
     for sign in manifest.signs:
         assert sign.id.startswith("isl_")
         assert sign.english_text
@@ -41,10 +41,64 @@ def test_reverse_match_service():
     assert res_namaste.matched is True
     assert res_namaste.matched_sign.id == "isl_namaste_hello"
 
+    # Conversational phrase with ISL grammar
+    res_how = dictionary_service.match_reverse_phrase("How are you?")
+    assert res_how.matched is True
+    assert res_how.matched_sign.id == "isl_how_are_you"
+    assert "Wh-interrogative" in (res_how.isl_grammar_note or "") or "[YOU] [HOW?]" in (res_how.isl_grammar_note or "")
+
     # Unsupported phrase
     res_unsupported = dictionary_service.match_reverse_phrase("Artificial intelligence neural network")
     assert res_unsupported.matched is False
-    assert "No verified ISL demonstration clip" in res_unsupported.explanation
+    assert "No verified Indian Sign Language (ISL) demonstration clip" in res_unsupported.explanation
+
+def test_coverage_report_endpoint():
+    async def _run():
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            res = await client.get("/api/v1/signs/coverage-report")
+            assert res.status_code == 200
+            data = res.json()
+            assert data["total_entries"] >= 25
+            assert data["verified_count"] >= 25
+            assert data["media_coverage_percent"] == 100.0
+            assert len(data["categories"]) >= 8
+    asyncio.run(_run())
+
+def test_sign_import_and_duplicate_detection():
+    async def _run():
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            # Attempt to import an existing sign without overwrite
+            dup_payload = {
+                "signs": [
+                    {
+                        "id": "isl_water",
+                        "display_name": "Water (Duplicate Attempt)",
+                        "sign_language": "Indian Sign Language (ISL)",
+                        "category": "Food & Drink",
+                        "meaning": "Water",
+                        "english_text": "Water",
+                        "hindi_text": "पानी",
+                        "hand_configuration": "W-handshape",
+                        "media": {
+                            "type": "svg_illustration",
+                            "asset_url": "/assets/signs/isl_water.svg",
+                            "description": "Water"
+                        },
+                        "source": "ISLRTC Test",
+                        "license": "CC-BY-4.0"
+                    }
+                ],
+                "overwrite_existing": False
+            }
+            res = await client.post("/api/v1/signs/import", json=dup_payload)
+            assert res.status_code == 200
+            data = res.json()
+            assert data["status"] == "success"
+            assert data["imported_count"] == 0
+            assert "isl_water" in data["skipped_duplicates"]
+    asyncio.run(_run())
 
 def test_orchestrator_consent_enforcement():
     async def _run():
@@ -75,4 +129,3 @@ def test_acceptance_test_runner_all_pass():
         for r in records:
             assert r.status == "PASS", f"Test {r.test_id} failed: {r.actual_output}"
     asyncio.run(_run())
-

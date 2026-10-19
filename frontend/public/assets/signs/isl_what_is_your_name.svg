@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <rect width="200" height="200" rx="16" fill="#0A192F"/>
+  <!-- Pointing to person (YOUR) then H-hand tap (NAME) -->
+  <rect x="75" y="70" width="50" height="15" rx="7" fill="#2DD4BF"/>
+  <rect x="75" y="95" width="50" height="15" rx="7" fill="#14B8A6"/>
+  <path d="M100 50 L100 35 M90 42 L100 35 L110 42" stroke="#38BDF8" stroke-width="3" fill="none"/>
+  <text x="100" y="180" font-family="sans-serif" font-size="10.5" fill="#94A3B8" text-anchor="middle" font-weight="bold">ISL: YOUR NAME WHAT?</text>
+</svg>

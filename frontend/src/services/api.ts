@@ -99,6 +99,12 @@ export const api = {
     request<OrchestratorContext>(`/orchestrator/reset?session_id=${sessionId}`, {
       method: "POST"
     }),
+  getCoverageReport: () => request<any>("/signs/coverage-report"),
+  importSigns: (signs: SignItem[], overwriteExisting = false) =>
+    request<any>("/signs/import", {
+      method: "POST",
+      body: JSON.stringify({ signs, overwrite_existing: overwriteExisting })
+    }),
   getAcceptanceSummary: () => request<AcceptanceTestSummary>("/tests/summary"),
   runAcceptanceTests: () => request<TestRunRecord[]>("/tests/run-all", { method: "POST" })
 };

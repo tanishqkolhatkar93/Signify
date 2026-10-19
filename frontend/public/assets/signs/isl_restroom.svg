@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
+  <rect width="200" height="200" rx="16" fill="#0A192F"/>
+  <!-- T-handshape (thumb tucked between index & middle) shaking side to side -->
+  <rect x="80" y="75" width="40" height="45" rx="10" fill="#2DD4BF"/>
+  <path d="M85 75 L85 55 C85 48 95 48 95 55 L95 75" fill="#2DD4BF"/>
+  <!-- Horizontal oscillation arrow -->
+  <path d="M60 100 Q100 90 140 100 M68 93 L60 100 L68 107 M132 93 L140 100 L132 107" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round"/>
+  <text x="100" y="180" font-family="sans-serif" font-size="12" fill="#94A3B8" text-anchor="middle" font-weight="bold">ISL: RESTROOM / TOILET</text>
+</svg>

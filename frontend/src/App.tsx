@@ -106,7 +106,15 @@ export const App: React.FC = () => {
           {activeTab === "speech-route" && <SpeechView />}
 
           {activeTab === "dictionary" && (
-            <SignDictionaryView manifest={manifest} signs={signs} />
+            <SignDictionaryView
+              manifest={manifest}
+              signs={signs}
+              onSignImported={async () => {
+                const refreshed = await api.getManifest();
+                setManifest(refreshed);
+                setSigns(refreshed.signs);
+              }}
+            />
           )}
 
           {activeTab === "test-evidence" && <TestEvidenceView />}

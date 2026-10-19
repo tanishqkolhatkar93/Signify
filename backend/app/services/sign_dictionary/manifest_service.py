@@ -1,97 +1,376 @@
 import json
 import re
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
+from datetime import datetime
+
 from backend.app.core.config import SIGN_MANIFEST_PATH, settings
-from backend.app.schemas.sign import SignManifest, SignItem, ReverseMatchResponse
+from backend.app.core.database import SessionLocal, SignItemRecord
+from backend.app.schemas.sign import (
+    SignManifest,
+    SignItem,
+    SignMedia,
+    ReverseMatchResponse,
+    SignImportRequest,
+    SignImportResponse,
+    VocabularyCoverageReport,
+    CategoryCoverage,
+    TypeCoverage,
+)
+
+def record_to_sign_item(rec: SignItemRecord) -> SignItem:
+    synonyms = []
+    if rec.approved_synonyms:
+        try:
+            synonyms = json.loads(rec.approved_synonyms)
+        except Exception:
+            synonyms = []
+
+    landmark_sig = None
+    if rec.landmark_signature:
+        try:
+            landmark_sig = json.loads(rec.landmark_signature)
+        except Exception:
+            landmark_sig = None
+
+    return SignItem(
+        id=rec.id,
+        canonical_phrase=rec.canonical_phrase,
+        display_name=rec.display_name,
+        sign_language=rec.sign_language,
+        category=rec.category,
+        sign_type=rec.sign_type,
+        is_dynamic=rec.is_dynamic,
+        validation_status=rec.validation_status,
+        meaning=rec.meaning,
+        english_text=rec.english_text,
+        hindi_text=rec.hindi_text,
+        phonetic_transcription=rec.phonetic_transcription,
+        hand_configuration=rec.hand_configuration,
+        isl_grammar_structure=rec.isl_grammar_structure,
+        cultural_linguistic_notes=rec.cultural_linguistic_notes,
+        approved_synonyms=synonyms,
+        landmark_signature=landmark_sig,
+        media=SignMedia(
+            type=rec.media_type,
+            asset_url=rec.asset_url,
+            verified_clip_url=rec.verified_clip_url,
+            description=rec.media_description or rec.display_name,
+        ),
+        source=rec.source,
+        license=rec.license,
+    )
+
+def sign_item_to_record_dict(item: SignItem) -> dict:
+    return {
+        "id": item.id,
+        "canonical_phrase": item.canonical_phrase or item.english_text,
+        "display_name": item.display_name,
+        "sign_language": item.sign_language,
+        "category": item.category,
+        "sign_type": item.sign_type,
+        "is_dynamic": item.is_dynamic,
+        "validation_status": item.validation_status,
+        "meaning": item.meaning,
+        "english_text": item.english_text,
+        "hindi_text": item.hindi_text,
+        "phonetic_transcription": item.phonetic_transcription,
+        "hand_configuration": item.hand_configuration,
+        "isl_grammar_structure": item.isl_grammar_structure,
+        "cultural_linguistic_notes": item.cultural_linguistic_notes,
+        "approved_synonyms": json.dumps(item.approved_synonyms),
+        "landmark_signature": json.dumps(item.landmark_signature) if item.landmark_signature else None,
+        "media_type": item.media.type,
+        "asset_url": item.media.asset_url,
+        "verified_clip_url": item.media.verified_clip_url,
+        "media_description": item.media.description,
+        "source": item.source,
+        "license": item.license,
+    }
 
 class SignDictionaryService:
     def __init__(self, manifest_path: Path = SIGN_MANIFEST_PATH):
         self.manifest_path = manifest_path
-        self._manifest: Optional[SignManifest] = None
-        self._load_manifest()
+        self._manifest_metadata: Dict[str, Any] = {}
+        self._init_sync()
 
-    def _load_manifest(self):
+    def _init_sync(self):
+        """Loads manifest JSON and ensures SQLite database is populated."""
         if not self.manifest_path.exists():
             raise FileNotFoundError(f"Sign manifest not found at {self.manifest_path}")
+
         with open(self.manifest_path, "r", encoding="utf-8") as f:
             data = json.load(f)
-        self._manifest = SignManifest(**data)
+
+        self._manifest_metadata = {
+            "sign_language": data.get("sign_language", "Indian Sign Language (ISL)"),
+            "language_code": data.get("language_code", "isl"),
+            "version": data.get("version", "2.1.0"),
+            "vocabulary_scope": data.get("vocabulary_scope", "Curated Indian Sign Language Practical Vocabulary"),
+            "disclaimer": data.get("disclaimer", ""),
+            "data_attribution": data.get("data_attribution", {}),
+        }
+
+        # Seed database from manifest if records missing or outdated
+        signs_in_json = [SignItem(**s) for s in data.get("signs", [])]
+        self._seed_database(signs_in_json)
+
+    def _seed_database(self, signs: List[SignItem]):
+        db = SessionLocal()
+        try:
+            existing_ids = {r.id for r in db.query(SignItemRecord.id).all()}
+            for sign in signs:
+                record_data = sign_item_to_record_dict(sign)
+                if sign.id in existing_ids:
+                    # Update existing record
+                    db.query(SignItemRecord).filter(SignItemRecord.id == sign.id).update(record_data)
+                else:
+                    # Insert new record
+                    rec = SignItemRecord(**record_data)
+                    db.add(rec)
+            db.commit()
+        except Exception as e:
+            db.rollback()
+            print(f"Warning: Failed to seed signs database: {e}")
+        finally:
+            db.close()
 
     def get_manifest(self) -> SignManifest:
-        if self._manifest is None:
-            self._load_manifest()
-        return self._manifest
+        signs = self.list_signs()
+        return SignManifest(
+            sign_language=self._manifest_metadata.get("sign_language", "Indian Sign Language (ISL)"),
+            language_code=self._manifest_metadata.get("language_code", "isl"),
+            version=self._manifest_metadata.get("version", "2.1.0"),
+            vocabulary_scope=self._manifest_metadata.get("vocabulary_scope", "Curated ISL Practical Vocabulary"),
+            disclaimer=self._manifest_metadata.get("disclaimer", ""),
+            data_attribution=self._manifest_metadata.get("data_attribution", {}),
+            signs=signs,
+        )
 
     def list_signs(self, category: Optional[str] = None) -> List[SignItem]:
-        manifest = self.get_manifest()
-        if category:
-            return [s for s in manifest.signs if s.category.lower() == category.lower()]
-        return manifest.signs
+        db = SessionLocal()
+        try:
+            query = db.query(SignItemRecord)
+            if category:
+                query = query.filter(SignItemRecord.category.ilike(category))
+            records = query.order_by(SignItemRecord.category, SignItemRecord.display_name).all()
+            return [record_to_sign_item(r) for r in records]
+        finally:
+            db.close()
 
     def get_sign_by_id(self, sign_id: str) -> Optional[SignItem]:
-        for s in self.get_manifest().signs:
-            if s.id.lower() == sign_id.lower():
-                return s
-        return None
+        db = SessionLocal()
+        try:
+            rec = db.query(SignItemRecord).filter(SignItemRecord.id.ilike(sign_id)).first()
+            if rec:
+                return record_to_sign_item(rec)
+            return None
+        finally:
+            db.close()
 
     def search_signs(self, query: str) -> List[SignItem]:
         q = query.strip().lower()
         if not q:
             return self.list_signs()
-        results = []
-        for s in self.get_manifest().signs:
-            if (
-                q in s.display_name.lower()
-                or q in s.meaning.lower()
-                or q in s.english_text.lower()
-                or q in s.hindi_text.lower()
-                or q in s.category.lower()
-            ):
-                results.append(s)
-        return results
+
+        db = SessionLocal()
+        try:
+            records = db.query(SignItemRecord).all()
+            results = []
+            for r in records:
+                synonyms = []
+                if r.approved_synonyms:
+                    try:
+                        synonyms = [s.lower() for s in json.loads(r.approved_synonyms)]
+                    except Exception:
+                        pass
+                
+                search_targets = [
+                    r.display_name.lower(),
+                    r.meaning.lower(),
+                    r.english_text.lower(),
+                    r.hindi_text.lower(),
+                    r.category.lower(),
+                    (r.canonical_phrase or "").lower(),
+                    (r.isl_grammar_structure or "").lower(),
+                ] + synonyms
+
+                if any(q in target for target in search_targets):
+                    results.append(record_to_sign_item(r))
+            return results
+        finally:
+            db.close()
+
+    def import_signs(self, request: SignImportRequest) -> SignImportResponse:
+        db = SessionLocal()
+        total = len(request.signs)
+        imported = 0
+        updated = 0
+        skipped = []
+
+        try:
+            for item in request.signs:
+                existing = db.query(SignItemRecord).filter(SignItemRecord.id == item.id).first()
+                if existing:
+                    if request.overwrite_existing:
+                        update_dict = sign_item_to_record_dict(item)
+                        for k, v in update_dict.items():
+                            setattr(existing, k, v)
+                        existing.updated_at = datetime.utcnow()
+                        updated += 1
+                    else:
+                        skipped.append(item.id)
+                else:
+                    new_rec = SignItemRecord(**sign_item_to_record_dict(item))
+                    db.add(new_rec)
+                    imported += 1
+
+            db.commit()
+            return SignImportResponse(
+                status="success",
+                total_submitted=total,
+                imported_count=imported,
+                updated_count=updated,
+                skipped_duplicates=skipped,
+                message=f"Import complete: {imported} added, {updated} updated, {len(skipped)} skipped as duplicates."
+            )
+        except Exception as e:
+            db.rollback()
+            return SignImportResponse(
+                status="error",
+                total_submitted=total,
+                imported_count=imported,
+                updated_count=updated,
+                skipped_duplicates=skipped,
+                message=f"Database import failed: {str(e)}"
+            )
+        finally:
+            db.close()
 
     def match_reverse_phrase(self, phrase: str) -> ReverseMatchResponse:
         cleaned = re.sub(r"[^\w\s]", "", phrase.lower()).strip()
         tokens = set(cleaned.split())
         
-        # Keyword mapping to verified ISL signs
-        keyword_map = {
-            "isl_namaste_hello": ["hello", "namaste", "hi", "greetings", "welcome", "namaskar"],
-            "isl_thank_you": ["thank", "thanks", "gratitude", "dhanyavaad", "shukriya"],
-            "isl_yes": ["yes", "yeah", "agree", "agreed", "correct", "haan"],
-            "isl_no": ["no", "nope", "disagree", "dont", "nahin", "nahi"],
-            "isl_help": ["help", "assist", "assistance", "emergency", "madad", "doctor"],
-            "isl_water": ["water", "drink", "thirsty", "pani", "paani", "jal"],
-            "isl_food": ["food", "eat", "hungry", "meal", "dinner", "lunch", "khana", "bhojan"],
-            "isl_stop": ["stop", "halt", "pause", "wait", "cease", "ruko", "ruk"],
-            "isl_please": ["please", "request", "kindly", "kripya", "kripayah"],
-            "isl_good": ["good", "great", "fine", "well", "achha", "badhiya"],
-            "isl_bad": ["bad", "poor", "unwell", "sick", "terrible", "bura", "kharab"],
-            "isl_more": ["more", "again", "repeat", "extra", "aur", "zyada"]
-        }
+        all_signs = self.list_signs()
+        
+        # 1. Exact phrase match against canonical phrase or approved synonyms
+        for s in all_signs:
+            # Check canonical phrase
+            if s.canonical_phrase and re.sub(r"[^\w\s]", "", s.canonical_phrase.lower()).strip() == cleaned:
+                return ReverseMatchResponse(
+                    matched=True,
+                    query_phrase=phrase,
+                    matched_sign=s,
+                    isl_grammar_note=s.isl_grammar_structure,
+                    explanation=f"Exact match found for '{phrase}'. ISL Grammar: {s.isl_grammar_structure or 'Standard ISL syntax'}."
+                )
+            # Check approved synonyms (full match)
+            for syn in s.approved_synonyms:
+                syn_clean = re.sub(r"[^\w\s]", "", syn.lower()).strip()
+                if syn_clean == cleaned:
+                    return ReverseMatchResponse(
+                        matched=True,
+                        query_phrase=phrase,
+                        matched_sign=s,
+                        isl_grammar_note=s.isl_grammar_structure,
+                        explanation=f"Approved synonym match ('{syn}') found for '{phrase}'. ISL Grammar: {s.isl_grammar_structure or 'Standard ISL syntax'}."
+                    )
 
-        matched_sign_id = None
-        for sign_id, synonyms in keyword_map.items():
-            if any(syn in tokens or syn == cleaned for syn in synonyms):
-                matched_sign_id = sign_id
-                break
+        # 2. Multi-word phrase containment in speech (e.g. "I want to ask how are you" -> "how are you")
+        for s in all_signs:
+            for syn in s.approved_synonyms:
+                syn_clean = re.sub(r"[^\w\s]", "", syn.lower()).strip()
+                syn_tokens = syn_clean.split()
+                if len(syn_tokens) >= 2 and syn_clean in cleaned:
+                    return ReverseMatchResponse(
+                        matched=True,
+                        query_phrase=phrase,
+                        matched_sign=s,
+                        isl_grammar_note=s.isl_grammar_structure,
+                        explanation=f"Recognized key conversational phrase '{syn}' in input. ISL Grammar: {s.isl_grammar_structure or 'Standard ISL syntax'}."
+                    )
 
-        if matched_sign_id:
-            sign = self.get_sign_by_id(matched_sign_id)
-            return ReverseMatchResponse(
-                matched=True,
-                query_phrase=phrase,
-                matched_sign=sign,
-                explanation=f"Exact match found in verified Indian Sign Language dictionary: '{sign.display_name}'."
-            )
+        # 3. Keyword / Single token match for high-signal nouns/verbs
+        # We ensure single tokens match unambiguously
+        for s in all_signs:
+            candidates = [s.display_name.lower(), s.english_text.lower(), s.hindi_text.lower()] + [
+                syn.lower() for syn in s.approved_synonyms if len(syn.split()) == 1
+            ]
+            candidates = [re.sub(r"[^\w\s]", "", c).strip() for c in candidates]
+            
+            for c in candidates:
+                if c and (c in tokens or c == cleaned):
+                    return ReverseMatchResponse(
+                        matched=True,
+                        query_phrase=phrase,
+                        matched_sign=s,
+                        isl_grammar_note=s.isl_grammar_structure,
+                        explanation=f"Keyword '{c}' matches verified ISL sign '{s.display_name}'. ISL Grammar: {s.isl_grammar_structure or 'Standard ISL syntax'}."
+                    )
 
+        # 4. No verified match found: explicit honest rejection
         return ReverseMatchResponse(
             matched=False,
             query_phrase=phrase,
             matched_sign=None,
-            explanation=f"Speech transcribed successfully. Notice: No verified ISL demonstration clip currently exists in the curated vocabulary for '{phrase}'."
+            isl_grammar_note=None,
+            explanation=(
+                f"Speech transcribed successfully: '{phrase}'. Notice: No verified Indian Sign Language (ISL) demonstration clip "
+                f"currently exists in the curated vocabulary for this sentence. Signify strictly adheres to authentic ISLRTC verified "
+                f"recordings and does not fabricate unverified sign animations."
+            )
+        )
+
+    def generate_coverage_report(self) -> VocabularyCoverageReport:
+        all_signs = self.list_signs()
+        total = len(all_signs)
+        verified = sum(1 for s in all_signs if s.validation_status == "verified")
+        pending = total - verified
+
+        # Category coverage
+        categories_dict: Dict[str, Dict[str, int]] = {}
+        for s in all_signs:
+            cat = s.category
+            if cat not in categories_dict:
+                categories_dict[cat] = {"count": 0, "verified": 0}
+            categories_dict[cat]["count"] += 1
+            if s.validation_status == "verified":
+                categories_dict[cat]["verified"] += 1
+
+        cat_list = [
+            CategoryCoverage(category=k, count=v["count"], verified_count=v["verified"])
+            for k, v in sorted(categories_dict.items())
+        ]
+
+        # Sign type coverage
+        type_dict: Dict[str, int] = {}
+        for s in all_signs:
+            st = s.sign_type
+            type_dict[st] = type_dict.get(st, 0) + 1
+
+        type_list = [
+            TypeCoverage(sign_type=k, count=v)
+            for k, v in sorted(type_dict.items())
+        ]
+
+        # Media coverage
+        media_count = sum(1 for s in all_signs if s.media and s.media.asset_url)
+        media_percent = (media_count / total * 100.0) if total > 0 else 0.0
+
+        # Model coverage
+        model_count = sum(1 for s in all_signs if s.landmark_signature is not None)
+
+        return VocabularyCoverageReport(
+            sign_language=self._manifest_metadata.get("sign_language", "Indian Sign Language (ISL)"),
+            total_entries=total,
+            verified_count=verified,
+            pending_count=pending,
+            categories=cat_list,
+            sign_types=type_list,
+            media_coverage_percent=round(media_percent, 1),
+            model_coverage_count=model_count,
+            source_attribution=self._manifest_metadata.get("data_attribution", {}),
+            disclaimer=self._manifest_metadata.get("disclaimer", ""),
         )
 
 dictionary_service = SignDictionaryService()
-

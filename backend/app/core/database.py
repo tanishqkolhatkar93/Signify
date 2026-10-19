@@ -11,6 +11,35 @@ engine = create_engine(
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, expire_on_commit=False, bind=engine)
 Base = declarative_base()
 
+class SignItemRecord(Base):
+    __tablename__ = "signs"
+
+    id = Column(String(100), primary_key=True, index=True)
+    canonical_phrase = Column(String(255), index=True)
+    display_name = Column(String(200))
+    sign_language = Column(String(100), default="Indian Sign Language (ISL)")
+    category = Column(String(100), index=True)
+    sign_type = Column(String(50), default="word")  # word, phrase, number, fingerspelling
+    is_dynamic = Column(Boolean, default=False)
+    validation_status = Column(String(50), default="verified")  # verified, pending_review
+    meaning = Column(Text)
+    english_text = Column(String(255))
+    hindi_text = Column(String(255))
+    phonetic_transcription = Column(String(255), nullable=True)
+    hand_configuration = Column(Text)
+    isl_grammar_structure = Column(Text, nullable=True)
+    cultural_linguistic_notes = Column(Text, nullable=True)
+    approved_synonyms = Column(Text, default="[]")  # JSON string array
+    landmark_signature = Column(Text, nullable=True)  # JSON string
+    media_type = Column(String(50), default="svg_illustration")
+    asset_url = Column(String(255))
+    verified_clip_url = Column(String(255), nullable=True)
+    media_description = Column(Text, nullable=True)
+    source = Column(String(255))
+    license = Column(String(100), default="CC-BY-4.0")
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
 class TestRunRecord(Base):
     __tablename__ = "test_runs"
 

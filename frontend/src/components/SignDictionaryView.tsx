@@ -1,33 +1,66 @@
 import React, { useState } from "react";
-import { Search, Volume2, ShieldCheck, AlertTriangle } from "lucide-react";
+import { Search, Volume2, ShieldCheck, BookOpen, PlusCircle, CheckCircle2, X } from "lucide-react";
 import type { SignItem, SignManifest } from "../types";
 import { speechService } from "../services/speech";
+import { api } from "../services/api";
 
 interface SignDictionaryViewProps {
   manifest: SignManifest | null;
   signs: SignItem[];
+  onSignImported?: () => void;
 }
 
-export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest, signs }) => {
+export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest, signs, onSignImported }) => {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [selectedType, setSelectedType] = useState("all");
+  const [showImportModal, setShowImportModal] = useState(false);
+  const [importJson, setImportJson] = useState("");
+  const [importStatus, setImportStatus] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const categories = ["all", ...Array.from(new Set(signs.map((s) => s.category)))];
+  const types = ["all", "word", "phrase", "number", "fingerspelling"];
 
   const filteredSigns = signs.filter((s) => {
     const matchesCat = selectedCategory === "all" || s.category.toLowerCase() === selectedCategory.toLowerCase();
+    const matchesType = selectedType === "all" || (s.sign_type || "word").toLowerCase() === selectedType.toLowerCase();
     const q = search.toLowerCase();
     const matchesSearch =
       !q ||
       s.display_name.toLowerCase().includes(q) ||
       s.meaning.toLowerCase().includes(q) ||
       s.english_text.toLowerCase().includes(q) ||
-      s.hindi_text.toLowerCase().includes(q);
-    return matchesCat && matchesSearch;
+      s.hindi_text.toLowerCase().includes(q) ||
+      (s.canonical_phrase && s.canonical_phrase.toLowerCase().includes(q)) ||
+      (s.isl_grammar_structure && s.isl_grammar_structure.toLowerCase().includes(q));
+    return matchesCat && matchesType && matchesSearch;
   });
 
   const speak = (text: string, lang: "en" | "hi") => {
     speechService.speak(text, lang);
+  };
+
+  const handleImportSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setImportStatus(null);
+    try {
+      const parsed = JSON.parse(importJson);
+      const signArray = Array.isArray(parsed) ? parsed : [parsed];
+      const res = await api.importSigns(signArray, true);
+      setImportStatus(`Success: ${res.imported_count} imported, ${res.updated_count} updated.`);
+      if (onSignImported) onSignImported();
+      setTimeout(() => {
+        setShowImportModal(false);
+        setImportStatus(null);
+        setImportJson("");
+      }, 1800);
+    } catch (err: any) {
+      setImportStatus(`Import Error: ${err.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -40,38 +73,68 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
           </p>
         </div>
 
-        <div className="disclaimer-pill">
-          <AlertTriangle size={15} />
-          <span>Curated Bounded Vocabulary (12 Signs)</span>
+        <div className="flex items-center gap-3">
+          <div className="disclaimer-pill">
+            <BookOpen size={15} />
+            <span>Curated Bounded Vocabulary ({signs.length} Signs)</span>
+          </div>
+          <button
+            className="btn btn-secondary flex items-center gap-2 text-sm"
+            onClick={() => setShowImportModal(true)}
+            title="Import reviewed sign vocabulary without modifying code"
+          >
+            <PlusCircle size={15} />
+            <span>Import Entry</span>
+          </button>
         </div>
       </div>
 
-      {/* Vocabulary Boundary Disclaimer Banner */}
+      {/* Linguistic Integrity Disclaimer */}
       <div className="alert alert-info">
         <ShieldCheck size={18} />
         <div>
-          <strong>Linguistic Integrity Disclosure:</strong>
-          <p>{manifest?.disclaimer || "This is a curated, verified baseline vocabulary for essential communication and demonstration. It does not represent full grammatical Indian Sign Language fluency."}</p>
+          <strong>Linguistic Integrity & Grammar Disclosure:</strong>
+          <p>
+            {manifest?.disclaimer ||
+              "Indian Sign Language (ISL) employs independent syntactic structure (Topic-Comment order, Wh-question markers sentence-finally) and does not mirror spoken word-order. Reverse matching only presents authenticated ISLRTC signs."}
+          </p>
           <span className="text-xs text-muted">
-            Primary Attribution: {manifest?.data_attribution?.primary_reference} • License: {manifest?.data_attribution?.license}
+            Primary Attribution: {manifest?.data_attribution?.primary_source || "ISLRTC"} • License: {manifest?.data_attribution?.license || "CC-BY-4.0"}
           </span>
         </div>
       </div>
 
-      {/* Search and Category Filters */}
+      {/* Search and Filters */}
       <div className="filter-bar">
         <div className="search-input-box">
           <Search size={16} className="search-icon" />
           <input
             type="text"
-            placeholder="Search by sign, English, Hindi, or meaning..."
+            placeholder="Search by sign, English, Hindi, meaning, or ISL grammar..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="search-input"
           />
         </div>
 
-        <div className="category-chips">
+        {/* Type Filter */}
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold text-muted uppercase">Type:</span>
+          <div className="category-chips">
+            {types.map((t) => (
+              <button
+                key={t}
+                className={`cat-chip ${selectedType === t ? "active" : ""}`}
+                onClick={() => setSelectedType(t)}
+              >
+                {t === "all" ? "All Types" : t.toUpperCase()}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Category Chips */}
+        <div className="category-chips flex-wrap">
           {categories.map((cat) => (
             <button
               key={cat}
@@ -93,17 +156,36 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
                 src={sign.media.asset_url}
                 alt={sign.display_name}
                 className="sign-thumbnail"
+                loading="lazy"
               />
-              <span className="category-badge">{sign.category}</span>
+              <div className="absolute top-2 left-2 flex gap-1">
+                <span className="category-badge">{sign.category}</span>
+                {sign.sign_type && (
+                  <span className="px-2 py-0.5 rounded text-[10px] font-semibold tracking-wider uppercase bg-slate-900/80 text-emerald-300 border border-emerald-500/30">
+                    {sign.sign_type}
+                  </span>
+                )}
+              </div>
             </div>
 
             <div className="sign-card-body">
               <div className="sign-card-title-row">
                 <h4 className="sign-card-name">{sign.display_name}</h4>
-                <span className="status-indicator-badge">{sign.validation_status}</span>
+                <span className="status-indicator-badge flex items-center gap-1">
+                  <CheckCircle2 size={12} className="text-emerald-400" />
+                  {sign.validation_status}
+                </span>
               </div>
 
               <p className="sign-card-meaning">{sign.meaning}</p>
+
+              {/* ISL Grammar Structure Note */}
+              {sign.isl_grammar_structure && (
+                <div className="p-2 my-2 rounded bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200">
+                  <span className="font-bold text-[10px] tracking-wide uppercase block text-amber-400">ISL Syntax:</span>
+                  <span>{sign.isl_grammar_structure}</span>
+                </div>
+              )}
 
               <div className="bilingual-pair-box">
                 <div className="lang-output-row">
@@ -137,13 +219,92 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
               </div>
 
               <div className="card-source-footer">
-                <span>{sign.source}</span>
+                <span title={sign.source}>{sign.source}</span>
                 <span>{sign.license}</span>
               </div>
             </div>
           </div>
         ))}
       </div>
+
+      {/* Zero-Code Vocabulary Import Modal */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-xl max-w-lg w-full p-6 shadow-2xl relative">
+            <button
+              onClick={() => setShowImportModal(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+            >
+              <X size={20} />
+            </button>
+            <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+              <PlusCircle size={18} className="text-emerald-400" />
+              Import Reviewed Vocabulary Entry
+            </h3>
+            <p className="text-xs text-slate-400 mb-4">
+              Paste a validated ISL sign specification in JSON format to dynamically register it into the SQLite dictionary database without modifying code.
+            </p>
+
+            <form onSubmit={handleImportSubmit}>
+              <textarea
+                rows={10}
+                className="w-full font-mono text-xs bg-slate-950 border border-slate-800 rounded p-3 text-slate-200 focus:outline-none focus:border-indigo-500 mb-4"
+                placeholder={`{
+  "id": "isl_custom_greeting",
+  "display_name": "Welcome",
+  "category": "Greetings",
+  "sign_type": "word",
+  "meaning": "Friendly welcoming gesture",
+  "english_text": "Welcome",
+  "hindi_text": "स्वागत है",
+  "hand_configuration": "Both open palms sweeping toward chest",
+  "isl_grammar_structure": "Topic-Comment lexical sign",
+  "media": {
+    "type": "svg_illustration",
+    "asset_url": "/assets/signs/isl_namaste_hello.svg",
+    "description": "Welcoming gesture"
+  },
+  "source": "ISLRTC Supplementary",
+  "license": "CC-BY-4.0"
+}`}
+                value={importJson}
+                onChange={(e) => setImportJson(e.target.value)}
+                required
+              />
+
+              {importStatus && (
+                <div
+                  className={`p-3 rounded text-xs mb-3 ${
+                    importStatus.startsWith("Success")
+                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                      : "bg-red-500/20 text-red-300 border border-red-500/40"
+                  }`}
+                >
+                  {importStatus}
+                </div>
+              )}
+
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  className="btn btn-secondary text-sm"
+                  onClick={() => setShowImportModal(false)}
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary text-sm"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? "Importing..." : "Validate & Save"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

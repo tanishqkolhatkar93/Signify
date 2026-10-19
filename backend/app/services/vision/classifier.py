@@ -17,9 +17,21 @@ class ISLGestureClassifier:
     Evaluates finger extensions, palm vectors, and multi-hand coordination
     against calibrated semantic signatures with explicit uncertainty bounds.
     """
+    SUPPORTED_GESTURES: List[str] = [
+        "isl_good",
+        "isl_bad",
+        "isl_stop",
+        "isl_namaste_hello",
+        "isl_yes",
+        "isl_no",
+        "isl_food",
+        "isl_water",
+    ]
+
     def __init__(self, confidence_threshold: float = settings.CONFIDENCE_THRESHOLD):
         self.confidence_threshold = confidence_threshold
         self.model_version = settings.MODEL_NAME
+        self.supported_gestures = self.SUPPORTED_GESTURES
         # Session state for temporal smoothing: session_id -> deque of recent predictions
         self._history: Dict[str, deque] = {}
         self._history_window = settings.TEMPORAL_SMOOTHING_FRAMES

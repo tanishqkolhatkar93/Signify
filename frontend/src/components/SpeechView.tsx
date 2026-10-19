@@ -24,11 +24,13 @@ export const SpeechView: React.FC = () => {
   const [reverseResult, setReverseResult] = useState<ReverseMatchResponse | null>(null);
 
   const samplePhrases = [
+    { label: "How are you?", text: "How are you doing today?" },
+    { label: "What is your name?", text: "What is your name?" },
+    { label: "Need Doctor", text: "I need to see a doctor" },
+    { label: "Emergency Help", text: "Please help me immediately" },
+    { label: "Where is Restroom?", text: "Where is the restroom?" },
     { label: "Thank you", text: "Thank you so much" },
-    { label: "Namaste / Hello", text: "Hello and welcome" },
     { label: "Water", text: "I need some water please" },
-    { label: "Emergency Help", text: "Please help me" },
-    { label: "Stop", text: "Please stop right there" },
     { label: "Unsupported (Astrophysics)", text: "Quantum mechanics and gravitational astrophysics" }
   ];
 
@@ -250,6 +252,17 @@ export const SpeechView: React.FC = () => {
                     <strong>Hand Configuration:</strong>
                     <p>{reverseResult.matched_sign.hand_configuration}</p>
                   </div>
+                  {reverseResult.matched_sign.isl_grammar_structure && (
+                    <div className="p-2 my-2 rounded bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200">
+                      <strong className="block text-[10px] text-amber-400 uppercase tracking-wider">ISL Syntax Structure:</strong>
+                      <p className="mt-0.5">{reverseResult.matched_sign.isl_grammar_structure}</p>
+                    </div>
+                  )}
+                  {reverseResult.matched_sign.cultural_linguistic_notes && (
+                    <div className="text-xs text-slate-400 italic mb-2">
+                      <span>Linguistic Note: {reverseResult.matched_sign.cultural_linguistic_notes}</span>
+                    </div>
+                  )}
                   <div className="attribution-tag">
                     <span>Source: {reverseResult.matched_sign.source}</span>
                     <span>License: {reverseResult.matched_sign.license}</span>
