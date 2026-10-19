@@ -14,6 +14,12 @@ import {
 import type { RecognitionResult, HandLandmarks, SignItem, UserProfile } from "../types";
 import { api } from "../services/api";
 import { speechService } from "../services/speech";
+import {
+  getHandLandmarker,
+  HAND_CONNECTIONS,
+  convertToAppHandLandmarks
+} from "../services/mediapipe";
+import type { HandLandmarker, HandLandmarkerResult } from "@mediapipe/tasks-vision";
 
 interface SignToSpeechViewProps {
   consentGranted: boolean;
@@ -30,19 +36,103 @@ export const SignToSpeechView: React.FC<SignToSpeechViewProps> = ({
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const handLandmarkerRef = useRef<HandLandmarker | null>(null);
+  const animationFrameIdRef = useRef<number | null>(null);
+  const lastClassificationTimeRef = useRef<number>(0);
   
   const [isCapturing, setIsCapturing] = useState(false);
+  const [modelLoading, setModelLoading] = useState(false);
+  const [trackingActive, setTrackingActive] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [recognition, setRecognition] = useState<RecognitionResult | null>(null);
   const [simulatedPose, setSimulatedPose] = useState<string | null>(null);
   const [isSpeaking, setIsSpeaking] = useState<"en" | "hi" | null>(null);
 
-  // Stop camera on unmount
+  // Stop camera and tracking loop on unmount
   useEffect(() => {
     return () => {
       stopCamera();
     };
   }, []);
+
+  const processVideoFrame = async () => {
+    if (!videoRef.current || videoRef.current.paused || videoRef.current.ended) {
+      return;
+    }
+
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+
+    if (video.readyState >= 2 && handLandmarkerRef.current) {
+      if (canvas && (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight)) {
+        canvas.width = video.videoWidth || 640;
+        canvas.height = video.videoHeight || 480;
+      }
+
+      const now = performance.now();
+      try {
+        const result = handLandmarkerRef.current.detectForVideo(video, now);
+        drawMediaPipeLandmarks(result);
+
+        // Throttle backend classification to ~8 times per second (every 120ms)
+        if (now - lastClassificationTimeRef.current > 120) {
+          lastClassificationTimeRef.current = now;
+          const appHands = convertToAppHandLandmarks(result);
+          if (appHands.length > 0) {
+            const res = await api.classifyLandmarks(appHands, "live-session", consentGranted);
+            setRecognition(res);
+          } else {
+            // Decay previous recognition if no hands in sight
+            setRecognition((prev) => (prev?.status === "RECOGNIZED" ? prev : null));
+          }
+        }
+      } catch (err) {
+        console.debug("MediaPipe frame detection notice:", err);
+      }
+    }
+
+    animationFrameIdRef.current = requestAnimationFrame(processVideoFrame);
+  };
+
+  const drawMediaPipeLandmarks = (result: HandLandmarkerResult) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (!result || !result.landmarks || result.landmarks.length === 0) return;
+
+    for (const landmarks of result.landmarks) {
+      // 1. Draw skeletal connections
+      ctx.strokeStyle = "#2DD4BF";
+      ctx.lineWidth = 3;
+      for (const conn of HAND_CONNECTIONS) {
+        const p1 = landmarks[conn.start];
+        const p2 = landmarks[conn.end];
+        if (p1 && p2) {
+          ctx.beginPath();
+          ctx.moveTo(p1.x * canvas.width, p1.y * canvas.height);
+          ctx.lineTo(p2.x * canvas.width, p2.y * canvas.height);
+          ctx.stroke();
+        }
+      }
+
+      // 2. Draw landmark joints
+      for (let idx = 0; idx < landmarks.length; idx++) {
+        const p = landmarks[idx];
+        const cx = p.x * canvas.width;
+        const cy = p.y * canvas.height;
+        ctx.beginPath();
+        ctx.arc(cx, cy, idx === 0 ? 6 : 4, 0, 2 * Math.PI);
+        ctx.fillStyle = idx === 0 ? "#F59E0B" : "#38BDF8";
+        ctx.fill();
+        ctx.strokeStyle = "#FFFFFF";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+    }
+  };
 
   const startCamera = async () => {
     if (!consentGranted) {
@@ -61,6 +151,17 @@ export const SignToSpeechView: React.FC<SignToSpeechViewProps> = ({
         videoRef.current.play();
       }
       setIsCapturing(true);
+
+      // Initialize MediaPipe Vision Tasks on the browser client
+      setModelLoading(true);
+      const landmarker = await getHandLandmarker();
+      handLandmarkerRef.current = landmarker;
+      setModelLoading(false);
+      setTrackingActive(true);
+
+      // Start processing loop
+      animationFrameIdRef.current = requestAnimationFrame(processVideoFrame);
+
       await api.orchestratorTransition(
         "GRANT_CONSENT",
         { user_id: currentUser?.id, user_email: currentUser?.email },
@@ -72,10 +173,22 @@ export const SignToSpeechView: React.FC<SignToSpeechViewProps> = ({
         "Camera stream not directly accessible in this browser sandbox. You can use the built-in Interactive Gesture Simulator below for live, verifiable landmark evaluation."
       );
       setIsCapturing(true); // Allow simulator mode
+      setModelLoading(false);
     }
   };
 
   const stopCamera = () => {
+    if (animationFrameIdRef.current) {
+      cancelAnimationFrame(animationFrameIdRef.current);
+      animationFrameIdRef.current = null;
+    }
+    setTrackingActive(false);
+
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext("2d");
+      ctx?.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    }
+
     if (videoRef.current && videoRef.current.srcObject) {
       const stream = videoRef.current.srcObject as MediaStream;
       stream.getTracks().forEach((track) => track.stop());
@@ -218,14 +331,38 @@ export const SignToSpeechView: React.FC<SignToSpeechViewProps> = ({
               <Eye size={16} />
               <span>Camera Stream & Landmark Normalization</span>
             </div>
-            <div className="privacy-badge">
-              <Shield size={12} />
-              <span>Local Processing Only</span>
+            <div className="flex items-center gap-2">
+              {modelLoading && (
+                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  <RefreshCw size={11} className="animate-spin" />
+                  <span>Loading MediaPipe...</span>
+                </div>
+              )}
+              {trackingActive && (
+                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  <CheckCircle size={11} />
+                  <span>MediaPipe 3D Live</span>
+                </div>
+              )}
+              <div className="privacy-badge">
+                <Shield size={12} />
+                <span>Local Processing Only</span>
+              </div>
             </div>
           </div>
 
           <div className="video-viewport">
-            <video ref={videoRef} className="camera-feed" playsInline muted />
+            <video
+              ref={videoRef}
+              className="camera-feed"
+              playsInline
+              muted
+              onPlay={() => {
+                if (!animationFrameIdRef.current) {
+                  animationFrameIdRef.current = requestAnimationFrame(processVideoFrame);
+                }
+              }}
+            />
             <canvas ref={canvasRef} width={640} height={480} className="landmark-canvas" />
 
             {!isCapturing && (

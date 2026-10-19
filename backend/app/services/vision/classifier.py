@@ -11,11 +11,18 @@ from backend.app.services.vision.landmarks import normalize_landmarks, extract_f
 from backend.app.services.sign_dictionary.manifest_service import dictionary_service
 from backend.app.core.config import settings
 
+import json
+from pathlib import Path
+import joblib
+
+MODEL_PATH = Path(__file__).resolve().parent / "isl_classifier.joblib"
+META_PATH = Path(__file__).resolve().parent / "model_meta.json"
+
 class ISLGestureClassifier:
     """
-    Normalized geometric gesture classifier for Indian Sign Language (ISL).
-    Evaluates finger extensions, palm vectors, and multi-hand coordination
-    against calibrated semantic signatures with explicit uncertainty bounds.
+    Hybrid ISL Gesture Classifier:
+    1. Scikit-learn RandomForestClassifier trained on scale/rotation-invariant anthropometric landmarks.
+    2. Normalized geometric heuristics fallback for deterministic edge-case resilience.
     """
     SUPPORTED_GESTURES: List[str] = [
         "isl_good",
@@ -35,6 +42,35 @@ class ISLGestureClassifier:
         # Session state for temporal smoothing: session_id -> deque of recent predictions
         self._history: Dict[str, deque] = {}
         self._history_window = settings.TEMPORAL_SMOOTHING_FRAMES
+
+        # Load trained scikit-learn model if available
+        self.rf_model = None
+        self.rf_classes: List[str] = []
+        if MODEL_PATH.exists():
+            try:
+                self.rf_model = joblib.load(MODEL_PATH)
+                if META_PATH.exists():
+                    with open(META_PATH, "r", encoding="utf-8") as f:
+                        meta = json.load(f)
+                        self.rf_classes = meta.get("classes", [])
+            except Exception as e:
+                self.rf_model = None
+
+    def _extract_feature_vector(self, landmarks: list) -> np.ndarray:
+        norm = normalize_landmarks(landmarks)
+        feats = extract_finger_features(norm)
+        coords = norm.flatten()
+        dist_vec = np.array([
+            feats["distances"]["thumb"],
+            feats["distances"]["index"],
+            feats["distances"]["middle"],
+            feats["distances"]["ring"],
+            feats["distances"]["pinky"],
+            feats["bunch_spread"],
+            1.0 if feats["thumb_pointing_up"] else 0.0,
+            1.0 if feats["thumb_pointing_down"] else 0.0,
+        ], dtype=np.float32)
+        return np.concatenate([coords, dist_vec])
 
     def _get_history(self, session_id: str) -> deque:
         if session_id not in self._history:
@@ -83,6 +119,25 @@ class ISLGestureClassifier:
 
         # 3. Evaluate Scores for Each Supported ISL Sign
         scores: Dict[str, float] = {}
+
+        # 3a. Scikit-learn RandomForest Prediction (if model is available)
+        rf_scores: Dict[str, float] = {}
+        if self.rf_model is not None and self.rf_classes:
+            try:
+                vec = self._extract_feature_vector(primary_hand.landmarks)
+                probs = self.rf_model.predict_proba([vec])[0]
+                for idx, cname in enumerate(self.rf_classes):
+                    if cname != "UNKNOWN_SIGN":
+                        rf_scores[cname] = float(probs[idx])
+                
+                # Check for explicit UNKNOWN_SIGN class
+                if "UNKNOWN_SIGN" in self.rf_classes:
+                    unk_idx = self.rf_classes.index("UNKNOWN_SIGN")
+                    if float(probs[unk_idx]) > 0.40:
+                        for c in rf_scores:
+                            rf_scores[c] = min(rf_scores[c], 0.20)
+            except Exception as e:
+                rf_scores = {}
 
         # Sign: isl_good (Thumbs Up)
         # Thumb pointing up, index, middle, ring, pinky curled
@@ -177,6 +232,12 @@ class ISLGestureClassifier:
             scores["isl_more"] = 0.93
         else:
             scores["isl_more"] = 0.05
+
+        # 3b. Consensus Blending with Scikit-learn Model
+        if rf_scores:
+            for s_id in list(scores.keys()):
+                if s_id in rf_scores:
+                    scores[s_id] = round(0.55 * scores[s_id] + 0.45 * rf_scores[s_id], 3)
 
         # 4. Rank Candidates
         sorted_candidates = sorted(scores.items(), key=lambda x: x[1], reverse=True)

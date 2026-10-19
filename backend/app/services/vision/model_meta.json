@@ -1,0 +1,19 @@
+{
+  "model_type": "RandomForestClassifier",
+  "n_estimators": 100,
+  "classes": [
+    "isl_good",
+    "isl_bad",
+    "isl_stop",
+    "isl_namaste_hello",
+    "isl_yes",
+    "isl_no",
+    "isl_food",
+    "isl_water",
+    "UNKNOWN_SIGN"
+  ],
+  "n_features": 71,
+  "mean_cv_f1_macro": 0.9768176354723203,
+  "dataset_samples": 1080,
+  "trained_timestamp": "2026-10-19T20:00:00Z"
+}

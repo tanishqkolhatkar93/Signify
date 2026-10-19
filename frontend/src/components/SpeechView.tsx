@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Mic,
   MicOff,
@@ -36,6 +36,100 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser }) => {
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [savingDialogue, setSavingDialogue] = useState(false);
   const [saveToast, setSaveToast] = useState<string | null>(null);
+
+  // Live browser SpeechRecognition refs & state
+  const recognitionRef = useRef<any>(null);
+  const [micStatusText, setMicStatusText] = useState<string | null>(null);
+
+  // Abort speech recognition on unmount
+  useEffect(() => {
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+    };
+  }, []);
+
+  const startVoiceRecording = () => {
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      alert(
+        "Live speech recognition is not supported in this browser. Please use Google Chrome or select a test phrase below."
+      );
+      handleSimulateSpeech("Hello, how are you?");
+      return;
+    }
+
+    try {
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+
+      const rec = new SpeechRecognition();
+      rec.lang = sourceLang === "hi" ? "hi-IN" : "en-US";
+      rec.interimResults = true;
+      rec.continuous = false;
+      rec.maxAlternatives = 1;
+
+      rec.onstart = () => {
+        setIsRecording(true);
+        setMicStatusText("Listening... Speak clearly into your microphone.");
+      };
+
+      rec.onresult = (event: any) => {
+        let finalTranscript = "";
+        let interimTranscript = "";
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+
+        const activeText = finalTranscript || interimTranscript;
+        if (activeText) {
+          setTranscript(activeText);
+        }
+        if (finalTranscript) {
+          handleManualTranscriptChange(finalTranscript);
+        }
+      };
+
+      rec.onerror = (e: any) => {
+        console.warn("Speech recognition error:", e.error);
+        setIsRecording(false);
+        setMicStatusText(null);
+        if (e.error === "not-allowed") {
+          alert("Microphone permission was denied. Please allow microphone access in your browser settings.");
+        }
+      };
+
+      rec.onend = () => {
+        setIsRecording(false);
+        setMicStatusText(null);
+      };
+
+      rec.start();
+      recognitionRef.current = rec;
+    } catch (err) {
+      console.warn("Could not start SpeechRecognition:", err);
+      setIsRecording(false);
+      setMicStatusText(null);
+    }
+  };
+
+  const stopVoiceRecording = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+      recognitionRef.current = null;
+    }
+    setIsRecording(false);
+    setMicStatusText(null);
+  };
 
   const samplePhrases = [
     { label: "How are you?", text: "How are you doing today?" },
@@ -204,18 +298,20 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser }) => {
               className={`mic-button ${isRecording ? "recording" : ""}`}
               onClick={() => {
                 if (isRecording) {
-                  setIsRecording(false);
+                  stopVoiceRecording();
                 } else {
-                  setIsRecording(true);
-                  handleSimulateSpeech("Hello, how are you?");
-                  setTimeout(() => setIsRecording(false), 1200);
+                  startVoiceRecording();
                 }
               }}
+              title={isRecording ? "Stop recording speech" : "Click to speak via microphone"}
             >
               {isRecording ? <MicOff size={32} /> : <Mic size={32} />}
             </button>
             <p className="mic-hint">
-              {isRecording ? "Listening to audio stream..." : "Click microphone to speak (or select a quick test phrase below)"}
+              {micStatusText ||
+                (isRecording
+                  ? "Listening to audio stream..."
+                  : "Click microphone to speak (or select a quick test phrase below)")}
             </p>
           </div>
 
