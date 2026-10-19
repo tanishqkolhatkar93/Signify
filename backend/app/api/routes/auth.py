@@ -1,8 +1,7 @@
-from fastapi import APIRouter, HTTPException, Header, Depends
+from fastapi import APIRouter, HTTPException, Header
 from typing import Optional
 from backend.app.schemas.auth import (
     GoogleAuthRequest,
-    DemoLoginRequest,
     AuthResponse,
     UserProfile,
     AuthStatusResponse,
@@ -42,12 +41,6 @@ async def google_login(req: GoogleAuthRequest):
             status_code=401,
             detail=f"Google authentication failed: {str(e)}"
         )
-
-@router.post("/demo", response_model=AuthResponse)
-def demo_login(req: Optional[DemoLoginRequest] = None):
-    email = req.email if req and req.email else "tanishq.signer@gmail.com"
-    name = req.name if req and req.name else "Tanishq (Signify Builder)"
-    return google_auth_service.demo_login(email=email, name=name)
 
 @router.get("/me", response_model=UserProfile)
 def get_current_user(authorization: Optional[str] = Header(None)):

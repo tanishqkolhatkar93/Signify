@@ -131,6 +131,8 @@ def test_acceptance_test_runner_all_pass():
     asyncio.run(_run())
 
 def test_google_auth_and_user_session():
+    from unittest.mock import patch
+
     async def _run():
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as client:
@@ -140,28 +142,39 @@ def test_google_auth_and_user_session():
             data = res.json()
             assert data["authenticated"] is False
 
-            # 2. Perform demo Google Sign-in
-            res_login = await client.post("/api/v1/auth/demo", json={
-                "email": "tanishq.signer@gmail.com",
-                "name": "Tanishq Signer"
-            })
-            assert res_login.status_code == 200
-            auth_data = res_login.json()
-            assert auth_data["access_token"]
-            assert auth_data["user"]["email"] == "tanishq.signer@gmail.com"
-            assert auth_data["user"]["role"] == "signer"
+            # 2. Perform Google Sign-in with verified credential
+            mock_google_payload = {
+                "sub": "google-user-id-998877",
+                "email": "tanishq.user@gmail.com",
+                "name": "Tanishq User",
+                "given_name": "Tanishq",
+                "family_name": "User",
+                "picture": "https://lh3.googleusercontent.com/a/mock-pic",
+                "email_verified": True
+            }
 
-            token = auth_data["access_token"]
+            with patch("backend.app.services.auth.google_auth.google_auth_service.verify_google_credential", return_value=mock_google_payload):
+                res_login = await client.post("/api/v1/auth/google", json={
+                    "credential": "mock-real-google-credential-token"
+                })
+                assert res_login.status_code == 200
+                auth_data = res_login.json()
+                assert auth_data["access_token"]
+                assert auth_data["user"]["email"] == "tanishq.user@gmail.com"
+                assert auth_data["user"]["role"] == "signer"
+                assert auth_data["user"]["picture"] == "https://lh3.googleusercontent.com/a/mock-pic"
 
-            # 3. Verify user profile with token
-            res_me = await client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
-            assert res_me.status_code == 200
-            me_data = res_me.json()
-            assert me_data["email"] == "tanishq.signer@gmail.com"
-            assert me_data["name"] == "Tanishq Signer"
+                token = auth_data["access_token"]
 
-            # 4. Verify auth status with token
-            res_status = await client.get("/api/v1/auth/status", headers={"Authorization": f"Bearer {token}"})
-            assert res_status.status_code == 200
-            assert res_status.json()["authenticated"] is True
+                # 3. Verify user profile with token
+                res_me = await client.get("/api/v1/auth/me", headers={"Authorization": f"Bearer {token}"})
+                assert res_me.status_code == 200
+                me_data = res_me.json()
+                assert me_data["email"] == "tanishq.user@gmail.com"
+                assert me_data["name"] == "Tanishq User"
+
+                # 4. Verify auth status with token
+                res_status = await client.get("/api/v1/auth/status", headers={"Authorization": f"Bearer {token}"})
+                assert res_status.status_code == 200
+                assert res_status.json()["authenticated"] is True
     asyncio.run(_run())

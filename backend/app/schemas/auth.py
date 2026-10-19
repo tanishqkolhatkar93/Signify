@@ -28,3 +28,4 @@ class AuthStatusResponse(BaseModel):
     authenticated: bool
     user: Optional[UserProfile] = None
     google_client_id: Optional[str] = None
+

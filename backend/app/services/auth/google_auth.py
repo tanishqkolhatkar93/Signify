@@ -18,45 +18,40 @@ class GoogleAuthService:
 
     async def verify_google_credential(self, credential: str) -> Dict[str, Any]:
         """
-        Verifies a Google ID token either against Google's public tokeninfo endpoint,
-        or safely decodes the payload in local/offline environments.
+        Verifies a Google ID token against Google's public OAuth2 tokeninfo endpoint.
+        Validates audience (aud) matches the configured GOOGLE_CLIENT_ID.
         """
-        # 1. Attempt official Google tokeninfo verification
-        try:
-            async with httpx.AsyncClient(timeout=5.0) as client:
-                res = await client.get(
-                    f"https://oauth2.googleapis.com/tokeninfo?id_token={credential}"
-                )
-                if res.status_code == 200:
-                    payload = res.json()
-                    # If client_id is set, verify audience
-                    if self.google_client_id and payload.get("aud") != self.google_client_id:
-                        raise ValueError("Token audience mismatch for Google Client ID.")
-                    return payload
-        except Exception as e:
-            # Fall through to JWT payload decode for offline / mock testing
-            pass
-
-        # 2. Offline / local fallback: inspect claims directly
-        try:
-            unverified_claims = jwt.decode(
-                credential,
-                options={"verify_signature": False}
+        async with httpx.AsyncClient(timeout=10.0) as client:
+            res = await client.get(
+                f"https://oauth2.googleapis.com/tokeninfo?id_token={credential}"
             )
-            if "email" in unverified_claims:
-                return unverified_claims
-        except Exception:
-            pass
+            if res.status_code != 200:
+                raise ValueError("Google OAuth token verification failed: Invalid token or expired.")
+            
+            payload = res.json()
 
-        raise ValueError("Invalid or unverified Google credential token.")
+            # Verify audience if client_id is configured
+            if settings.GOOGLE_CLIENT_ID:
+                aud = payload.get("aud")
+                if aud != settings.GOOGLE_CLIENT_ID:
+                    raise ValueError(f"Token audience ({aud}) does not match configured Google Client ID.")
+
+            # Ensure email is verified
+            if payload.get("email_verified") not in [True, "true", "True"]:
+                raise ValueError("Google account email is not verified.")
+
+            return payload
 
     def upsert_user_from_google(self, payload: Dict[str, Any]) -> UserProfile:
         email = payload.get("email")
         if not email:
-            raise ValueError("Google user profile must contain an email address.")
+            raise ValueError("Google user profile must contain a valid email address.")
 
         name = payload.get("name") or email.split("@")[0]
-        google_id = payload.get("sub") or str(uuid.uuid4())
+        google_id = payload.get("sub")
+        if not google_id:
+            raise ValueError("Missing Google user identifier (sub).")
+
         picture = payload.get("picture")
         given_name = payload.get("given_name")
         family_name = payload.get("family_name")
@@ -68,6 +63,7 @@ class GoogleAuthService:
             ).first()
 
             if user:
+                user.google_id = google_id
                 user.name = name
                 user.picture = picture or user.picture
                 user.given_name = given_name or user.given_name
@@ -84,7 +80,7 @@ class GoogleAuthService:
                     name=name,
                     given_name=given_name,
                     family_name=family_name,
-                    picture=picture or f"https://api.dicebear.com/7.x/bottts/svg?seed={user_id}",
+                    picture=picture,
                     role="signer",
                     created_at=datetime.utcnow(),
                     last_login=datetime.utcnow()
@@ -142,24 +138,5 @@ class GoogleAuthService:
                 db.close()
         except jwt.PyJWTError:
             return None
-
-    def demo_login(self, email: str = "tanishq.signer@gmail.com", name: str = "Tanishq (Signify Builder)") -> AuthResponse:
-        """One-click instant authentication for judging demos and local evaluation."""
-        payload = {
-            "sub": "google-oauth2-demo-109827341",
-            "email": email,
-            "name": name,
-            "given_name": name.split()[0],
-            "family_name": name.split()[-1] if len(name.split()) > 1 else "",
-            "picture": f"https://api.dicebear.com/7.x/avataaars/svg?seed={email}"
-        }
-        user = self.upsert_user_from_google(payload)
-        token = self.create_access_token(user)
-        return AuthResponse(
-            access_token=token,
-            token_type="bearer",
-            user=user,
-            message="Demo Google Authentication successful"
-        )
 
 google_auth_service = GoogleAuthService()

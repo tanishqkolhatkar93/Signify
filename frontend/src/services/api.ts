@@ -57,16 +57,6 @@ export const api = {
     }
     return res;
   },
-  loginDemo: async (email?: string, name?: string) => {
-    const res = await request<AuthResponse>("/auth/demo", {
-      method: "POST",
-      body: JSON.stringify({ email, name })
-    });
-    if (res.access_token) {
-      localStorage.setItem("signify_auth_token", res.access_token);
-    }
-    return res;
-  },
   getCurrentUser: () => request<UserProfile>("/auth/me"),
   logout: () => {
     localStorage.removeItem("signify_auth_token");

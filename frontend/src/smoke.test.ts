@@ -14,7 +14,6 @@ describe("Signify Frontend Architecture & Smoke Tests", () => {
     expect(typeof api.orchestratorTransition).toBe("function");
     expect(typeof api.runAcceptanceTests).toBe("function");
     expect(typeof api.loginGoogle).toBe("function");
-    expect(typeof api.loginDemo).toBe("function");
     expect(typeof api.getAuthStatus).toBe("function");
     expect(typeof api.getCurrentUser).toBe("function");
     expect(typeof api.logout).toBe("function");
