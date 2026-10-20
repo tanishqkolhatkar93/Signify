@@ -1,6 +1,6 @@
 # Signify — System Architecture
 
-**Signify** (from Latin *Designare* / *Signum* — to signify and convey meaning) is an intelligent, uncertainty-aware sign-language communication system. It bridges deaf and hard-of-hearing individuals with hearing communicators through bidirectional, multilingual AI assistance.
+**Signify** (from Latin *Designare* / *Signum* — to signify and convey meaning) is an intelligent, uncertainty-aware sign-language communication agent. It bridges deaf and hard-of-hearing individuals with hearing communicators through bidirectional, multilingual AI assistance.
 
 ---
 
@@ -8,52 +8,49 @@
 
 ```mermaid
 flowchart TB
-    subgraph Client ["Frontend (React 18 + TypeScript + Vite)"]
-        UI["User Interface (Tailwind CSS)"]
+    subgraph Client ["Frontend (React 19 + TypeScript + Vite)"]
+        UI["User Interface"]
         Consent["Consent & Privacy Gate"]
         MP["MediaPipe Tasks Vision (21 3D Hand Landmarks)"]
-        AudioIn["Web Audio / MediaRecorder API"]
-        AudioOut["Web Speech Synthesis (Local Fallback)"]
+        AudioIn["Web Audio / SpeechRecognition API"]
+        AudioOut["Audio Playback / TTS Player"]
     end
 
     subgraph Backend ["Backend (FastAPI + Python 3.11)"]
-        API["REST & WebSocket API Endpoints"]
+        API["REST API Endpoints (/orchestrator, /signs, /auth)"]
         
-        subgraph Orchestrator ["Agentic Communication Orchestrator"]
-            FSM["Finite State Machine Engine"]
-            Safety["Confidence & Safety Guardrails"]
-            EventLogger["Audit & Event Log Stream"]
+        subgraph Orchestrator ["Bounded Agent Orchestrator"]
+            FSM["Typed Finite State Machine (12 States, 10 Actions)"]
+            Thresholds["Confidence Thresholds (>= 0.72) & Retry Budget (3)"]
+            EventLogger["Structured Audit & Event Logger"]
         end
 
-        subgraph Providers ["Provider Layer"]
-            VisionProv["Gesture Recognition Provider<br/>(Landmark Normalization, Temporal Filter, Classifier)"]
-            SpeechProv["Speech Provider (STT & TTS)<br/>(VerbX / Mock / Local)"]
-            TransProv["Translation Provider (EN <-> HI)<br/>(VerbX / Mock)"]
-            DictProv["Sign Dictionary Provider (ISL)<br/>(Documented Manifest & Media)"]
+        subgraph ToolSubsystem ["Structured Agent Tools"]
+            ToolVision["VisionLandmarkClassifier (Random Forest + Normalizer)"]
+            ToolTrans["VerbXTranslationEngine (LangShift / Fallback)"]
+            ToolSynth["VerbXSpeechSynthesizer (TTS / Fallback)"]
+            ToolSTT["VerbXSpeechTranscriber (Vocaline / Fallback)"]
+            ToolDict["ISLDictionaryRegistry (28 Signs + Grammar)"]
         end
 
-        DB[("SQLite Database<br/>(Audit Trails, Test Runs, Feedback)")]
+        DB[("SQLite Database (signify.db)<br/>(Audit Ledger, Test Runs, User Calibration)")]
     end
 
     subgraph External ["External Services"]
-        VerbX["VerbX / IvishAI Platform API<br/>(https://one.verbxeco.com)"]
+        VerbX["VerbX API Ecosystem (https://api.verbxeco.com)"]
     end
 
     UI --> Consent
     Consent --> MP
     Consent --> AudioIn
-    MP -- "Normalized 21 Landmarks (JSON)" --> API
-    AudioIn -- "Audio Blob / Base64" --> API
+    MP -- "Normalized 21 3D Landmarks" --> API
+    AudioIn -- "Audio Stream / Transcript" --> API
     API --> FSM
-    FSM --> Safety
-    Safety --> VisionProv
-    Safety --> SpeechProv
-    Safety --> TransProv
-    Safety --> DictProv
+    FSM --> Thresholds
+    Thresholds --> ToolSubsystem
     FSM --> EventLogger
     EventLogger --> DB
-    SpeechProv -. "When configured" .-> VerbX
-    TransProv -. "When configured" .-> VerbX
+    ToolSubsystem -. "Authenticated REST" .-> VerbX
     FSM -- "Structured State, Transcript, Audio, Video" --> UI
     UI --> AudioOut
 ```
@@ -62,7 +59,7 @@ flowchart TB
 
 ## 2. Agentic Workflow Finite State Machine (FSM)
 
-The communication orchestrator enforces strict state boundaries:
+The communication orchestrator enforces a typed, bounded Finite State Machine (FSM) with structured tool execution, calibrated confidence routing, and bounded retry budgets:
 
 ```mermaid
 stateDiagram-v2
@@ -72,28 +69,44 @@ stateDiagram-v2
     CONSENT_REQUIRED --> CAPTURING: Consent Explicitly Granted
     CONSENT_REQUIRED --> IDLE: Consent Declined
 
-    CAPTURING --> RECOGNIZING: Landmarks Extracted
+    CAPTURING --> RECOGNIZING: Landmarks Extracted (Candidate Stabilizing)
+    CAPTURING --> UNCERTAIN: Confidence < 0.72 or Distractor (retry_count < 3)
+    CAPTURING --> TRANSLATING: Sign Recognized (Confidence >= 0.72, Stable >= 5 frames)
     
-    RECOGNIZING --> UNCERTAIN: Confidence < 0.72 or Unstable
-    UNCERTAIN --> CAPTURING: Retrying Detection
-    UNCERTAIN --> IDLE: Stop Session
+    RECOGNIZING --> RECOGNIZING: Accumulating 5 Consecutive Frames
+    RECOGNIZING --> TRANSLATING: Threshold Reached (Resets Retry Counter)
+    RECOGNIZING --> UNCERTAIN: Landmark Drift / Ambiguity
+    
+    UNCERTAIN --> CAPTURING: Retry within Budget (retry_count < 3)
+    UNCERTAIN --> FAILED: Exhausted Retry Budget (retry_count >= 3)
 
-    RECOGNIZING --> TRANSLATING: Sign Recognized (Stable >= 5 frames)
     TRANSLATING --> GENERATING_SPEECH: Bilingual Translations Ready (EN + HI)
-    GENERATING_SPEECH --> COMPLETED: Speech Audio Ready / Played
+    GENERATING_SPEECH --> COMPLETED: Speech Audio Synthesized & Played
     
     IDLE --> TRANSCRIBING: Mic Audio Received (Speech Mode)
-    TRANSCRIBING --> AWAITING_CONFIRMATION: Transcript Rendered (Editable)
-    AWAITING_CONFIRMATION --> GENERATING_SIGN_OUTPUT: Match Found in ISL Dictionary
-    AWAITING_CONFIRMATION --> COMPLETED: No Sign Match (Text-Only Fallback)
+    TRANSCRIBING --> AWAITING_CONFIRMATION: Transcript Rendered (Human Editable)
+    TRANSCRIBING --> UNCERTAIN: Unintelligible Speech (retry_count < 3)
+    TRANSCRIBING --> FAILED: Provider Error / Exhausted Retries
+    
+    AWAITING_CONFIRMATION --> GENERATING_SIGN_OUTPUT: Match Found in Verified ISL Dictionary
+    AWAITING_CONFIRMATION --> COMPLETED: No Sign Match (Honest Text Boundary Notice)
     GENERATING_SIGN_OUTPUT --> COMPLETED: Verified Sign Clip Rendered
     
-    COMPLETED --> IDLE: Reset / Next Interaction
+    COMPLETED --> IDLE: RESET
+    COMPLETED --> CAPTURING: Next Gesture
+    COMPLETED --> TRANSCRIBING: Next Speech Turn
     
-    CAPTURING --> FAILED: Hardware Error
-    TRANSCRIBING --> FAILED: Provider Error
-    FAILED --> IDLE: Clear Error
+    FAILED --> IDLE: RESET / Perception Loop Cleared
+    FAILED --> CAPTURING: RETRY (after camera repositioning)
 ```
+
+### Structured Tool Execution Subsystem
+All perception, linguistic, and acoustic capabilities are encapsulated as typed tools returning a `ToolCallRecord`:
+- **`VisionLandmarkClassifier`**: Scikit-learn Random Forest + Anthropometric heuristic normalizer (0.9768 Macro F1 across 71 features).
+- **`VerbXTranslationEngine`**: Multi-turn English ↔ Hindi neural translation (`api.verbxeco.com`).
+- **`VerbXSpeechSynthesizer`**: Dual English & Hindi voice waveform synthesizer (`api.verbxeco.com`).
+- **`VerbXSpeechTranscriber`**: Acoustic speech recognition with silence and confidence estimation.
+- **`ISLDictionaryRegistry`**: Curated ISLRTC dictionary lookup with syntactic grammar structures.
 
 ---
 
@@ -101,18 +114,17 @@ stateDiagram-v2
 
 ### Route A: Sign to Speech (Deaf -> Hearing)
 1. User provides affirmative consent for camera capture.
-2. MediaPipe detects 21 hand landmarks per hand locally at 30 FPS.
+2. MediaPipe detects 21 hand landmarks per hand locally in browser WASM.
 3. Coordinates are normalized relative to wrist origin and palm span.
-4. Feature vector evaluated against ISL gesture signatures with cosine similarity and finger flexion vectors.
+4. Feature vector evaluated against ISL gesture signatures with Random Forest and finger flexion vectors.
 5. If confidence $\ge 0.72$ across 5 consecutive frames, gesture is verified.
-6. System maps gesture ID to English meaning (e.g., "Hello / Welcome") and Hindi translation ("नमस्ते / स्वागत हे").
-7. Dual audio synthesizers output bilingual speech.
+6. System maps gesture ID to English meaning (e.g., "Good / Well") and Hindi translation ("अच्छा / बहुत अच्छा").
+7. Dual audio synthesizers output bilingual speech via VerbX TTS.
 
 ### Route B: Speech to Text (Hearing -> Deaf)
-1. Hearing user presses push-to-talk microphone.
-2. Audio recorded and sent to STT provider (VerbX / local).
-3. Transcript is generated and displayed in high-contrast text.
-4. Signer can read the transcript immediately and request clarification.
+1. Hearing user speaks into the microphone (live Web Speech / VerbX Vocaline).
+2. Transcript is generated and displayed in high-contrast text.
+3. Transcript enters `AWAITING_CONFIRMATION`, allowing immediate human correction.
 
 ### Route C: Speech to Supported Sign (Hearing -> Deaf Visual)
 1. Spoken transcript is matched against verified ISL dictionary keys.
@@ -125,6 +137,5 @@ stateDiagram-v2
 ## 4. Privacy and Security Guardrails
 - **Zero Video Stream Transmission**: Raw video frames never leave client volatile memory.
 - **Client Secrets Protection**: No API keys in Vite bundle; all external provider requests are authenticated via the FastAPI backend proxy.
-- **Audit Logging**: State transitions, recognition scores, and test assertions are recorded in SQLite (`signify.db`) without storing biometric facial imagery.
-- **Consequential Actions**: External sharing or reporting requires explicit modal confirmation.
-
+- **Audit Logging**: State transitions, recognition scores, tool telemetry, and test assertions are recorded in SQLite (`signify.db`) without storing biometric facial imagery.
+- **Affirmative Consent Gate**: Mandatory before any camera or landmark perception loop activates.

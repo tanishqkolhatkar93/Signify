@@ -29,6 +29,22 @@ class WorkflowAction(str, Enum):
     RESET = "RESET"
     RETRY = "RETRY"
 
+class ToolExecutionStatus(str, Enum):
+    SUCCESS = "SUCCESS"
+    UNCERTAIN = "UNCERTAIN"
+    FAILURE = "FAILURE"
+    BLOCKED = "BLOCKED"
+
+class ToolCallRecord(BaseModel):
+    tool_name: str
+    action: str
+    status: ToolExecutionStatus
+    input_summary: Dict[str, Any] = Field(default_factory=dict)
+    output_summary: Dict[str, Any] = Field(default_factory=dict)
+    confidence: Optional[float] = None
+    execution_time_ms: float = 0.0
+    error_message: Optional[str] = None
+
 class OrchestratorEvent(BaseModel):
     timestamp: datetime = Field(default_factory=datetime.utcnow)
     from_state: WorkflowState
@@ -36,6 +52,8 @@ class OrchestratorEvent(BaseModel):
     action: WorkflowAction
     message: str
     details: Optional[Dict[str, Any]] = None
+    tool_call: Optional[ToolCallRecord] = None
+    retry_count: int = 0
 
 class OrchestratorContext(BaseModel):
     session_id: str = "default-session"
@@ -53,7 +71,11 @@ class OrchestratorContext(BaseModel):
     user_id: Optional[str] = None
     user_email: Optional[str] = None
     last_error: Optional[str] = None
-    event_history: List[OrchestratorEvent] = []
+    retry_count: int = 0
+    max_retries: int = 3
+    last_tool_call: Optional[ToolCallRecord] = None
+    tool_history: List[ToolCallRecord] = Field(default_factory=list)
+    event_history: List[OrchestratorEvent] = Field(default_factory=list)
 
 class TransitionRequest(BaseModel):
     session_id: str = "default-session"
@@ -62,4 +84,3 @@ class TransitionRequest(BaseModel):
     user_consented: Optional[bool] = None
     user_id: Optional[str] = None
     user_email: Optional[str] = None
-
