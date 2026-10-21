@@ -24,12 +24,10 @@ services:
       - key: JWT_SECRET
         generateValue: true
 
-  # 2. React + Vite Frontend Static Site
+  # 2. React + Vite Frontend Static Site (Served globally via Render CDN)
   - type: web
     name: signify-frontend
     runtime: static
-    plan: free
-    region: oregon
     buildCommand: npm --prefix frontend install && npm --prefix frontend run build
     staticPublishPath: ./frontend/dist
     envVars:
