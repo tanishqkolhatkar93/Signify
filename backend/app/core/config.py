@@ -16,7 +16,7 @@ class Settings(BaseSettings):
 
     ENVIRONMENT: str = "development"
     BACKEND_HOST: str = "127.0.0.1"
-    BACKEND_PORT: int = 8000
+    BACKEND_PORT: int = int(os.environ.get("PORT", 8000))
     DATABASE_URL: str = f"sqlite:///{ROOT_DIR / 'backend' / 'signify.db'}"
     CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000"
     

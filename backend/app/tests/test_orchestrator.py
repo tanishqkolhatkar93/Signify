@@ -272,3 +272,4 @@ def test_auditable_sqlite_event_trail():
         finally:
             db.close()
     asyncio.run(_run())
+
