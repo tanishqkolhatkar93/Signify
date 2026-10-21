@@ -25,12 +25,13 @@ services:
         generateValue: true
 
   # 2. React + Vite Frontend Static Site
-  - type: static
+  - type: web
     name: signify-frontend
+    runtime: static
     plan: free
     region: oregon
     buildCommand: npm --prefix frontend install && npm --prefix frontend run build
-    staticPublishPath: frontend/dist
+    staticPublishPath: ./frontend/dist
     envVars:
       - key: VITE_API_URL
         fromService:
@@ -41,4 +42,3 @@ services:
       - type: rewrite
         source: /*
         destination: /index.html
-
