@@ -94,3 +94,4 @@ Once both services show **"Live"**:
    { "status": "healthy", "sign_language": "Indian Sign Language (ISL)", ... }
    ```
 4. Test the **Consent Gate**, **Interactive Gesture Simulator**, and **Microphone Speech Recognition**.
+
