@@ -12,7 +12,9 @@ import {
   Bookmark,
   History,
   Trash2,
-  X
+  X,
+  BookOpen,
+  Info
 } from "lucide-react";
 import type { ReverseMatchResponse, UserProfile, ConversationItem } from "../types";
 import { api } from "../services/api";
@@ -21,6 +23,25 @@ import { speechService } from "../services/speech";
 interface SpeechViewProps {
   currentUser?: UserProfile | null;
 }
+
+const renderSyntaxWithHighlights = (text: string) => {
+  if (!text) return null;
+  const parts = text.split(/(\([^)]+\)|\[[^\]]+\])/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if ((part.startsWith("(") && part.endsWith(")")) || (part.startsWith("[") && part.endsWith("]"))) {
+          return (
+            <span key={i} className="isl-syntax-highlight">
+              {part}
+            </span>
+          );
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </>
+  );
+};
 
 export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser }) => {
   const [isRecording, setIsRecording] = useState(false);
@@ -447,15 +468,43 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser }) => {
                     <strong>Hand Configuration:</strong>
                     <p>{reverseResult.matched_sign.hand_configuration}</p>
                   </div>
+                  {/* ISL Grammar Structure - High-Contrast Aesthetic Badge */}
                   {reverseResult.matched_sign.isl_grammar_structure && (
-                    <div className="p-2 my-2 rounded bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200">
-                      <strong className="block text-[10px] text-amber-400 uppercase tracking-wider">ISL Syntax Structure:</strong>
-                      <p className="mt-0.5">{reverseResult.matched_sign.isl_grammar_structure}</p>
+                    <div className="isl-syntax-badge">
+                      <div className="isl-syntax-header">
+                        <span className="isl-syntax-tag">
+                          <BookOpen size={11} />
+                          ISL Syntax Structure
+                        </span>
+                        <span className="isl-syntax-category-pill">Grammar Rule</span>
+                      </div>
+                      <p className="isl-syntax-text">
+                        {renderSyntaxWithHighlights(reverseResult.matched_sign.isl_grammar_structure)}
+                      </p>
                     </div>
                   )}
+
+                  {/* Contextual Linguistic & Non-Manual Marker Note */}
+                  {reverseResult.isl_grammar_note && reverseResult.isl_grammar_note !== reverseResult.matched_sign.isl_grammar_structure && (
+                    <div className="isl-syntax-badge variant-indigo">
+                      <div className="isl-syntax-header">
+                        <span className="isl-syntax-tag variant-indigo">
+                          <Sparkles size={11} />
+                          Facial Non-Manual Marker
+                        </span>
+                      </div>
+                      <p className="isl-syntax-text">
+                        {renderSyntaxWithHighlights(reverseResult.isl_grammar_note)}
+                      </p>
+                    </div>
+                  )}
+
                   {reverseResult.matched_sign.cultural_linguistic_notes && (
-                    <div className="text-xs text-slate-400 italic mb-2">
-                      <span>Linguistic Note: {reverseResult.matched_sign.cultural_linguistic_notes}</span>
+                    <div className="isl-linguistic-note">
+                      <Info size={13} className="text-slate-500 shrink-0 mt-0.5" />
+                      <span>
+                        <strong>Note:</strong> {reverseResult.matched_sign.cultural_linguistic_notes}
+                      </span>
                     </div>
                   )}
                   <div className="attribution-tag">

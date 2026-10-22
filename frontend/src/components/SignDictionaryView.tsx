@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, Volume2, ShieldCheck, BookOpen, PlusCircle, CheckCircle2, X, User } from "lucide-react";
+import { Search, Volume2, ShieldCheck, BookOpen, PlusCircle, CheckCircle2, X, User, Info } from "lucide-react";
 import type { SignItem, SignManifest, UserProfile } from "../types";
 import { speechService } from "../services/speech";
 import { api } from "../services/api";
@@ -10,6 +10,25 @@ interface SignDictionaryViewProps {
   currentUser?: UserProfile | null;
   onSignImported?: () => void;
 }
+
+const renderSyntaxWithHighlights = (text: string) => {
+  if (!text) return null;
+  const parts = text.split(/(\([^)]+\)|\[[^\]]+\])/g);
+  return (
+    <>
+      {parts.map((part, i) => {
+        if ((part.startsWith("(") && part.endsWith(")")) || (part.startsWith("[") && part.endsWith("]"))) {
+          return (
+            <span key={i} className="isl-syntax-highlight">
+              {part}
+            </span>
+          );
+        }
+        return <span key={i}>{part}</span>;
+      })}
+    </>
+  );
+};
 
 export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest, signs, currentUser, onSignImported }) => {
   const [search, setSearch] = useState("");
@@ -186,11 +205,29 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
 
               <p className="sign-card-meaning">{sign.meaning}</p>
 
-              {/* ISL Grammar Structure Note */}
+              {/* ISL Grammar Structure Note - High-Contrast Aesthetic Badge */}
               {sign.isl_grammar_structure && (
-                <div className="p-2 my-2 rounded bg-amber-500/10 border border-amber-500/30 text-xs text-amber-200">
-                  <span className="font-bold text-[10px] tracking-wide uppercase block text-amber-400">ISL Syntax:</span>
-                  <span>{sign.isl_grammar_structure}</span>
+                <div className="isl-syntax-badge">
+                  <div className="isl-syntax-header">
+                    <span className="isl-syntax-tag">
+                      <BookOpen size={11} />
+                      ISL Syntax
+                    </span>
+                    <span className="isl-syntax-category-pill">Grammar Rule</span>
+                  </div>
+                  <p className="isl-syntax-text">
+                    {renderSyntaxWithHighlights(sign.isl_grammar_structure)}
+                  </p>
+                </div>
+              )}
+
+              {/* Cultural / Linguistic Note */}
+              {sign.cultural_linguistic_notes && (
+                <div className="isl-linguistic-note">
+                  <Info size={12} className="text-slate-500 shrink-0 mt-0.5" />
+                  <span>
+                    <strong>Note:</strong> {sign.cultural_linguistic_notes}
+                  </span>
                 </div>
               )}
 
