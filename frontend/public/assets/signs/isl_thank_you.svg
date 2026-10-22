@@ -74,7 +74,7 @@
   <!-- Cue Badge -->
   <g transform="translate(16, 56)">
     <rect width="130" height="22" rx="6" fill="#1E293B" stroke="#0D9488" stroke-width="1"/>
-    <text x="8" y="15" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="600" fill="#5EEAD4">🖐️ Touch Chin & Move Forward</text>
+    <text x="8" y="15" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="600" fill="#5EEAD4">🖐️ Touch Chin &amp; Move Forward</text>
   </g>
 
   <!-- Bottom Instruction Box -->

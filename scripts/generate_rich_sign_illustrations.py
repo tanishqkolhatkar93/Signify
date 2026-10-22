@@ -85,28 +85,38 @@ SVG_HEADER = '''<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" wi
 SVG_FOOTER = '''</svg>'''
 
 
+def xml_escape(text):
+    if not text:
+        return ""
+    return str(text).replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;")
+
 def card_frame(title, category, cue, steps, footer_instruction):
     """Generates standard top badges, category pills, and bottom step guide."""
+    title_esc = xml_escape(title).upper()
+    cat_esc = xml_escape(category).upper()
+    cue_esc = xml_escape(cue)
+    footer_esc = xml_escape(footer_instruction)
+
     return f'''
   <!-- Top Header Bar -->
   <rect x="12" y="12" width="376" height="34" rx="8" fill="#0F172A" stroke="#334155" stroke-width="1"/>
   <circle cx="28" cy="29" r="5" fill="#2DD4BF" />
-  <text x="42" y="33" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" font-weight="700" fill="#F8FAFC" letter-spacing="0.5">ISL: {title.upper()}</text>
+  <text x="42" y="33" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" font-weight="700" fill="#F8FAFC" letter-spacing="0.5">ISL: {title_esc}</text>
   
   <rect x="270" y="19" width="108" height="20" rx="10" fill="#1E293B" stroke="#475569" stroke-width="1"/>
-  <text x="324" y="33" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="600" fill="#38BDF8" text-anchor="middle">{category.upper()}</text>
+  <text x="324" y="33" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="600" fill="#38BDF8" text-anchor="middle">{cat_esc}</text>
 
   <!-- Cue Badge -->
   <g transform="translate(16, 56)">
     <rect width="130" height="22" rx="6" fill="#1E293B" stroke="#0D9488" stroke-width="1"/>
-    <text x="8" y="15" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="600" fill="#5EEAD4">🖐️ {cue}</text>
+    <text x="8" y="15" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="600" fill="#5EEAD4">🖐️ {cue_esc}</text>
   </g>
 
   <!-- Bottom Instruction Box -->
   <rect x="12" y="260" width="376" height="48" rx="10" fill="#0F172A" stroke="#1E293B" stroke-width="1.2"/>
   <rect x="18" y="266" width="364" height="20" rx="4" fill="#1E293B"/>
   <text x="26" y="280" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="700" fill="#FBBF24">HOW TO PERFORM WITH HANDS:</text>
-  <text x="26" y="299" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="600" fill="#F1F5F9">{footer_instruction}</text>
+  <text x="26" y="299" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="600" fill="#F1F5F9">{footer_esc}</text>
 '''
 
 
@@ -870,7 +880,7 @@ SIGNS_ART = {
   <g transform="translate(80, 65)">
     <!-- Horizontal Sweep Indicator -->
     <path d="M30 30 L210 30" stroke="#FBBF24" stroke-width="3" marker-start="url(#arrowAmber)" marker-end="url(#arrowAmber)"/>
-    <text x="120" y="20" font-family="sans-serif" font-size="10" font-weight="700" fill="#FBBF24" text-anchor="middle">SWEEP LEFT & RIGHT TOGETHER</text>
+    <text x="120" y="20" font-family="sans-serif" font-size="10" font-weight="700" fill="#FBBF24" text-anchor="middle">SWEEP LEFT &amp; RIGHT TOGETHER</text>
 
     <!-- Left Open Palm Up -->
     <g transform="translate(20, 50)">
@@ -1155,14 +1165,18 @@ def build_svg_file(filename, data):
 
 
 def main():
+    import xml.etree.ElementTree as ET
     print(f"Generating anatomical SVGs in {OUTPUT_DIR}...")
     count = 0
     for filename, data in SIGNS_ART.items():
         fp = build_svg_file(filename, data)
+        # Verify valid XML
+        ET.parse(fp)
         count += 1
-        print(f"[{count}/28] Generated {filename} -> {data['title']}")
-    print(f"Successfully created {count} anatomical ISL sign illustrations!")
+        print(f"[{count}/28] Generated & Validated {filename} -> {data['title']}")
+    print(f"Successfully created and validated all {count} anatomical ISL sign illustrations!")
 
 
 if __name__ == "__main__":
     main()
+

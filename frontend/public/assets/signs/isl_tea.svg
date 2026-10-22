@@ -81,7 +81,7 @@
   <rect x="12" y="260" width="376" height="48" rx="10" fill="#0F172A" stroke="#1E293B" stroke-width="1.2"/>
   <rect x="18" y="266" width="364" height="20" rx="4" fill="#1E293B"/>
   <text x="26" y="280" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="700" fill="#FBBF24">HOW TO PERFORM WITH HANDS:</text>
-  <text x="26" y="299" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="600" fill="#F1F5F9">Cup non-dominant hand like a teacup; pinch dominant thumb & index to dip like a teabag.</text>
+  <text x="26" y="299" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="600" fill="#F1F5F9">Cup non-dominant hand like a teacup; pinch dominant thumb &amp; index to dip like a teabag.</text>
 
   <!-- Dipping Teabag / Sugar into Cupped Hand -->
   <g transform="translate(110, 65)">

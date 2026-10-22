@@ -10,7 +10,7 @@
 
 /* Header */
 .site-header {
-  background: rgba(6, 10, 20, 0.88);
+  background: var(--header-bg);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   color: var(--text-light);
@@ -59,6 +59,10 @@
   font-size: 1.45rem;
   font-weight: 800;
   letter-spacing: -0.03em;
+  color: var(--text-light);
+}
+
+:root[data-theme="dark"] .brand-title {
   background: linear-gradient(135deg, #FFFFFF 0%, #F1F5F9 50%, #94A3B8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -66,7 +70,7 @@
 
 .brand-subtitle {
   font-size: 0.75rem;
-  color: #94A3B8;
+  color: var(--text-muted);
   font-weight: 500;
 }
 
@@ -75,6 +79,28 @@
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+}
+
+.theme-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background-color: var(--bg-card);
+  border: 1px solid var(--navy-border);
+  color: var(--teal-light);
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow-sm);
+}
+
+.theme-toggle-btn:hover {
+  transform: rotate(20deg) scale(1.08);
+  border-color: var(--teal-light);
+  background-color: var(--teal-bg);
+  box-shadow: 0 0 15px rgba(20, 184, 166, 0.35);
 }
 
 .status-pill {
@@ -176,12 +202,16 @@
 
 /* Hero Section */
 .hero-section {
-  background: linear-gradient(180deg, rgba(8, 12, 22, 0.95) 0%, rgba(11, 18, 36, 0.95) 100%);
+  background: var(--bg-card);
   color: var(--text-light);
   padding: 2.75rem 1.5rem;
   border-bottom: 1px solid var(--navy-border);
   position: relative;
   overflow: hidden;
+}
+
+:root[data-theme="dark"] .hero-section {
+  background: linear-gradient(180deg, rgba(8, 12, 22, 0.95) 0%, rgba(11, 18, 36, 0.95) 100%);
 }
 
 .hero-content {
@@ -200,7 +230,7 @@
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--teal-light);
-  background: rgba(20, 184, 166, 0.14);
+  background: var(--teal-bg);
   border: 1px solid var(--teal-border);
   padding: 0.3rem 0.75rem;
   border-radius: 9999px;
@@ -214,6 +244,10 @@
   letter-spacing: -0.035em;
   line-height: 1.15;
   margin-bottom: 0.85rem;
+  color: var(--text-light);
+}
+
+:root[data-theme="dark"] .hero-title {
   background: linear-gradient(135deg, #FFFFFF 0%, #F1F5F9 50%, #94A3B8 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;

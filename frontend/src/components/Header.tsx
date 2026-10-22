@@ -1,5 +1,5 @@
-import React from "react";
-import { ShieldCheck, Activity, Video, Mic, BookOpen, CheckCircle2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { ShieldCheck, Activity, Video, Mic, BookOpen, CheckCircle2, Sun, Moon } from "lucide-react";
 import type { UserProfile } from "../types";
 import { GoogleAuthButton } from "./GoogleAuthButton";
 
@@ -22,6 +22,20 @@ export const Header: React.FC<HeaderProps> = ({
   onUserChange,
   signCount = 28
 }) => {
+  const [theme, setTheme] = useState<"dark" | "light">(() => {
+    const saved = localStorage.getItem("signify-theme");
+    return (saved === "light" || saved === "dark") ? saved : "dark";
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem("signify-theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === "dark" ? "light" : "dark"));
+  };
+
   return (
     <header className="site-header">
       <div className="header-top">
@@ -36,6 +50,16 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
 
         <div className="status-badges flex items-center gap-3">
+          {/* Light / Dark Mode Toggle */}
+          <button
+            className="theme-toggle-btn"
+            onClick={toggleTheme}
+            title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            aria-label="Toggle Theme"
+          >
+            {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
+          </button>
+
           <div className={`status-pill ${consentGranted ? "pill-consented" : "pill-neutral"}`}>
             <ShieldCheck size={14} />
             <span>{consentGranted ? "Camera Consented" : "Consent Required"}</span>

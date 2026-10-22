@@ -1,8 +1,9 @@
 @import "tailwindcss";
 
-/* Signify Hackathon-Winning UI/UX: Deep Obsidian Cyber-Accessible Theme */
+/* Signify Adaptive Design System: Obsidian Dark & Clean Light Themes */
 
-:root {
+:root,
+:root[data-theme="dark"] {
   color-scheme: dark;
 
   /* Primary Obsidian & Navy Spectrum */
@@ -37,6 +38,8 @@
   --text-muted: #94A3B8;
   --text-dim: #64748B;
   --text-light: #FFFFFF;
+  --header-bg: rgba(6, 10, 20, 0.88);
+  --input-bg: rgba(11, 17, 32, 0.9);
 
   /* Semantic Feedback Accents */
   --emerald-success: #10B981;
@@ -54,6 +57,11 @@
   --rose-bg: rgba(244, 63, 94, 0.14);
   --rose-border: rgba(244, 63, 94, 0.4);
 
+  --body-bg-gradient: 
+    radial-gradient(circle at 15% 10%, rgba(20, 184, 166, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 85% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 45%),
+    radial-gradient(circle at 50% 60%, rgba(56, 189, 248, 0.04) 0%, transparent 50%);
+
   /* Typography & Layout Tokens */
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --radius-sm: 8px;
@@ -65,6 +73,72 @@
   --shadow-glow: 0 0 25px rgba(20, 184, 166, 0.2);
 }
 
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  /* Primary Light Theme Spectrum */
+  --navy-dark: #0F172A;
+  --navy-base: #FFFFFF;
+  --navy-surface: #F1F5F9;
+  --navy-elevated: #FFFFFF;
+  --navy-border: #E2E8F0;
+  --navy-border-hover: #0D9488;
+
+  /* Crisp Jewel Accents */
+  --teal-primary: #0D9488;
+  --teal-accent: #0F766E;
+  --teal-light: #0D9488;
+  --teal-bg: #F0FDFA;
+  --teal-border: #99F6E4;
+
+  --cyan-electric: #0284C7;
+  --cyan-bg: #F0F9FF;
+  --cyan-border: #BAE6FD;
+
+  --indigo-accent: #4F46E5;
+  --indigo-light: #4338CA;
+  --indigo-bg: #EEF2FF;
+  --indigo-border: #C7D2FE;
+
+  /* High-Contrast Light Surfaces & Text */
+  --bg-page: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --bg-card-hover: #F8FAFC;
+  --text-main: #0F172A;
+  --text-muted: #475569;
+  --text-dim: #94A3B8;
+  --text-light: #0F172A;
+  --header-bg: rgba(255, 255, 255, 0.92);
+  --input-bg: #FFFFFF;
+
+  /* Semantic Feedback Accents */
+  --emerald-success: #059669;
+  --emerald-light: #047857;
+  --emerald-bg: #ECFDF5;
+  --emerald-border: #A7F3D0;
+
+  --amber-warning: #D97706;
+  --amber-light: #B45309;
+  --amber-bg: #FFFBEB;
+  --amber-border: #FDE68A;
+
+  --rose-danger: #E11D48;
+  --rose-light: #BE123C;
+  --rose-bg: #FFF1F2;
+  --rose-border: #FECDD3;
+
+  --body-bg-gradient: 
+    radial-gradient(circle at 15% 10%, rgba(20, 184, 166, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 85% 15%, rgba(99, 102, 241, 0.05) 0%, transparent 45%),
+    radial-gradient(circle at 50% 60%, rgba(56, 189, 248, 0.03) 0%, transparent 50%);
+
+  /* Light Shadows */
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 16px -2px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 12px 28px -4px rgba(15, 23, 42, 0.12);
+  --shadow-glow: 0 0 20px rgba(13, 148, 136, 0.15);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
@@ -74,15 +148,13 @@
 body {
   font-family: var(--font-sans);
   background-color: var(--bg-page);
-  background-image: 
-    radial-gradient(circle at 15% 10%, rgba(20, 184, 166, 0.08) 0%, transparent 40%),
-    radial-gradient(circle at 85% 15%, rgba(99, 102, 241, 0.08) 0%, transparent 45%),
-    radial-gradient(circle at 50% 60%, rgba(56, 189, 248, 0.04) 0%, transparent 50%);
+  background-image: var(--body-bg-gradient);
   background-attachment: fixed;
   color: var(--text-main);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  transition: background-color 0.25s ease, color 0.25s ease;
 }
 
 /* Accessibility Focus States */
@@ -103,7 +175,7 @@ textarea:focus-visible {
 .text-indigo { color: var(--indigo-light); }
 .text-muted { color: var(--text-muted); }
 .text-dim { color: var(--text-dim); }
-.text-high-contrast { font-size: 1.15rem; font-weight: 700; color: #FFFFFF; }
+.text-high-contrast { font-size: 1.15rem; font-weight: 700; color: var(--text-light); }
 .text-xs { font-size: 0.75rem; }
 .text-sm { font-size: 0.875rem; }
 .font-bold { font-weight: 700; }

@@ -87,7 +87,7 @@
   <g transform="translate(80, 65)">
     <!-- Horizontal Sweep Indicator -->
     <path d="M30 30 L210 30" stroke="#FBBF24" stroke-width="3" marker-start="url(#arrowAmber)" marker-end="url(#arrowAmber)"/>
-    <text x="120" y="20" font-family="sans-serif" font-size="10" font-weight="700" fill="#FBBF24" text-anchor="middle">SWEEP LEFT & RIGHT TOGETHER</text>
+    <text x="120" y="20" font-family="sans-serif" font-size="10" font-weight="700" fill="#FBBF24" text-anchor="middle">SWEEP LEFT &amp; RIGHT TOGETHER</text>
 
     <!-- Left Open Palm Up -->
     <g transform="translate(20, 50)">
