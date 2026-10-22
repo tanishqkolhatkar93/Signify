@@ -1,9 +1,111 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
-  <rect width="200" height="200" rx="16" fill="#0A192F"/>
-  <!-- Flat open hand -->
-  <rect x="75" y="75" width="50" height="45" rx="10" fill="#2DD4BF"/>
-  <!-- Gentle circular motion arrow -->
-  <path d="M100 45 A35 35 0 1 1 65 80" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round" stroke-dasharray="6"/>
-  <path d="M60 70 L65 80 L75 75" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round"/>
-  <text x="100" y="180" font-family="sans-serif" font-size="12" fill="#94A3B8" text-anchor="middle" font-weight="bold">ISL: PLEASE (CIRCULAR CHEST)</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090E1A" />
+      <stop offset="100%" stop-color="#141E33" />
+    </linearGradient>
+
+    <!-- Subtle Tech Grid -->
+    <pattern id="techGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1E293B" stroke-width="0.7" opacity="0.4" />
+    </pattern>
+
+    <!-- Hand Skin Gradients (Warm Natural Tone with Depth) -->
+    <linearGradient id="skinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D" />
+      <stop offset="35%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+
+    <linearGradient id="skinBase" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FDE68A" />
+      <stop offset="50%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+
+    <linearGradient id="skinSec" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E2E8F0" />
+      <stop offset="60%" stop-color="#94A3B8" />
+      <stop offset="100%" stop-color="#64748B" />
+    </linearGradient>
+
+    <linearGradient id="handShade" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FEF08A" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+
+    <!-- Arrow Markers -->
+    <marker id="arrowTeal" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#2DD4BF" />
+    </marker>
+    <marker id="arrowCyan" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#38BDF8" />
+    </marker>
+    <marker id="arrowEmerald" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#34D399" />
+    </marker>
+    <marker id="arrowAmber" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#FBBF24" />
+    </marker>
+    <marker id="arrowRose" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#F43F5E" />
+    </marker>
+
+    <!-- Glow Filter -->
+    <filter id="glowTeal" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Frame Background -->
+  <rect width="400" height="320" rx="16" fill="url(#bgGrad)" stroke="#334155" stroke-width="1.5"/>
+  <rect width="400" height="320" rx="16" fill="url(#techGrid)"/>
+
+  <!-- Top Header Bar -->
+  <rect x="12" y="12" width="376" height="34" rx="8" fill="#0F172A" stroke="#334155" stroke-width="1"/>
+  <circle cx="28" cy="29" r="5" fill="#2DD4BF" />
+  <text x="42" y="33" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" font-weight="700" fill="#F8FAFC" letter-spacing="0.5">ISL: PLEASE</text>
+  
+  <rect x="270" y="19" width="108" height="20" rx="10" fill="#1E293B" stroke="#475569" stroke-width="1"/>
+  <text x="324" y="33" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="600" fill="#38BDF8" text-anchor="middle">COURTESIES</text>
+
+  <!-- Cue Badge -->
+  <g transform="translate(16, 56)">
+    <rect width="130" height="22" rx="6" fill="#1E293B" stroke="#0D9488" stroke-width="1"/>
+    <text x="8" y="15" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="600" fill="#5EEAD4">🖐️ Circular Rub on Chest</text>
+  </g>
+
+  <!-- Bottom Instruction Box -->
+  <rect x="12" y="260" width="376" height="48" rx="10" fill="#0F172A" stroke="#1E293B" stroke-width="1.2"/>
+  <rect x="18" y="266" width="364" height="20" rx="4" fill="#1E293B"/>
+  <text x="26" y="280" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="700" fill="#FBBF24">HOW TO PERFORM WITH HANDS:</text>
+  <text x="26" y="299" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="600" fill="#F1F5F9">Place open flat palm over center of chest/heart and rub in gentle clockwise circle.</text>
+
+  <!-- Flat Palm Rubbing Chest in Circle -->
+  <g transform="translate(120, 65)">
+    <!-- Chest / Sternum Landmark -->
+    <ellipse cx="80" cy="80" rx="75" ry="60" fill="#1E293B" stroke="#334155" stroke-width="2"/>
+    <text x="80" y="35" font-family="sans-serif" font-size="9" font-weight="700" fill="#94A3B8" text-anchor="middle">CHEST / HEART AREA</text>
+
+    <!-- Clockwise Circular Motion Indicator -->
+    <path d="M80 35 A45 45 0 1 1 79 35" fill="none" stroke="#FBBF24" stroke-width="3" stroke-dasharray="6,4" marker-end="url(#arrowAmber)"/>
+    <text x="135" y="85" font-family="sans-serif" font-size="10" font-weight="700" fill="#FBBF24">RUB CIRCLE</text>
+
+    <!-- Flat Open Palm on Chest -->
+    <g transform="translate(45, 40)">
+      <!-- Palm body -->
+      <path d="M20 40 L60 40 C65 60, 55 85, 20 85 Z" fill="url(#skinGrad)" stroke="#78350F" stroke-width="2"/>
+      <!-- Fingers flat together -->
+      <rect x="18" y="5" width="10" height="38" rx="5" fill="url(#skinBase)" stroke="#78350F" stroke-width="1.5"/>
+      <rect x="29" y="0" width="10" height="43" rx="5" fill="url(#skinBase)" stroke="#78350F" stroke-width="1.5"/>
+      <rect x="40" y="3" width="10" height="40" rx="5" fill="url(#skinBase)" stroke="#78350F" stroke-width="1.5"/>
+      <rect x="51" y="10" width="9" height="33" rx="4.5" fill="url(#skinBase)" stroke="#78350F" stroke-width="1.5"/>
+      <!-- Thumb -->
+      <path d="M15 45 C8 42, 5 35, 8 28 C12 28, 16 35, 18 42" fill="url(#skinBase)" stroke="#78350F" stroke-width="1.5"/>
+      <!-- Palm Creases -->
+      <path d="M25 55 C35 60, 45 58, 55 52" stroke="#B45309" stroke-width="1.2" fill="none"/>
+    </g>
+  </g>
 </svg>

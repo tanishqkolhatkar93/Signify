@@ -465,8 +465,10 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser }) => {
                   <h4 className="sign-title">{reverseResult.matched_sign.display_name}</h4>
                   <p className="sign-desc">{reverseResult.matched_sign.meaning}</p>
                   <div className="sign-hand-config">
-                    <strong>Hand Configuration:</strong>
-                    <p>{reverseResult.matched_sign.hand_configuration}</p>
+                    <strong className="block text-cyan font-bold text-xs uppercase tracking-wider mb-1">
+                      🖐️ How to Perform Gesture with Hands:
+                    </strong>
+                    <p className="text-sm leading-relaxed">{reverseResult.matched_sign.hand_configuration}</p>
                   </div>
                   {/* ISL Grammar Structure - High-Contrast Aesthetic Badge */}
                   {reverseResult.matched_sign.isl_grammar_structure && (

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, Volume2, ShieldCheck, BookOpen, PlusCircle, CheckCircle2, X, User, Info } from "lucide-react";
+import { Search, Volume2, ShieldCheck, BookOpen, PlusCircle, CheckCircle2, X, User, Info, Maximize2 } from "lucide-react";
 import type { SignItem, SignManifest, UserProfile } from "../types";
 import { speechService } from "../services/speech";
 import { api } from "../services/api";
@@ -35,6 +35,7 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
   const [showImportModal, setShowImportModal] = useState(false);
+  const [selectedSignForModal, setSelectedSignForModal] = useState<SignItem | null>(null);
   const [importJson, setImportJson] = useState("");
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -177,11 +178,15 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
       <div className="signs-grid">
         {filteredSigns.map((sign) => (
           <div key={sign.id} className="card sign-card">
-            <div className="sign-card-media">
+            <div
+              className="sign-card-media group cursor-pointer relative"
+              onClick={() => setSelectedSignForModal(sign)}
+              title="Click to view full anatomical handshape guide"
+            >
               <img
                 src={sign.media.asset_url}
                 alt={sign.display_name}
-                className="sign-thumbnail"
+                className="sign-thumbnail transition-transform duration-300 group-hover:scale-105"
                 loading="lazy"
               />
               <div className="absolute top-2 left-2 flex gap-1">
@@ -191,6 +196,10 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
                     {sign.sign_type}
                   </span>
                 )}
+              </div>
+              <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900/90 text-teal-300 border border-teal-500/40 rounded p-1.5 flex items-center gap-1 text-[11px] font-bold shadow-lg">
+                <Maximize2 size={12} />
+                <span>Enlarge Guide</span>
               </div>
             </div>
 
@@ -224,7 +233,7 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
               {/* Cultural / Linguistic Note */}
               {sign.cultural_linguistic_notes && (
                 <div className="isl-linguistic-note">
-                  <Info size={12} className="text-slate-500 shrink-0 mt-0.5" />
+                  <Info size={12} className="text-slate-400 shrink-0 mt-0.5" />
                   <span>
                     <strong>Note:</strong> {sign.cultural_linguistic_notes}
                   </span>
@@ -257,9 +266,12 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
                 </div>
               </div>
 
+              {/* Anatomical Gesture Breakdown Box for Common People */}
               <div className="hand-config-box">
-                <span className="text-xs font-bold text-muted">HAND FORM:</span>
-                <p className="text-xs">{sign.hand_configuration}</p>
+                <div className="hand-config-header">
+                  <span>🖐️ HOW TO PERFORM WITH HANDS:</span>
+                </div>
+                <p>{sign.hand_configuration}</p>
               </div>
 
               <div className="card-source-footer">
@@ -358,6 +370,118 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Anatomical Sign Detail Modal (High-Res Illustration & Finger Breakdown) */}
+      {selectedSignForModal && (
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
+          onClick={() => setSelectedSignForModal(null)}
+        >
+          <div
+            className="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative overflow-hidden flex flex-col gap-4 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setSelectedSignForModal(null)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800/80 p-1.5 rounded-full z-10 transition-colors"
+              title="Close Guide"
+            >
+              <X size={20} />
+            </button>
+
+            {/* Header */}
+            <div>
+              <div className="flex items-center gap-2 mb-1">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-teal-500/20 text-teal-300 border border-teal-500/30">
+                  {selectedSignForModal.category}
+                </span>
+                {selectedSignForModal.sign_type && (
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
+                    {selectedSignForModal.sign_type}
+                  </span>
+                )}
+                <span className="text-xs text-slate-400 ml-auto mr-8 font-mono">
+                  {selectedSignForModal.id}
+                </span>
+              </div>
+              <h3 className="text-2xl font-black text-white">
+                {selectedSignForModal.display_name}
+              </h3>
+              <p className="text-sm text-slate-300 mt-1">
+                {selectedSignForModal.meaning}
+              </p>
+            </div>
+
+            {/* High-Res SVG Graphic Display */}
+            <div className="bg-slate-950/90 rounded-xl border border-slate-800 p-2 flex items-center justify-center aspect-[4/3] max-h-[320px] overflow-hidden shadow-inner">
+              <img
+                src={selectedSignForModal.media.asset_url}
+                alt={selectedSignForModal.display_name}
+                className="w-full h-full object-contain"
+              />
+            </div>
+
+            {/* Step-by-Step Anatomical Instructions */}
+            <div className="bg-slate-800/60 border border-sky-500/30 rounded-xl p-4">
+              <div className="flex items-center gap-2 text-sky-300 font-bold text-xs uppercase tracking-wider mb-2">
+                <span>🖐️ Step-by-Step Hand & Finger Placement:</span>
+              </div>
+              <p className="text-sm text-slate-100 font-medium leading-relaxed">
+                {selectedSignForModal.hand_configuration}
+              </p>
+            </div>
+
+            {/* ISL Grammar Badge */}
+            {selectedSignForModal.isl_grammar_structure && (
+              <div className="isl-syntax-badge">
+                <div className="isl-syntax-header">
+                  <span className="isl-syntax-tag">
+                    <BookOpen size={11} />
+                    ISL Syntax
+                  </span>
+                  <span className="isl-syntax-category-pill">Grammar Rule</span>
+                </div>
+                <p className="isl-syntax-text">
+                  {renderSyntaxWithHighlights(selectedSignForModal.isl_grammar_structure)}
+                </p>
+              </div>
+            )}
+
+            {/* Bilingual Translation Buttons */}
+            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-800">
+              <button
+                className="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 transition-all text-left"
+                onClick={() => speak(selectedSignForModal.english_text, "en")}
+              >
+                <div>
+                  <span className="text-[10px] font-bold text-teal-400 uppercase tracking-wider block">
+                    English
+                  </span>
+                  <span className="text-sm font-semibold text-white">
+                    {selectedSignForModal.english_text}
+                  </span>
+                </div>
+                <Volume2 size={16} className="text-teal-400 shrink-0" />
+              </button>
+
+              <button
+                className="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 transition-all text-left"
+                onClick={() => speak(selectedSignForModal.hindi_text, "hi")}
+              >
+                <div>
+                  <span className="text-[10px] font-bold text-teal-400 uppercase tracking-wider block">
+                    Hindi (हिंदी)
+                  </span>
+                  <span className="text-sm font-semibold text-white">
+                    {selectedSignForModal.hindi_text}
+                  </span>
+                </div>
+                <Volume2 size={16} className="text-teal-400 shrink-0" />
+              </button>
+            </div>
           </div>
         </div>
       )}

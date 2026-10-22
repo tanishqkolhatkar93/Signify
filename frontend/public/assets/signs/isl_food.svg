@@ -1,9 +1,114 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
-  <rect width="200" height="200" rx="16" fill="#0A192F"/>
-  <!-- Bunched fingertips -->
-  <path d="M85 110 L95 65 C97 60 103 60 105 65 L115 110 Z" fill="#2DD4BF"/>
-  <circle cx="100" cy="62" r="8" fill="#14B8A6"/>
-  <!-- Inward motion to mouth -->
-  <path d="M100 135 L100 115 M95 123 L100 115 L105 123" fill="none" stroke="#38BDF8" stroke-width="3" stroke-linecap="round"/>
-  <text x="100" y="180" font-family="sans-serif" font-size="12" fill="#94A3B8" text-anchor="middle" font-weight="bold">ISL: FOOD / EAT</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090E1A" />
+      <stop offset="100%" stop-color="#141E33" />
+    </linearGradient>
+
+    <!-- Subtle Tech Grid -->
+    <pattern id="techGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1E293B" stroke-width="0.7" opacity="0.4" />
+    </pattern>
+
+    <!-- Hand Skin Gradients (Warm Natural Tone with Depth) -->
+    <linearGradient id="skinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D" />
+      <stop offset="35%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+
+    <linearGradient id="skinBase" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FDE68A" />
+      <stop offset="50%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+
+    <linearGradient id="skinSec" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E2E8F0" />
+      <stop offset="60%" stop-color="#94A3B8" />
+      <stop offset="100%" stop-color="#64748B" />
+    </linearGradient>
+
+    <linearGradient id="handShade" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FEF08A" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+
+    <!-- Arrow Markers -->
+    <marker id="arrowTeal" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#2DD4BF" />
+    </marker>
+    <marker id="arrowCyan" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#38BDF8" />
+    </marker>
+    <marker id="arrowEmerald" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#34D399" />
+    </marker>
+    <marker id="arrowAmber" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#FBBF24" />
+    </marker>
+    <marker id="arrowRose" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#F43F5E" />
+    </marker>
+
+    <!-- Glow Filter -->
+    <filter id="glowTeal" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Frame Background -->
+  <rect width="400" height="320" rx="16" fill="url(#bgGrad)" stroke="#334155" stroke-width="1.5"/>
+  <rect width="400" height="320" rx="16" fill="url(#techGrid)"/>
+
+  <!-- Top Header Bar -->
+  <rect x="12" y="12" width="376" height="34" rx="8" fill="#0F172A" stroke="#334155" stroke-width="1"/>
+  <circle cx="28" cy="29" r="5" fill="#2DD4BF" />
+  <text x="42" y="33" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" font-weight="700" fill="#F8FAFC" letter-spacing="0.5">ISL: FOOD / EAT</text>
+  
+  <rect x="270" y="19" width="108" height="20" rx="10" fill="#1E293B" stroke="#475569" stroke-width="1"/>
+  <text x="324" y="33" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="600" fill="#38BDF8" text-anchor="middle">BASIC NEEDS</text>
+
+  <!-- Cue Badge -->
+  <g transform="translate(16, 56)">
+    <rect width="130" height="22" rx="6" fill="#1E293B" stroke="#0D9488" stroke-width="1"/>
+    <text x="8" y="15" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="600" fill="#5EEAD4">🖐️ Morsel Grip to Mouth</text>
+  </g>
+
+  <!-- Bottom Instruction Box -->
+  <rect x="12" y="260" width="376" height="48" rx="10" fill="#0F172A" stroke="#1E293B" stroke-width="1.2"/>
+  <rect x="18" y="266" width="364" height="20" rx="4" fill="#1E293B"/>
+  <text x="26" y="280" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="700" fill="#FBBF24">HOW TO PERFORM WITH HANDS:</text>
+  <text x="26" y="299" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="600" fill="#F1F5F9">Bring all 5 fingertips and thumb together (cone/morsel grip), tap repeatedly near mouth.</text>
+
+  <!-- Pinched Fingertips (Morsel Grip) to Mouth -->
+  <g transform="translate(110, 60)">
+    <!-- Lips Landmark -->
+    <path d="M40 35 C55 45, 55 65, 40 75" stroke="#475569" stroke-width="2.5" fill="none"/>
+    <text x="15" y="58" font-family="sans-serif" font-size="9" font-weight="700" fill="#94A3B8">MOUTH</text>
+
+    <!-- Repeated Tap Towards Mouth -->
+    <path d="M100 45 L55 55" stroke="#FBBF24" stroke-width="3" stroke-dasharray="4,2" marker-end="url(#arrowAmber)"/>
+    <text x="70" y="35" font-family="sans-serif" font-size="10" font-weight="700" fill="#FBBF24">TAP 2-3x</text>
+
+    <!-- Hand with Pinched Fingertips (Indian Eating Mudra) -->
+    <g transform="translate(95, 45)">
+      <!-- Wrist -->
+      <rect x="45" y="45" width="28" height="35" rx="5" fill="#D97706" stroke="#78350F" stroke-width="1.8" transform="rotate(25 45 45)"/>
+      <!-- Hand Base -->
+      <path d="M40 25 C55 35, 60 55, 40 70 L25 50 Z" fill="url(#skinGrad)" stroke="#78350F" stroke-width="1.8"/>
+      <!-- Tapered Cone Fingers -->
+      <path d="M0 35 L30 15 L35 30 L0 35 Z" fill="url(#skinBase)" stroke="#78350F" stroke-width="1.8"/>
+      <path d="M0 35 L30 25 L35 45 L0 35 Z" fill="url(#skinBase)" stroke="#78350F" stroke-width="1.8"/>
+      <circle cx="2" cy="35" r="5" fill="#FEF08A" stroke="#78350F" stroke-width="1"/>
+    </g>
+
+    <!-- Food Bowl Badge -->
+    <g transform="translate(180, 25)">
+      <circle cx="15" cy="15" r="14" fill="#854D0E" stroke="#FBBF24" stroke-width="1.5"/>
+      <path d="M6 14 C6 22, 24 22, 24 14 Z" fill="#FBBF24"/>
+    </g>
+  </g>
 </svg>

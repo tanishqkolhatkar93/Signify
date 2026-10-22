@@ -1,8 +1,105 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
-  <rect width="200" height="200" rx="16" fill="#0A192F"/>
-  <!-- Cheek / mustache location indicator -->
-  <circle cx="100" cy="80" r="40" fill="none" stroke="#334155" stroke-width="2"/>
-  <path d="M85 95 Q100 105 115 95" stroke="#2DD4BF" stroke-width="4" fill="none" stroke-linecap="round"/>
-  <circle cx="120" cy="95" r="6" fill="#F59E0B"/>
-  <text x="100" y="180" font-family="sans-serif" font-size="12" fill="#94A3B8" text-anchor="middle" font-weight="bold">ISL: FATHER</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090E1A" />
+      <stop offset="100%" stop-color="#141E33" />
+    </linearGradient>
+
+    <!-- Subtle Tech Grid -->
+    <pattern id="techGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1E293B" stroke-width="0.7" opacity="0.4" />
+    </pattern>
+
+    <!-- Hand Skin Gradients (Warm Natural Tone with Depth) -->
+    <linearGradient id="skinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D" />
+      <stop offset="35%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+
+    <linearGradient id="skinBase" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FDE68A" />
+      <stop offset="50%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+
+    <linearGradient id="skinSec" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E2E8F0" />
+      <stop offset="60%" stop-color="#94A3B8" />
+      <stop offset="100%" stop-color="#64748B" />
+    </linearGradient>
+
+    <linearGradient id="handShade" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FEF08A" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+
+    <!-- Arrow Markers -->
+    <marker id="arrowTeal" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#2DD4BF" />
+    </marker>
+    <marker id="arrowCyan" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#38BDF8" />
+    </marker>
+    <marker id="arrowEmerald" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#34D399" />
+    </marker>
+    <marker id="arrowAmber" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#FBBF24" />
+    </marker>
+    <marker id="arrowRose" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#F43F5E" />
+    </marker>
+
+    <!-- Glow Filter -->
+    <filter id="glowTeal" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Frame Background -->
+  <rect width="400" height="320" rx="16" fill="url(#bgGrad)" stroke="#334155" stroke-width="1.5"/>
+  <rect width="400" height="320" rx="16" fill="url(#techGrid)"/>
+
+  <!-- Top Header Bar -->
+  <rect x="12" y="12" width="376" height="34" rx="8" fill="#0F172A" stroke="#334155" stroke-width="1"/>
+  <circle cx="28" cy="29" r="5" fill="#2DD4BF" />
+  <text x="42" y="33" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" font-weight="700" fill="#F8FAFC" letter-spacing="0.5">ISL: FATHER / DAD</text>
+  
+  <rect x="270" y="19" width="108" height="20" rx="10" fill="#1E293B" stroke="#475569" stroke-width="1"/>
+  <text x="324" y="33" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="600" fill="#38BDF8" text-anchor="middle">FAMILY</text>
+
+  <!-- Cue Badge -->
+  <g transform="translate(16, 56)">
+    <rect width="130" height="22" rx="6" fill="#1E293B" stroke="#0D9488" stroke-width="1"/>
+    <text x="8" y="15" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="600" fill="#5EEAD4">🖐️ Mustache Stroke Line</text>
+  </g>
+
+  <!-- Bottom Instruction Box -->
+  <rect x="12" y="260" width="376" height="48" rx="10" fill="#0F172A" stroke="#1E293B" stroke-width="1.2"/>
+  <rect x="18" y="266" width="364" height="20" rx="4" fill="#1E293B"/>
+  <text x="26" y="280" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="700" fill="#FBBF24">HOW TO PERFORM WITH HANDS:</text>
+  <text x="26" y="299" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="600" fill="#F1F5F9">Stroke dominant index finger or thumb horizontally across the upper lip (mustache gesture).</text>
+
+  <!-- Mustache Stroke Above Upper Lip -->
+  <g transform="translate(100, 60)">
+    <!-- Face / Mouth Silhouette -->
+    <ellipse cx="100" cy="80" rx="60" ry="50" fill="#1E293B" stroke="#334155" stroke-width="2"/>
+    <!-- Upper lip line -->
+    <path d="M75 85 Q100 95 125 85" stroke="#64748B" stroke-width="2" fill="none"/>
+
+    <!-- Mustache Stroke Gesture -->
+    <path d="M70 70 Q100 80 135 70" stroke="#FBBF24" stroke-width="5" stroke-linecap="round"/>
+    <!-- Motion Arrow -->
+    <path d="M80 58 L125 58" stroke="#38BDF8" stroke-width="3" marker-end="url(#arrowCyan)"/>
+    <text x="100" y="48" font-family="sans-serif" font-size="10" font-weight="700" fill="#38BDF8" text-anchor="middle">STROKE MUSTACHE LINE</text>
+
+    <!-- Hand Stroking -->
+    <g transform="translate(115, 60)">
+      <rect x="10" y="10" width="30" height="25" rx="6" fill="url(#skinGrad)" stroke="#78350F" stroke-width="1.5"/>
+      <rect x="-10" y="10" width="26" height="10" rx="5" fill="url(#skinBase)" stroke="#78350F" stroke-width="1.5"/>
+    </g>
+  </g>
 </svg>

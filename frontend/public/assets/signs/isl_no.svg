@@ -1,11 +1,113 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="100%" height="100%">
-  <rect width="200" height="200" rx="16" fill="#0A192F"/>
-  <!-- Index and Middle finger extended -->
-  <rect x="80" y="45" width="14" height="60" rx="7" fill="#2DD4BF"/>
-  <rect x="100" y="48" width="14" height="57" rx="7" fill="#2DD4BF"/>
-  <!-- Closed palm & thumb -->
-  <rect x="75" y="95" width="50" height="40" rx="10" fill="#0D9488"/>
-  <!-- Horizontal wave arrow -->
-  <path d="M50 75 Q100 65 150 75 M60 70 L50 75 L60 80 M140 70 L150 75 L140 80" fill="none" stroke="#F43F5E" stroke-width="3" stroke-linecap="round"/>
-  <text x="100" y="180" font-family="sans-serif" font-size="12" fill="#94A3B8" text-anchor="middle" font-weight="bold">ISL: NO (TWO-FINGER WAVE)</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 320" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient -->
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#090E1A" />
+      <stop offset="100%" stop-color="#141E33" />
+    </linearGradient>
+
+    <!-- Subtle Tech Grid -->
+    <pattern id="techGrid" width="20" height="20" patternUnits="userSpaceOnUse">
+      <path d="M 20 0 L 0 0 0 20" fill="none" stroke="#1E293B" stroke-width="0.7" opacity="0.4" />
+    </pattern>
+
+    <!-- Hand Skin Gradients (Warm Natural Tone with Depth) -->
+    <linearGradient id="skinGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FCD34D" />
+      <stop offset="35%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+
+    <linearGradient id="skinBase" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FDE68A" />
+      <stop offset="50%" stop-color="#F59E0B" />
+      <stop offset="100%" stop-color="#B45309" />
+    </linearGradient>
+
+    <linearGradient id="skinSec" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E2E8F0" />
+      <stop offset="60%" stop-color="#94A3B8" />
+      <stop offset="100%" stop-color="#64748B" />
+    </linearGradient>
+
+    <linearGradient id="handShade" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FEF08A" />
+      <stop offset="100%" stop-color="#D97706" />
+    </linearGradient>
+
+    <!-- Arrow Markers -->
+    <marker id="arrowTeal" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#2DD4BF" />
+    </marker>
+    <marker id="arrowCyan" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#38BDF8" />
+    </marker>
+    <marker id="arrowEmerald" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#34D399" />
+    </marker>
+    <marker id="arrowAmber" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#FBBF24" />
+    </marker>
+    <marker id="arrowRose" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+      <polygon points="0 1, 8 4, 0 7" fill="#F43F5E" />
+    </marker>
+
+    <!-- Glow Filter -->
+    <filter id="glowTeal" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="4" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Frame Background -->
+  <rect width="400" height="320" rx="16" fill="url(#bgGrad)" stroke="#334155" stroke-width="1.5"/>
+  <rect width="400" height="320" rx="16" fill="url(#techGrid)"/>
+
+  <!-- Top Header Bar -->
+  <rect x="12" y="12" width="376" height="34" rx="8" fill="#0F172A" stroke="#334155" stroke-width="1"/>
+  <circle cx="28" cy="29" r="5" fill="#2DD4BF" />
+  <text x="42" y="33" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="12" font-weight="700" fill="#F8FAFC" letter-spacing="0.5">ISL: NO / NEGATION</text>
+  
+  <rect x="270" y="19" width="108" height="20" rx="10" fill="#1E293B" stroke="#475569" stroke-width="1"/>
+  <text x="324" y="33" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="600" fill="#38BDF8" text-anchor="middle">FEEDBACK</text>
+
+  <!-- Cue Badge -->
+  <g transform="translate(16, 56)">
+    <rect width="130" height="22" rx="6" fill="#1E293B" stroke="#0D9488" stroke-width="1"/>
+    <text x="8" y="15" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="600" fill="#5EEAD4">🖐️ Snap Fingers Shut / Wag</text>
+  </g>
+
+  <!-- Bottom Instruction Box -->
+  <rect x="12" y="260" width="376" height="48" rx="10" fill="#0F172A" stroke="#1E293B" stroke-width="1.2"/>
+  <rect x="18" y="266" width="364" height="20" rx="4" fill="#1E293B"/>
+  <text x="26" y="280" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="10" font-weight="700" fill="#FBBF24">HOW TO PERFORM WITH HANDS:</text>
+  <text x="26" y="299" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="11" font-weight="600" fill="#F1F5F9">Extend index & middle finger with thumb open, then snap them shut together firmly.</text>
+
+  <!-- 2 Fingers Snapping Shut onto Thumb -->
+  <g transform="translate(120, 65)">
+    <!-- Snap Shut Motion Arcs -->
+    <path d="M85 35 C100 50, 105 70, 100 85" fill="none" stroke="#F43F5E" stroke-width="2.5" stroke-dasharray="3,3" marker-end="url(#arrowRose)"/>
+    <text x="125" y="60" font-family="sans-serif" font-size="10" font-weight="700" fill="#F43F5E">SNAP SHUT</text>
+
+    <!-- Wrist -->
+    <rect x="40" y="130" width="35" height="40" rx="6" fill="#D97706" stroke="#78350F" stroke-width="2"/>
+
+    <!-- Hand Palm Base -->
+    <path d="M35 85 L35 130 L75 130 L75 85 Z" fill="url(#skinGrad)" stroke="#78350F" stroke-width="2"/>
+
+    <!-- Folded Ring and Little Fingers -->
+    <circle cx="48" cy="115" r="10" fill="#B45309" stroke="#78350F" stroke-width="1.5"/>
+    <circle cx="62" cy="115" r="9" fill="#B45309" stroke="#78350F" stroke-width="1.5"/>
+
+    <!-- Extended Index Finger (Approaching thumb) -->
+    <rect x="42" y="30" width="14" height="60" rx="7" transform="rotate(15 42 30)" fill="url(#skinBase)" stroke="#78350F" stroke-width="1.8"/>
+    <!-- Extended Middle Finger (Beside index) -->
+    <rect x="56" y="32" width="14" height="58" rx="7" transform="rotate(15 56 32)" fill="url(#skinBase)" stroke="#78350F" stroke-width="1.8"/>
+
+    <!-- Open Opposing Thumb -->
+    <path d="M40 95 C55 90, 75 90, 85 96 C90 102, 75 110, 60 110" fill="url(#skinBase)" stroke="#78350F" stroke-width="1.8"/>
+
+    <!-- Impact Ripple -->
+    <circle cx="82" cy="78" r="8" fill="none" stroke="#FBBF24" stroke-width="2" stroke-dasharray="2,2"/>
+  </g>
 </svg>
