@@ -171,28 +171,28 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
         </button>
 
         {dropdownOpen && (
-          <div className="absolute right-0 mt-2 w-64 rounded-xl bg-slate-900 border border-slate-700 shadow-2xl py-2 z-50 text-xs">
-            <div className="px-3 py-2 border-b border-slate-800">
-              <p className="font-bold text-white truncate">{currentUser.name}</p>
-              <p className="text-[11px] text-slate-400 truncate">{currentUser.email}</p>
-              <span className="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 uppercase">
+          <div className="absolute right-0 mt-2 w-64 rounded-xl bg-[var(--bg-card-solid)] border border-[var(--navy-border)] shadow-[var(--shadow-lg)] py-2 z-50 text-xs backdrop-blur-xl">
+            <div className="px-3 py-2 border-b border-[var(--navy-border)]">
+              <p className="font-bold text-[var(--text-light)] truncate">{currentUser.name}</p>
+              <p className="text-[11px] text-[var(--text-muted)] truncate">{currentUser.email}</p>
+              <span className="inline-block mt-1 px-1.5 py-0.5 rounded text-[10px] font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase">
                 Google Verified User
               </span>
             </div>
 
             {/* Profile Calibration Summary */}
-            <div className="px-3 py-2 text-[11px] text-slate-400 border-b border-slate-800 space-y-1">
+            <div className="px-3 py-2 text-[11px] text-[var(--text-muted)] border-b border-[var(--navy-border)] space-y-1">
               <div className="flex justify-between">
-                <span className="text-slate-500">Dominant Hand:</span>
-                <span className="font-medium text-slate-300 capitalize">{currentUser.dominant_hand || "Right"}</span>
+                <span className="text-[var(--text-dim)]">Dominant Hand:</span>
+                <span className="font-medium text-[var(--text-main)] capitalize">{currentUser.dominant_hand || "Right"}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Signing Speed:</span>
-                <span className="font-medium text-slate-300 capitalize">{currentUser.signing_speed || "Normal"}</span>
+                <span className="text-[var(--text-dim)]">Signing Speed:</span>
+                <span className="font-medium text-[var(--text-main)] capitalize">{currentUser.signing_speed || "Normal"}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Target Voice:</span>
-                <span className="font-medium text-slate-300 uppercase">{currentUser.preferred_language || "EN"}</span>
+                <span className="text-[var(--text-dim)]">Target Voice:</span>
+                <span className="font-medium text-[var(--text-main)] uppercase">{currentUser.preferred_language || "EN"}</span>
               </div>
             </div>
 
@@ -201,7 +201,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
                 setCalibrationModalOpen(true);
                 setDropdownOpen(false);
               }}
-              className="w-full px-3 py-2 flex items-center gap-2 text-indigo-400 hover:bg-slate-800 text-left transition-colors font-medium border-b border-slate-800"
+              className="w-full px-3 py-2 flex items-center gap-2 text-indigo-400 hover:bg-[var(--bg-card-hover)] text-left transition-colors font-medium border-b border-[var(--navy-border)]"
             >
               <Settings size={14} />
               <span>Signer Calibration & Settings</span>
@@ -209,7 +209,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
 
             <button
               onClick={handleLogout}
-              className="w-full px-3 py-2 flex items-center gap-2 text-red-400 hover:bg-slate-800 text-left transition-colors font-medium"
+              className="w-full px-3 py-2 flex items-center gap-2 text-rose-400 hover:bg-[var(--bg-card-hover)] text-left transition-colors font-medium"
             >
               <LogOut size={14} />
               <span>Sign Out</span>
@@ -219,27 +219,27 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
 
         {/* Signer Calibration Modal */}
         {calibrationModalOpen && (
-          <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl relative text-slate-200">
+          <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4">
+            <div className="bg-[var(--bg-card-solid)] border border-[var(--navy-border)] rounded-2xl max-w-md w-full p-6 shadow-2xl relative text-[var(--text-main)] shadow-[var(--card-bevel)]">
               <button
                 onClick={() => setCalibrationModalOpen(false)}
-                className="absolute top-4 right-4 text-slate-400 hover:text-white"
+                className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-light)]"
               >
                 <X size={20} />
               </button>
 
-              <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+              <h3 className="text-lg font-bold text-[var(--text-light)] mb-1 flex items-center gap-2">
                 <Settings size={18} className="text-indigo-400" />
                 Signer Calibration & Profile Settings
               </h3>
-              <p className="text-xs text-slate-400 mb-4">
+              <p className="text-xs text-[var(--text-muted)] mb-4">
                 Personalized settings saved to your Google identity in SQLite database for customized landmark normalization and speech output.
               </p>
 
               <form onSubmit={handleSaveCalibration} className="space-y-4">
                 {/* Dominant Hand */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-2 flex items-center gap-1.5">
+                  <label className="block text-xs font-bold text-[var(--text-main)] mb-2 flex items-center gap-1.5">
                     <Hand size={14} className="text-emerald-400" />
                     Dominant Signing Hand:
                   </label>
@@ -248,8 +248,8 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
                       type="button"
                       className={`p-2 rounded-lg border text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
                         dominantHand === "right"
-                          ? "bg-indigo-600/30 border-indigo-500 text-indigo-300"
-                          : "bg-slate-800 border-slate-700 text-slate-400"
+                          ? "bg-indigo-600/30 border-indigo-500 text-indigo-300 font-bold"
+                          : "bg-[var(--bg-card)] border-[var(--navy-border)] text-[var(--text-muted)]"
                       }`}
                       onClick={() => setDominantHand("right")}
                     >
@@ -259,8 +259,8 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
                       type="button"
                       className={`p-2 rounded-lg border text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
                         dominantHand === "left"
-                          ? "bg-indigo-600/30 border-indigo-500 text-indigo-300"
-                          : "bg-slate-800 border-slate-700 text-slate-400"
+                          ? "bg-indigo-600/30 border-indigo-500 text-indigo-300 font-bold"
+                          : "bg-[var(--bg-card)] border-[var(--navy-border)] text-[var(--text-muted)]"
                       }`}
                       onClick={() => setDominantHand("left")}
                     >
@@ -271,7 +271,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
 
                 {/* Signing Speed */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-2 flex items-center gap-1.5">
+                  <label className="block text-xs font-bold text-[var(--text-main)] mb-2 flex items-center gap-1.5">
                     <Zap size={14} className="text-amber-400" />
                     Signing Speed / Temporal Tolerance:
                   </label>
@@ -282,8 +282,8 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
                         type="button"
                         className={`p-2 rounded-lg border text-xs font-semibold capitalize text-center transition-all ${
                           signingSpeed === spd
-                            ? "bg-amber-600/30 border-amber-500 text-amber-300"
-                            : "bg-slate-800 border-slate-700 text-slate-400"
+                            ? "bg-amber-600/30 border-amber-500 text-amber-300 font-bold"
+                            : "bg-[var(--bg-card)] border-[var(--navy-border)] text-[var(--text-muted)]"
                         }`}
                         onClick={() => setSigningSpeed(spd)}
                       >
@@ -295,7 +295,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
 
                 {/* Preferred Spoken Voice */}
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-2 flex items-center gap-1.5">
+                  <label className="block text-xs font-bold text-[var(--text-main)] mb-2 flex items-center gap-1.5">
                     <Languages size={14} className="text-cyan-400" />
                     Preferred Voice Output Language:
                   </label>
@@ -304,8 +304,8 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
                       type="button"
                       className={`p-2 rounded-lg border text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
                         preferredLanguage === "en"
-                          ? "bg-cyan-600/30 border-cyan-500 text-cyan-300"
-                          : "bg-slate-800 border-slate-700 text-slate-400"
+                          ? "bg-cyan-600/30 border-cyan-500 text-cyan-300 font-bold"
+                          : "bg-[var(--bg-card)] border-[var(--navy-border)] text-[var(--text-muted)]"
                       }`}
                       onClick={() => setPreferredLanguage("en")}
                     >
@@ -315,8 +315,8 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
                       type="button"
                       className={`p-2 rounded-lg border text-xs font-semibold flex items-center justify-center gap-2 transition-all ${
                         preferredLanguage === "hi"
-                          ? "bg-cyan-600/30 border-cyan-500 text-cyan-300"
-                          : "bg-slate-800 border-slate-700 text-slate-400"
+                          ? "bg-cyan-600/30 border-cyan-500 text-cyan-300 font-bold"
+                          : "bg-[var(--bg-card)] border-[var(--navy-border)] text-[var(--text-muted)]"
                       }`}
                       onClick={() => setPreferredLanguage("hi")}
                     >

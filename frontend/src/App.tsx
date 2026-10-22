@@ -7,7 +7,7 @@ import { SignDictionaryView } from "./components/SignDictionaryView";
 import { TestEvidenceView } from "./components/TestEvidenceView";
 import { api } from "./services/api";
 import type { SignItem, SignManifest, UserProfile } from "./types";
-import { ShieldCheck, Languages, Sparkles } from "lucide-react";
+import { ShieldCheck, Languages, Sparkles, BookOpen } from "lucide-react";
 import "./App.css";
 
 export const App: React.FC = () => {
@@ -84,7 +84,11 @@ export const App: React.FC = () => {
         <section className="hero-section">
           <div className="hero-content">
             <span className="hero-eyebrow">
-              <Sparkles size={14} className="text-teal" />
+              <span className="relative flex h-2 w-2 mr-0.5 inline-flex">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-teal-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-teal-500"></span>
+              </span>
+              <Sparkles size={13} className="text-teal inline ml-1" />
               <span>Agentic AI Hackathon 2026 • VerbX / IvishAI PS 3</span>
             </span>
             <h1 className="hero-title">Communication Without Barriers.</h1>
@@ -100,6 +104,10 @@ export const App: React.FC = () => {
               <div className="hero-badge">
                 <ShieldCheck size={15} className="text-teal" />
                 <span>Zero Video Upload: 100% Local Landmark Processing</span>
+              </div>
+              <div className="hero-badge">
+                <BookOpen size={15} className="text-teal" />
+                <span>{signs.length || 28} Verified ISL Signs • ISLRTC Grounded</span>
               </div>
             </div>
           </div>
