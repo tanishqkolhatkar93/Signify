@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { ShieldCheck, Activity, Video, Mic, BookOpen, CheckCircle2, Sun, Moon } from "lucide-react";
+import { ShieldAlert, Video, Mic, BookOpen, CheckCircle2, Sun, Moon } from "lucide-react";
 import type { UserProfile } from "../types";
 import { GoogleAuthButton } from "./GoogleAuthButton";
 
@@ -8,6 +8,7 @@ interface HeaderProps {
   setActiveTab: (tab: string) => void;
   backendOnline: boolean;
   consentGranted: boolean;
+  onRequestConsent?: () => void;
   currentUser: UserProfile | null;
   onUserChange: (user: UserProfile | null) => void;
   signCount?: number;
@@ -18,6 +19,7 @@ export const Header: React.FC<HeaderProps> = ({
   setActiveTab,
   backendOnline,
   consentGranted,
+  onRequestConsent,
   currentUser,
   onUserChange,
   signCount = 28
@@ -26,6 +28,8 @@ export const Header: React.FC<HeaderProps> = ({
     const saved = localStorage.getItem("signify-theme");
     return (saved === "light" || saved === "dark") ? saved : "dark";
   });
+
+  const [selectedLanguage, setSelectedLanguage] = useState<"ISL" | "EN" | "HI">("ISL");
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -38,82 +42,140 @@ export const Header: React.FC<HeaderProps> = ({
 
   return (
     <header className="site-header">
-      <div className="header-top">
-        <div className="brand-group">
-          <div className="brand-badge">
-            <span className="brand-symbol">◈</span>
-          </div>
-          <div>
-            <h1 className="brand-title">Signify</h1>
-            <p className="brand-subtitle">AI Sign-Language Communication • Indian Sign Language (ISL)</p>
-          </div>
-        </div>
-
-        <div className="status-badges flex items-center gap-3">
-          {/* Light / Dark Mode Toggle */}
-          <button
-            className="theme-toggle-btn"
-            onClick={toggleTheme}
-            title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            aria-label="Toggle Theme"
-          >
-            {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
-          </button>
-
-          <div className={`status-pill ${consentGranted ? "pill-consented" : "pill-neutral"}`}>
-            <ShieldCheck size={14} />
-            <span>{consentGranted ? "Camera Consented" : "Consent Required"}</span>
+      {/* 1. TOP NAVIGATION / HEADER (Single Horizontal Bar) */}
+      <div className="header-top-bar">
+        <div className="header-top-inner">
+          {/* LEFT SIDE */}
+          <div className="brand-group">
+            <div className="brand-badge">
+              <span className="brand-symbol">◈</span>
+            </div>
+            <div className="brand-text">
+              <h1 className="brand-title">Signify</h1>
+              <p className="brand-subtitle">AI Sign-Language Communication • Indian Sign Language (ISL)</p>
+            </div>
           </div>
 
-          <div className={`status-pill ${backendOnline ? "pill-online" : "pill-offline"}`}>
-            <Activity size={14} />
-            <span>{backendOnline ? "Backend Connected (FastAPI)" : "Connecting..."}</span>
-          </div>
+          {/* RIGHT SIDE (Grouped together horizontally with gap-4) */}
+          <div className="header-right-tools">
+            {/* Status indicator badge */}
+            <div className={`status-indicator-badge ${backendOnline ? "online" : "offline"}`}>
+              <span className="relative flex h-2 w-2">
+                <span className={`animate-ping absolute inline-flex h-full w-full rounded-full opacity-75 ${backendOnline ? "bg-emerald-500" : "bg-amber-500"}`} />
+                <span className={`relative inline-flex rounded-full h-2 w-2 ${backendOnline ? "bg-emerald-500" : "bg-amber-500"}`} />
+              </span>
+              <span className="status-text">{backendOnline ? "Backend Connected (FastAPI)" : "Connecting..."}</span>
+            </div>
 
-          <div className="language-tags hidden sm:flex">
-            <span className="lang-tag active">ISL</span>
-            <span className="lang-tag">EN</span>
-            <span className="lang-tag">HI (हिंदी)</span>
-          </div>
+            {/* Language switch pill selector: [ ISL | EN | HI (हिंदी) ] */}
+            <div className="language-selector-control" role="group" aria-label="Language selection">
+              <button
+                type="button"
+                className={`lang-pill-btn ${selectedLanguage === "ISL" ? "active" : ""}`}
+                onClick={() => setSelectedLanguage("ISL")}
+              >
+                ISL
+              </button>
+              <button
+                type="button"
+                className={`lang-pill-btn ${selectedLanguage === "EN" ? "active" : ""}`}
+                onClick={() => setSelectedLanguage("EN")}
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                className={`lang-pill-btn ${selectedLanguage === "HI" ? "active" : ""}`}
+                onClick={() => setSelectedLanguage("HI")}
+              >
+                HI (हिंदी)
+              </button>
+            </div>
 
-          {/* Google Authentication Component */}
-          <GoogleAuthButton currentUser={currentUser} onUserChange={onUserChange} />
+            {/* Light / Dark Mode Toggle */}
+            <button
+              type="button"
+              className="theme-toggle-btn"
+              onClick={toggleTheme}
+              title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              aria-label="Toggle Theme"
+            >
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+
+            {/* Google Authentication Component */}
+            <GoogleAuthButton currentUser={currentUser} onUserChange={onUserChange} />
+          </div>
         </div>
       </div>
 
-      <nav className="nav-tabs" aria-label="Main Navigation">
-        <button
-          className={`nav-tab-btn ${activeTab === "sign-to-speech" ? "active" : ""}`}
-          onClick={() => setActiveTab("sign-to-speech")}
-        >
-          <Video size={16} />
-          <span>Sign to Speech</span>
-        </button>
+      {/* 2. CONSENT BANNER (Directly below header) */}
+      {!consentGranted && (
+        <div className="consent-notification-bar">
+          <div className="consent-bar-inner">
+            <div className="flex items-center gap-2.5">
+              <div className="consent-beacon">
+                <ShieldAlert size={14} className="text-amber-400" />
+              </div>
+              <span className="consent-message">
+                <strong className="text-amber-300">Camera Consent Required:</strong> Real-time ISL recognition processes video 100% locally on your device. Zero frames are uploaded.
+              </span>
+            </div>
+            {onRequestConsent && (
+              <button
+                type="button"
+                className="consent-trigger-btn"
+                onClick={onRequestConsent}
+              >
+                Enable Camera & Consent
+              </button>
+            )}
+          </div>
+        </div>
+      )}
 
-        <button
-          className={`nav-tab-btn ${activeTab === "speech-route" ? "active" : ""}`}
-          onClick={() => setActiveTab("speech-route")}
-        >
-          <Mic size={16} />
-          <span>Speech to Text & Sign</span>
-        </button>
+      {/* 3. TAB NAVIGATION (Horizontal Button Group / Bar) */}
+      <div className="header-tabs-bar">
+        <div className="header-tabs-inner">
+          <nav className="nav-tabs-grid" aria-label="Main Navigation">
+            <button
+              type="button"
+              className={`nav-tab-btn ${activeTab === "sign-to-speech" ? "active" : ""}`}
+              onClick={() => setActiveTab("sign-to-speech")}
+            >
+              <Video size={16} className="tab-icon" />
+              <span className="tab-label">Sign to Speech</span>
+            </button>
 
-        <button
-          className={`nav-tab-btn ${activeTab === "dictionary" ? "active" : ""}`}
-          onClick={() => setActiveTab("dictionary")}
-        >
-          <BookOpen size={16} />
-          <span>Sign Dictionary ({signCount} ISL Signs)</span>
-        </button>
+            <button
+              type="button"
+              className={`nav-tab-btn ${activeTab === "speech-route" ? "active" : ""}`}
+              onClick={() => setActiveTab("speech-route")}
+            >
+              <Mic size={16} className="tab-icon" />
+              <span className="tab-label">Speech to Text & Sign</span>
+            </button>
 
-        <button
-          className={`nav-tab-btn ${activeTab === "test-evidence" ? "active" : ""}`}
-          onClick={() => setActiveTab("test-evidence")}
-        >
-          <CheckCircle2 size={16} />
-          <span>Acceptance Test Studio (TC1–TC4)</span>
-        </button>
-      </nav>
+            <button
+              type="button"
+              className={`nav-tab-btn ${activeTab === "dictionary" ? "active" : ""}`}
+              onClick={() => setActiveTab("dictionary")}
+            >
+              <BookOpen size={16} className="tab-icon" />
+              <span className="tab-label">Sign Dictionary ({signCount} ISL Signs)</span>
+            </button>
+
+            <button
+              type="button"
+              className={`nav-tab-btn ${activeTab === "test-evidence" ? "active" : ""}`}
+              onClick={() => setActiveTab("test-evidence")}
+            >
+              <CheckCircle2 size={16} className="tab-icon" />
+              <span className="tab-label">Acceptance Test Studio (TC1–TC4)</span>
+            </button>
+          </nav>
+        </div>
+      </div>
     </header>
   );
 };
