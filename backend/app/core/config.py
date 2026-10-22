@@ -2,28 +2,44 @@ import os
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-# Root directory: c:\Users\tanuu\Downloads\Signify
+# Robust root & data directory discovery
 ROOT_DIR = Path(__file__).resolve().parent.parent.parent.parent
+candidates = [
+    ROOT_DIR,
+    Path.cwd(),
+    Path(__file__).resolve().parent.parent.parent,
+    Path(__file__).resolve().parent.parent.parent.parent,
+]
 DATA_DIR = ROOT_DIR / "data"
+for c in candidates:
+    if (c / "data" / "sign_manifest.json").exists():
+        ROOT_DIR = c
+        DATA_DIR = c / "data"
+        break
+
 SIGN_MANIFEST_PATH = DATA_DIR / "sign_manifest.json"
+
+# Ensure database directory exists
+DB_DIR = ROOT_DIR / "backend"
+DB_DIR.mkdir(parents=True, exist_ok=True)
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=str(ROOT_DIR / ".env"),
+        env_file=str(ROOT_DIR / ".env") if (ROOT_DIR / ".env").exists() else None,
         env_file_encoding="utf-8",
         extra="ignore"
     )
 
-    ENVIRONMENT: str = "development"
-    BACKEND_HOST: str = "127.0.0.1"
+    ENVIRONMENT: str = "production"
+    BACKEND_HOST: str = "0.0.0.0"
     BACKEND_PORT: int = int(os.environ.get("PORT", 8000))
-    DATABASE_URL: str = f"sqlite:///{ROOT_DIR / 'backend' / 'signify.db'}"
-    CORS_ORIGINS: str = "http://localhost:5173,http://127.0.0.1:5173,http://localhost:3000"
+    DATABASE_URL: str = f"sqlite:///{DB_DIR / 'signify.db'}"
+    CORS_ORIGINS: str = "*"
     
     # Provider Settings
-    PROVIDER_MODE: str = "mock"  # 'mock' or 'verbx'
+    PROVIDER_MODE: str = "verbx"  # 'mock' or 'verbx'
     VERBX_API_KEY: str = ""
-    VERBX_API_BASE_URL: str = "https://one.verbxeco.com/api/v1"
+    VERBX_API_BASE_URL: str = "https://api.verbxeco.com"
     
     # Vision & Uncertainty Thresholds
     CONFIDENCE_THRESHOLD: float = 0.72
@@ -46,4 +62,3 @@ class Settings(BaseSettings):
     JWT_EXPIRES_MINUTES: int = 60 * 24 * 7
 
 settings = Settings()
-
