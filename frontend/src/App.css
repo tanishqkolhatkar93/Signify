@@ -229,6 +229,41 @@ html, body, #root, .app-layout {
   transform: scale(0.94);
 }
 
+/* Google Auth Button Harmonized Wrapper (Eliminates White Rectangle in Dark Mode) */
+.google-btn-wrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  border-radius: 9999px;
+  overflow: hidden;
+  background: transparent !important;
+  color-scheme: light dark;
+}
+
+:root[data-theme="dark"] .google-btn-wrapper {
+  color-scheme: dark;
+  background-color: transparent !important;
+  border-radius: 9999px !important;
+}
+
+:root[data-theme="dark"] .google-btn-wrapper > div {
+  background: transparent !important;
+  background-color: transparent !important;
+  border-radius: 9999px !important;
+}
+
+:root[data-theme="dark"] .google-btn-wrapper iframe {
+  color-scheme: dark !important;
+  background-color: transparent !important;
+  border-radius: 9999px !important;
+}
+
+:root[data-theme="light"] .google-btn-wrapper iframe {
+  background-color: transparent !important;
+  border-radius: 9999px !important;
+}
+
 /* 2. CONSENT BANNER */
 .consent-notification-bar {
   background: linear-gradient(90deg, rgba(245, 158, 11, 0.12) 0%, rgba(20, 184, 166, 0.08) 100%);

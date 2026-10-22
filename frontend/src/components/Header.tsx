@@ -12,6 +12,8 @@ interface HeaderProps {
   currentUser: UserProfile | null;
   onUserChange: (user: UserProfile | null) => void;
   signCount?: number;
+  selectedLanguage: "ISL" | "EN" | "HI";
+  onLanguageChange: (lang: "ISL" | "EN" | "HI") => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -22,14 +24,14 @@ export const Header: React.FC<HeaderProps> = ({
   onRequestConsent,
   currentUser,
   onUserChange,
-  signCount = 28
+  signCount = 28,
+  selectedLanguage,
+  onLanguageChange
 }) => {
   const [theme, setTheme] = useState<"dark" | "light">(() => {
     const saved = localStorage.getItem("signify-theme");
     return (saved === "light" || saved === "dark") ? saved : "dark";
   });
-
-  const [selectedLanguage, setSelectedLanguage] = useState<"ISL" | "EN" | "HI">("ISL");
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -72,21 +74,24 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 type="button"
                 className={`lang-pill-btn ${selectedLanguage === "ISL" ? "active" : ""}`}
-                onClick={() => setSelectedLanguage("ISL")}
+                onClick={() => onLanguageChange("ISL")}
+                title="Indian Sign Language Mode (Visual & Grammar Grounding)"
               >
                 ISL
               </button>
               <button
                 type="button"
                 className={`lang-pill-btn ${selectedLanguage === "EN" ? "active" : ""}`}
-                onClick={() => setSelectedLanguage("EN")}
+                onClick={() => onLanguageChange("EN")}
+                title="English Spoken & Voice Synthesis Mode"
               >
                 EN
               </button>
               <button
                 type="button"
                 className={`lang-pill-btn ${selectedLanguage === "HI" ? "active" : ""}`}
-                onClick={() => setSelectedLanguage("HI")}
+                onClick={() => onLanguageChange("HI")}
+                title="Hindi (हिंदी) Spoken & Voice Synthesis Mode"
               >
                 HI (हिंदी)
               </button>
@@ -104,7 +109,7 @@ export const Header: React.FC<HeaderProps> = ({
             </button>
 
             {/* Google Authentication Component */}
-            <GoogleAuthButton currentUser={currentUser} onUserChange={onUserChange} />
+            <GoogleAuthButton currentUser={currentUser} onUserChange={onUserChange} currentTheme={theme} />
           </div>
         </div>
       </div>

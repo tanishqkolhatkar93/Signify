@@ -18,6 +18,29 @@ export const App: React.FC = () => {
   const [manifest, setManifest] = useState<SignManifest | null>(null);
   const [signs, setSigns] = useState<SignItem[]>([]);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState<"ISL" | "EN" | "HI">("ISL");
+  const [languageToast, setLanguageToast] = useState<string | null>(null);
+
+  const handleLanguageChange = (lang: "ISL" | "EN" | "HI") => {
+    setSelectedLanguage(lang);
+    if (lang === "ISL") {
+      setLanguageToast("Mode: Indian Sign Language (ISL) Visual & Spatial Grounding");
+      if (activeTab === "speech-route") {
+        setActiveTab("sign-to-speech");
+      }
+    } else if (lang === "EN") {
+      setLanguageToast("Voice & Speech Mode: English (en-US)");
+    } else if (lang === "HI") {
+      setLanguageToast("Voice & Speech Mode: Hindi / हिंदी (hi-IN)");
+    }
+  };
+
+  useEffect(() => {
+    if (languageToast) {
+      const timer = setTimeout(() => setLanguageToast(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [languageToast]);
 
   // Initial health check and manifest loading
   useEffect(() => {
@@ -78,6 +101,8 @@ export const App: React.FC = () => {
         currentUser={currentUser}
         onUserChange={setCurrentUser}
         signCount={signs.length || 28}
+        selectedLanguage={selectedLanguage}
+        onLanguageChange={handleLanguageChange}
       />
 
       <div className="master-container max-w-7xl mx-auto px-6 py-6 w-full">
@@ -123,16 +148,24 @@ export const App: React.FC = () => {
                 onRequestConsent={() => setConsentModalOpen(true)}
                 signs={signs}
                 currentUser={currentUser}
+                selectedLanguage={selectedLanguage}
               />
             )}
 
-            {activeTab === "speech-route" && <SpeechView currentUser={currentUser} />}
+            {activeTab === "speech-route" && (
+              <SpeechView
+                currentUser={currentUser}
+                selectedLanguage={selectedLanguage}
+                onLanguageChange={handleLanguageChange}
+              />
+            )}
 
             {activeTab === "dictionary" && (
               <SignDictionaryView
                 manifest={manifest}
                 signs={signs}
                 currentUser={currentUser}
+                selectedLanguage={selectedLanguage}
                 onSignImported={async () => {
                   const refreshed = await api.getManifest();
                   setManifest(refreshed);
@@ -145,6 +178,14 @@ export const App: React.FC = () => {
           </div>
         </main>
       </div>
+
+      {/* Language Feedback Toast */}
+      {languageToast && (
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] border border-teal-500/50 shadow-2xl text-xs font-semibold text-teal-300 backdrop-blur-xl animate-bounce">
+          <Languages size={15} className="text-teal-400" />
+          <span>{languageToast}</span>
+        </div>
+      )}
 
       {/* Consent Modal Gate */}
       <ConsentModal

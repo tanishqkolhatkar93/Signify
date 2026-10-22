@@ -12,9 +12,10 @@ declare global {
 interface GoogleAuthButtonProps {
   currentUser: UserProfile | null;
   onUserChange: (user: UserProfile | null) => void;
+  currentTheme?: "dark" | "light";
 }
 
-export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser, onUserChange }) => {
+export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser, onUserChange, currentTheme }) => {
   const [googleClientId, setGoogleClientId] = useState<string>(
     import.meta.env.VITE_GOOGLE_CLIENT_ID || ""
   );
@@ -108,8 +109,10 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
           cancel_on_tap_outside: true
         });
 
+        const isDark = (currentTheme || document.documentElement.getAttribute("data-theme") || "dark") === "dark";
+
         window.google.accounts.id.renderButton(googleBtnRef.current, {
-          theme: "filled_blue",
+          theme: isDark ? "filled_black" : "outline",
           size: "medium",
           shape: "pill",
           text: "signin_with",
@@ -119,7 +122,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
         console.warn("Error initializing Google Identity Services button:", err);
       }
     }
-  }, [googleClientId, gisLoaded, currentUser]);
+  }, [googleClientId, gisLoaded, currentUser, currentTheme]);
 
   const handleLogout = () => {
     api.logout();
@@ -355,7 +358,7 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
       {loading ? (
         <span className="text-xs text-slate-400 animate-pulse">Authenticating with Google...</span>
       ) : googleClientId ? (
-        <div ref={googleBtnRef} className="min-h-[38px] flex items-center"></div>
+        <div ref={googleBtnRef} className="google-btn-wrapper"></div>
       ) : (
         <div className="flex items-center gap-1.5 text-xs text-amber-400 px-2 py-1 rounded bg-amber-500/10 border border-amber-500/30">
           <AlertCircle size={13} />

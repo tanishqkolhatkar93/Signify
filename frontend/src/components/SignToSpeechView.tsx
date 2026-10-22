@@ -26,13 +26,15 @@ interface SignToSpeechViewProps {
   onRequestConsent: () => void;
   signs?: SignItem[];
   currentUser?: UserProfile | null;
+  selectedLanguage?: "ISL" | "EN" | "HI";
 }
 
 export const SignToSpeechView: React.FC<SignToSpeechViewProps> = ({
   consentGranted,
   onRequestConsent,
   signs: _signs,
-  currentUser
+  currentUser,
+  selectedLanguage = "ISL"
 }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -457,26 +459,31 @@ export const SignToSpeechView: React.FC<SignToSpeechViewProps> = ({
 
               {/* Bilingual Speech Outputs */}
               <div className="speech-actions-box">
-                <h4>Bilingual Speech Synthesizer</h4>
+                <div className="flex items-center justify-between mb-2">
+                  <h4>Bilingual Speech Synthesizer</h4>
+                  <span className="text-[11px] font-bold text-teal-300 bg-teal-500/10 px-2 py-0.5 rounded-full border border-teal-500/30">
+                    Target: {selectedLanguage === "HI" ? "Hindi (हिंदी)" : selectedLanguage === "EN" ? "English" : "ISL Dual"}
+                  </span>
+                </div>
                 <div className="speech-button-grid">
                   <button
-                    className={`speech-btn speech-btn-en ${isSpeaking === "en" ? "speaking" : ""}`}
+                    className={`speech-btn speech-btn-en ${isSpeaking === "en" ? "speaking" : ""} ${selectedLanguage === "EN" ? "border-teal-400 shadow-teal-500/20" : ""}`}
                     onClick={() => handleSpeak("en")}
                   >
                     <Volume2 size={18} />
                     <div className="speech-btn-text">
-                      <span className="speech-lang">English Audio</span>
+                      <span className="speech-lang">English Audio {selectedLanguage === "EN" && "★ Priority"}</span>
                       <span className="speech-quote">"{recognition.english_text}"</span>
                     </div>
                   </button>
 
                   <button
-                    className={`speech-btn speech-btn-hi ${isSpeaking === "hi" ? "speaking" : ""}`}
+                    className={`speech-btn speech-btn-hi ${isSpeaking === "hi" ? "speaking" : ""} ${selectedLanguage === "HI" ? "border-teal-400 shadow-teal-500/20" : ""}`}
                     onClick={() => handleSpeak("hi")}
                   >
                     <Volume2 size={18} />
                     <div className="speech-btn-text">
-                      <span className="speech-lang">Hindi Audio (हिंदी)</span>
+                      <span className="speech-lang">Hindi Audio (हिंदी) {selectedLanguage === "HI" && "★ Priority"}</span>
                       <span className="speech-quote">"{recognition.hindi_text}"</span>
                     </div>
                   </button>

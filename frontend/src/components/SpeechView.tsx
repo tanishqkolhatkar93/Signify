@@ -22,6 +22,8 @@ import { speechService } from "../services/speech";
 
 interface SpeechViewProps {
   currentUser?: UserProfile | null;
+  selectedLanguage?: "ISL" | "EN" | "HI";
+  onLanguageChange?: (lang: "ISL" | "EN" | "HI") => void;
 }
 
 const renderSyntaxWithHighlights = (text: string) => {
@@ -43,9 +45,20 @@ const renderSyntaxWithHighlights = (text: string) => {
   );
 };
 
-export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser }) => {
+export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLanguage, onLanguageChange }) => {
   const [isRecording, setIsRecording] = useState(false);
-  const [sourceLang, setSourceLang] = useState<"en" | "hi">("en");
+  const [sourceLang, setSourceLang] = useState<"en" | "hi">(() => {
+    return selectedLanguage === "HI" ? "hi" : "en";
+  });
+
+  // Synchronize sourceLang when selectedLanguage changes from top header
+  useEffect(() => {
+    if (selectedLanguage === "HI") {
+      setSourceLang("hi");
+    } else if (selectedLanguage === "EN") {
+      setSourceLang("en");
+    }
+  }, [selectedLanguage]);
   const [transcript, setTranscript] = useState("");
   const [translation, setTranslation] = useState("");
   const [isTranslating, setIsTranslating] = useState(false);
@@ -299,7 +312,13 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser }) => {
             <span>Spoken Language:</span>
             <select
               value={sourceLang}
-              onChange={(e) => setSourceLang(e.target.value as "en" | "hi")}
+              onChange={(e) => {
+                const newLang = e.target.value as "en" | "hi";
+                setSourceLang(newLang);
+                if (onLanguageChange) {
+                  onLanguageChange(newLang === "hi" ? "HI" : "EN");
+                }
+              }}
               className="lang-select"
             >
               <option value="en">English (en-US)</option>

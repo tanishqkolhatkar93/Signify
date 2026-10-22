@@ -8,6 +8,7 @@ interface SignDictionaryViewProps {
   manifest: SignManifest | null;
   signs: SignItem[];
   currentUser?: UserProfile | null;
+  selectedLanguage?: "ISL" | "EN" | "HI";
   onSignImported?: () => void;
 }
 
@@ -30,7 +31,7 @@ const renderSyntaxWithHighlights = (text: string) => {
   );
 };
 
-export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest, signs, currentUser, onSignImported }) => {
+export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest, signs, currentUser, selectedLanguage = "ISL", onSignImported }) => {
   const [search, setSearch] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedType, setSelectedType] = useState("all");
@@ -97,7 +98,7 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
         <div className="flex items-center gap-3">
           <div className="disclaimer-pill">
             <BookOpen size={15} />
-            <span>Curated Bounded Vocabulary ({signs.length} Signs)</span>
+            <span>Curated Vocabulary ({signs.length} Signs • {selectedLanguage === "HI" ? "Hindi (हिंदी)" : selectedLanguage === "EN" ? "English" : "ISL Mode"})</span>
           </div>
           <button
             className="btn btn-secondary flex items-center gap-2 text-sm"
@@ -241,7 +242,7 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
               )}
 
               <div className="bilingual-pair-box">
-                <div className="lang-output-row">
+                <div className={`lang-output-row ${selectedLanguage === "EN" ? "border-l-2 border-teal-400 pl-1.5 bg-teal-500/10 rounded-r" : ""}`}>
                   <span className="lang-label">English:</span>
                   <span className="lang-val">{sign.english_text}</span>
                   <button
@@ -253,9 +254,9 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
                   </button>
                 </div>
 
-                <div className="lang-output-row">
+                <div className={`lang-output-row ${selectedLanguage === "HI" ? "border-l-2 border-teal-400 pl-1.5 bg-teal-500/10 rounded-r" : ""}`}>
                   <span className="lang-label">Hindi:</span>
-                  <span className="lang-val">{sign.hindi_text}</span>
+                  <span className="lang-val font-semibold">{sign.hindi_text}</span>
                   <button
                     className="speak-mini-btn"
                     onClick={() => speak(sign.hindi_text, "hi")}
