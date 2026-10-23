@@ -1118,6 +1118,50 @@ html, body, #root, .app-layout {
   100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0); }
 }
 
+.recording-countdown-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: rgba(244, 63, 94, 0.15);
+  color: #FB7185;
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  border-radius: 9999px;
+  padding: 0.35rem 0.85rem;
+  font-size: 0.825rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-top: 0.65rem;
+}
+
+.recording-pulse-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #F43F5E;
+  box-shadow: 0 0 8px #F43F5E;
+  animation: blink-dot 1s infinite alternate;
+}
+
+@keyframes blink-dot {
+  from { opacity: 0.4; transform: scale(0.85); }
+  to { opacity: 1; transform: scale(1.15); }
+}
+
+.active-sign-animation {
+  animation: signEnter 0.4s ease-out;
+}
+
+@keyframes signEnter {
+  0% { transform: scale(0.94); opacity: 0.7; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.sign-video-player {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
 .mic-hint {
   font-size: 0.875rem;
   color: var(--text-muted);

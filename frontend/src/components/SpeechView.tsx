@@ -71,18 +71,62 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
   const [savingDialogue, setSavingDialogue] = useState(false);
   const [saveToast, setSaveToast] = useState<string | null>(null);
 
-  // Live browser SpeechRecognition refs & state
+  // Live browser SpeechRecognition refs & 15s recording window state
   const recognitionRef = useRef<any>(null);
   const [micStatusText, setMicStatusText] = useState<string | null>(null);
+  const [recordingTimeLeft, setRecordingTimeLeft] = useState<number>(15);
+  const timerIntervalRef = useRef<any>(null);
+  const hardStopTimeoutRef = useRef<any>(null);
+  const isRecordingActiveRef = useRef<boolean>(false);
+  const finalTranscriptRef = useRef<string>("");
+  const debounceMatchRef = useRef<any>(null);
 
-  // Abort speech recognition on unmount
+  const clearTimers = () => {
+    if (timerIntervalRef.current) {
+      clearInterval(timerIntervalRef.current);
+      timerIntervalRef.current = null;
+    }
+    if (hardStopTimeoutRef.current) {
+      clearTimeout(hardStopTimeoutRef.current);
+      hardStopTimeoutRef.current = null;
+    }
+    if (debounceMatchRef.current) {
+      clearTimeout(debounceMatchRef.current);
+      debounceMatchRef.current = null;
+    }
+  };
+
+  // Abort speech recognition and clean timers on unmount
   useEffect(() => {
     return () => {
+      isRecordingActiveRef.current = false;
+      clearTimers();
       if (recognitionRef.current) {
         recognitionRef.current.abort();
       }
     };
   }, []);
+
+  const stopVoiceRecording = () => {
+    isRecordingActiveRef.current = false;
+    clearTimers();
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch (err) {
+        console.warn("Could not stop recognition cleanly:", err);
+      }
+      recognitionRef.current = null;
+    }
+    setIsRecording(false);
+    setRecordingTimeLeft(15);
+    setMicStatusText(null);
+
+    // Commit any finalized transcript upon session completion
+    if (finalTranscriptRef.current.trim()) {
+      handleManualTranscriptChange(finalTranscriptRef.current.trim());
+    }
+  };
 
   const startVoiceRecording = () => {
     const SpeechRecognition =
@@ -100,51 +144,129 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
       if (recognitionRef.current) {
         recognitionRef.current.abort();
       }
+      clearTimers();
+
+      finalTranscriptRef.current = "";
+      isRecordingActiveRef.current = true;
+      setRecordingTimeLeft(15);
+      setIsRecording(true);
+      setMicStatusText("Recording live... 15s window active. Speak clearly.");
 
       const rec = new SpeechRecognition();
-      rec.lang = sourceLang === "hi" ? "hi-IN" : "en-US";
+      // Dynamically bind recognition language to the selected UI toggle:
+      // When EN is active: recognition.lang = 'en-IN' (or 'en-US')
+      // When HI (हिंदी) is active: recognition.lang = 'hi-IN'
+      rec.lang = sourceLang === "hi" ? "hi-IN" : "en-IN";
+      rec.continuous = true;
       rec.interimResults = true;
-      rec.continuous = false;
       rec.maxAlternatives = 1;
+
+      // 15-second persistent countdown window
+      const startTime = Date.now();
+      const WINDOW_DURATION_SEC = 15;
+
+      timerIntervalRef.current = setInterval(() => {
+        const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
+        const remaining = Math.max(0, WINDOW_DURATION_SEC - elapsedSec);
+        setRecordingTimeLeft(remaining);
+        if (remaining > 0) {
+          setMicStatusText(`Listening... ${remaining}s remaining in recording window.`);
+        } else {
+          setMicStatusText("15s recording window reached. Processing final transcript...");
+          stopVoiceRecording();
+        }
+      }, 250);
+
+      hardStopTimeoutRef.current = setTimeout(() => {
+        if (isRecordingActiveRef.current) {
+          stopVoiceRecording();
+        }
+      }, WINDOW_DURATION_SEC * 1000);
 
       rec.onstart = () => {
         setIsRecording(true);
-        setMicStatusText("Listening... Speak clearly into your microphone.");
       };
 
+      // Real-time live transcript rendering & keyword-to-ISL clip routing
       rec.onresult = (event: any) => {
-        let finalTranscript = "";
-        let interimTranscript = "";
+        let interimText = "";
 
         for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript;
+          const res = event.results[i];
+          if (res.isFinal) {
+            const piece = res[0].transcript.trim();
+            if (piece) {
+              finalTranscriptRef.current = finalTranscriptRef.current
+                ? `${finalTranscriptRef.current} ${piece}`
+                : piece;
+            }
           } else {
-            interimTranscript += event.results[i][0].transcript;
+            interimText += res[0].transcript;
           }
         }
 
-        const activeText = finalTranscript || interimTranscript;
-        if (activeText) {
-          setTranscript(activeText);
+        const liveText = (finalTranscriptRef.current + (interimText ? ` ${interimText}` : "")).trim();
+        if (liveText) {
+          // Stream interim and committed text into transcript container in real time
+          setTranscript(liveText);
+
+          // Route transcribed phrase/keywords immediately to ISL sign clip
+          if (debounceMatchRef.current) clearTimeout(debounceMatchRef.current);
+          debounceMatchRef.current = setTimeout(() => {
+            checkReverseSignMatch(liveText);
+          }, 150);
         }
-        if (finalTranscript) {
-          handleManualTranscriptChange(finalTranscript);
+
+        if (finalTranscriptRef.current) {
+          translateTranscript(finalTranscriptRef.current);
         }
       };
 
       rec.onerror = (e: any) => {
         console.warn("Speech recognition error:", e.error);
-        setIsRecording(false);
-        setMicStatusText(null);
-        if (e.error === "not-allowed") {
-          alert("Microphone permission was denied. Please allow microphone access in your browser settings.");
+        if (e.error === "no-speech") {
+          // Ambient pause: do not terminate the 15-second window
+          return;
+        }
+
+        if (e.error === "not-allowed" || e.error === "audio-capture") {
+          isRecordingActiveRef.current = false;
+          clearTimers();
+          setIsRecording(false);
+          setMicStatusText(null);
+          alert("Microphone permission was denied or audio device not found. Please verify browser permissions.");
+          return;
+        }
+
+        if (!isRecordingActiveRef.current) {
+          setIsRecording(false);
+          setMicStatusText(null);
         }
       };
 
+      rec.onnomatch = () => {
+        console.info("Speech recognition onnomatch event.");
+        setMicStatusText("Spoken phrase not recognized. Please speak closer to microphone.");
+      };
+
       rec.onend = () => {
-        setIsRecording(false);
-        setMicStatusText(null);
+        // If the 15-second timer has not elapsed, automatically restart recognition so ambient pauses do not terminate prematurely
+        if (isRecordingActiveRef.current) {
+          setTimeout(() => {
+            if (isRecordingActiveRef.current && recognitionRef.current) {
+              try {
+                recognitionRef.current.start();
+              } catch (err: any) {
+                if (err.name !== "InvalidStateError") {
+                  console.warn("Auto-restart recognition attempt:", err);
+                }
+              }
+            }
+          }, 60);
+        } else {
+          setIsRecording(false);
+          setMicStatusText(null);
+        }
       };
 
       rec.start();
@@ -152,17 +274,9 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
     } catch (err) {
       console.warn("Could not start SpeechRecognition:", err);
       setIsRecording(false);
+      clearTimers();
       setMicStatusText(null);
     }
-  };
-
-  const stopVoiceRecording = () => {
-    if (recognitionRef.current) {
-      recognitionRef.current.stop();
-      recognitionRef.current = null;
-    }
-    setIsRecording(false);
-    setMicStatusText(null);
   };
 
   const samplePhrases = [
@@ -227,8 +341,15 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
   };
 
   const checkReverseSignMatch = async (text: string) => {
+    if (!text || !text.trim()) return;
     try {
-      const match = await api.matchReversePhrase(text);
+      // Normalize transcript text: lowercase and strip punctuation
+      const normalized = text
+        .toLowerCase()
+        .replace(/[\/\\#,+()$~%.'":*?<>{}[\]_`^=!?]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+      const match = await api.matchReversePhrase(normalized || text);
       setReverseResult(match);
       await api.orchestratorTransition("CONFIRM_TRANSCRIPT", { transcript: text }, "speech-session");
     } catch (e) {
@@ -347,10 +468,18 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
             >
               {isRecording ? <MicOff size={32} /> : <Mic size={32} />}
             </button>
+
+            {isRecording && (
+              <div className="recording-countdown-badge">
+                <span className="recording-pulse-dot" />
+                <span>Recording Live ({recordingTimeLeft}s remaining)</span>
+              </div>
+            )}
+
             <p className="mic-hint">
               {micStatusText ||
                 (isRecording
-                  ? "Listening to audio stream..."
+                  ? `Listening to audio stream (${recordingTimeLeft}s remaining)...`
                   : "Click microphone to speak (or select a quick test phrase below)")}
             </p>
           </div>
@@ -473,10 +602,30 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
 
               <div className="sign-media-display">
                 <div className="media-preview-box">
+                  {reverseResult.matched_sign.media.verified_clip_url &&
+                  (reverseResult.matched_sign.media.verified_clip_url.endsWith(".mp4") ||
+                    reverseResult.matched_sign.media.verified_clip_url.endsWith(".webm")) ? (
+                    <video
+                      key={reverseResult.matched_sign.id}
+                      src={reverseResult.matched_sign.media.verified_clip_url}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="sign-video-player"
+                      onError={(e) => {
+                        (e.target as HTMLElement).style.display = "none";
+                        const svgEl = document.getElementById(`sign-svg-${reverseResult.matched_sign?.id}`);
+                        if (svgEl) svgEl.style.display = "block";
+                      }}
+                    />
+                  ) : null}
                   <img
+                    id={`sign-svg-${reverseResult.matched_sign.id}`}
+                    key={`img-${reverseResult.matched_sign.id}`}
                     src={reverseResult.matched_sign.media.asset_url}
                     alt={reverseResult.matched_sign.display_name}
-                    className="sign-svg-image"
+                    className="sign-svg-image active-sign-animation"
                   />
                 </div>
 

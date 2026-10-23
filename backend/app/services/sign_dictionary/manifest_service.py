@@ -256,61 +256,70 @@ class SignDictionaryService:
         tokens = set(cleaned.split())
         
         all_signs = self.list_signs()
+
+        def extract_phrases(s: SignItem) -> List[str]:
+            res = []
+            if s.canonical_phrase:
+                res.append(s.canonical_phrase)
+            if s.approved_synonyms:
+                res.extend(s.approved_synonyms)
+            if s.english_text:
+                for part in re.split(r'[/\\|,;]', s.english_text):
+                    if part.strip():
+                        res.append(part.strip())
+            if s.hindi_text:
+                for part in re.split(r'[/\\|,;]', s.hindi_text):
+                    if part.strip():
+                        res.append(part.strip())
+            if s.display_name:
+                for part in re.split(r'[/\\|,;]', s.display_name):
+                    if part.strip():
+                        res.append(part.strip())
+            return res
         
-        # 1. Exact phrase match against canonical phrase or approved synonyms
+        # 1. Exact phrase match against canonical phrase or approved synonyms / split translations
         for s in all_signs:
-            # Check canonical phrase
-            if s.canonical_phrase and re.sub(r"[^\w\s]", "", s.canonical_phrase.lower()).strip() == cleaned:
-                return ReverseMatchResponse(
-                    matched=True,
-                    query_phrase=phrase,
-                    matched_sign=s,
-                    isl_grammar_note=s.isl_grammar_structure,
-                    explanation=f"Exact match found for '{phrase}'. ISL Grammar: {s.isl_grammar_structure or 'Standard ISL syntax'}."
-                )
-            # Check approved synonyms (full match)
-            for syn in s.approved_synonyms:
-                syn_clean = re.sub(r"[^\w\s]", "", syn.lower()).strip()
-                if syn_clean == cleaned:
+            phrases = extract_phrases(s)
+            for p in phrases:
+                p_clean = re.sub(r"[^\w\s]", "", p.lower()).strip()
+                if p_clean and p_clean == cleaned:
                     return ReverseMatchResponse(
                         matched=True,
                         query_phrase=phrase,
                         matched_sign=s,
                         isl_grammar_note=s.isl_grammar_structure,
-                        explanation=f"Approved synonym match ('{syn}') found for '{phrase}'. ISL Grammar: {s.isl_grammar_structure or 'Standard ISL syntax'}."
+                        explanation=f"Exact match ('{p}') found for '{phrase}'. ISL Grammar: {s.isl_grammar_structure or 'Standard ISL syntax'}."
                     )
 
         # 2. Multi-word phrase containment in speech (e.g. "I want to ask how are you" -> "how are you")
         for s in all_signs:
-            for syn in s.approved_synonyms:
-                syn_clean = re.sub(r"[^\w\s]", "", syn.lower()).strip()
-                syn_tokens = syn_clean.split()
-                if len(syn_tokens) >= 2 and syn_clean in cleaned:
+            phrases = extract_phrases(s)
+            for p in phrases:
+                p_clean = re.sub(r"[^\w\s]", "", p.lower()).strip()
+                p_tokens = p_clean.split()
+                if len(p_tokens) >= 2 and p_clean in cleaned:
                     return ReverseMatchResponse(
                         matched=True,
                         query_phrase=phrase,
                         matched_sign=s,
                         isl_grammar_note=s.isl_grammar_structure,
-                        explanation=f"Recognized key conversational phrase '{syn}' in input. ISL Grammar: {s.isl_grammar_structure or 'Standard ISL syntax'}."
+                        explanation=f"Recognized key conversational phrase '{p}' in input. ISL Grammar: {s.isl_grammar_structure or 'Standard ISL syntax'}."
                     )
 
-        # 3. Keyword / Single token match for high-signal nouns/verbs
-        # We ensure single tokens match unambiguously
+        # 3. Keyword / Single token match for high-signal nouns/verbs (English and Hindi)
         for s in all_signs:
-            candidates = [s.display_name.lower(), s.english_text.lower(), s.hindi_text.lower()] + [
-                syn.lower() for syn in s.approved_synonyms if len(syn.split()) == 1
-            ]
-            candidates = [re.sub(r"[^\w\s]", "", c).strip() for c in candidates]
-            
-            for c in candidates:
-                if c and (c in tokens or c == cleaned):
-                    return ReverseMatchResponse(
-                        matched=True,
-                        query_phrase=phrase,
-                        matched_sign=s,
-                        isl_grammar_note=s.isl_grammar_structure,
-                        explanation=f"Keyword '{c}' matches verified ISL sign '{s.display_name}'. ISL Grammar: {s.isl_grammar_structure or 'Standard ISL syntax'}."
-                    )
+            phrases = extract_phrases(s)
+            for p in phrases:
+                for word in p.split():
+                    word_clean = re.sub(r"[^\w\s]", "", word.lower()).strip()
+                    if len(word_clean) >= 2 and (word_clean in tokens or word_clean == cleaned):
+                        return ReverseMatchResponse(
+                            matched=True,
+                            query_phrase=phrase,
+                            matched_sign=s,
+                            isl_grammar_note=s.isl_grammar_structure,
+                            explanation=f"Keyword '{word}' matches verified ISL sign '{s.display_name}'. ISL Grammar: {s.isl_grammar_structure or 'Standard ISL syntax'}."
+                        )
 
         # 4. No verified match found: explicit honest rejection
         return ReverseMatchResponse(

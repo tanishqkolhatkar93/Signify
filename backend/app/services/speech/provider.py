@@ -2,6 +2,7 @@ import os
 import uuid
 import base64
 import logging
+import re
 from abc import ABC, abstractmethod
 from typing import Optional
 import httpx
@@ -14,6 +15,30 @@ from backend.app.schemas.speech import (
 from backend.app.core.config import settings
 
 logger = logging.getLogger(__name__)
+
+def sanitize_text_for_speech(raw_text: Optional[str], language: str = "en") -> str:
+    """
+    Cleans raw text before vocalization, ensuring that delimiter slashes (e.g. 'अच्छा / बहुत अच्छा'),
+    regex markers, unescaped tokens, or formatting characters are not pronounced as literal words (e.g. 'slash').
+    """
+    if not raw_text or not isinstance(raw_text, str):
+        return "नमस्ते" if language == "hi" else "Hello"
+
+    text = raw_text.strip()
+    # If text contains bilingual or multi-option slash delimiters, select the primary phrase
+    if "/" in text or "\\" in text or "|" in text:
+        parts = [p.strip() for p in re.split(r'[/\\|]', text) if p.strip()]
+        if parts:
+            text = parts[0]
+
+    # Strip delimiter slashes, escape characters, and regex markers
+    clean_text = re.sub(r'[/\\#,+()$~%.\'":*?<>{}[\]_`^=]', ' ', text)
+    clean_text = re.sub(r'\s+', ' ', clean_text).strip()
+
+    if not clean_text:
+        return "नमस्ते" if language == "hi" else "Hello"
+
+    return clean_text
 
 class BaseSpeechProvider(ABC):
     @abstractmethod
@@ -47,6 +72,8 @@ class MockSpeechProvider(BaseSpeechProvider):
         )
 
     async def synthesize(self, request: SynthesizeRequest) -> SynthesizeResponse:
+        clean_text = sanitize_text_for_speech(request.text, request.language or "en")
+
         # Generates a minimal valid silent/beacon PCM WAV header in base64
         # RIFF header with 1 second 8kHz 8-bit mono tone
         header = (
@@ -57,7 +84,7 @@ class MockSpeechProvider(BaseSpeechProvider):
         audio_b64 = base64.b64encode(header).decode("utf-8")
 
         return SynthesizeResponse(
-            text=request.text,
+            text=clean_text,
             language=request.language,
             audio_base64=f"data:audio/wav;base64,{audio_b64}",
             audio_url=None,
@@ -125,6 +152,8 @@ class VerbXSpeechProvider(BaseSpeechProvider):
             logger.info("VerbX API key not configured; falling back to local mock TTS.")
             return await self.fallback_mock.synthesize(request)
 
+        clean_text = sanitize_text_for_speech(request.text, request.language or "en")
+
         try:
             async with httpx.AsyncClient(timeout=10.0) as client:
                 headers = {
@@ -134,14 +163,14 @@ class VerbXSpeechProvider(BaseSpeechProvider):
                     "Idempotency-Key": str(uuid.uuid4())
                 }
                 payload = {
-                    "text": request.text
+                    "text": clean_text
                 }
                 res = await client.post(f"{self.base_url}/v1/tts", json=payload, headers=headers)
                 if res.status_code == 200:
                     mime = res.headers.get("content-type", "audio/mpeg").split(";")[0]
                     audio_b64 = base64.b64encode(res.content).decode("utf-8")
                     return SynthesizeResponse(
-                        text=request.text,
+                        text=clean_text,
                         language=request.language,
                         audio_base64=f"data:{mime};base64,{audio_b64}",
                         audio_url=None,
@@ -163,4 +192,3 @@ def get_speech_provider() -> BaseSpeechProvider:
     return MockSpeechProvider()
 
 speech_provider = get_speech_provider()
-
