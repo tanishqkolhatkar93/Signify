@@ -259,9 +259,9 @@ export const SignToSpeechView: React.FC<SignToSpeechViewProps> = ({
       hands.push({ handedness: "Right", landmarks: points });
     }
 
-    // Feed 5 frames to satisfy temporal window
+    // Feed 3 frames to satisfy temporal window
     let res: RecognitionResult | null = null;
-    for (let frame = 0; frame < 5; frame++) {
+    for (let frame = 0; frame < 3; frame++) {
       res = await api.classifyLandmarks(hands, "live-session", consentGranted);
     }
     setRecognition(res);
@@ -452,7 +452,7 @@ export const SignToSpeechView: React.FC<SignToSpeechViewProps> = ({
                     />
                   </div>
                   <span className="text-xs text-muted">
-                    Threshold: ≥ 72% • Stability: {recognition.stability_count}/5 frames
+                    Threshold: ≥ 65% • Stability: {recognition.stability_count}/3 frames
                   </span>
                 </div>
               </div>
@@ -513,7 +513,7 @@ export const SignToSpeechView: React.FC<SignToSpeechViewProps> = ({
                   <li>Ensure your full hand is framed clearly inside the camera.</li>
                   <li>Check that lighting is bright and without heavy backlighting.</li>
                   <li>Hold the gesture steadily for ~200ms to allow temporal stabilization.</li>
-                  <li>Refer to the supported 12 ISL vocabulary catalog.</li>
+                  <li>Refer to the supported 28 ISL vocabulary catalog.</li>
                 </ul>
               </div>
 
