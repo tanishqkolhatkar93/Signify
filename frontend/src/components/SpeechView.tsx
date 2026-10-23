@@ -73,12 +73,6 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
 
   // Live browser SpeechRecognition refs & 10s recording window state
   const recognitionRef = useRef<any>(null);
-  const mediaStreamRef = useRef<MediaStream | null>(null);
-  const audioContextRef = useRef<AudioContext | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const animFrameRef = useRef<number | null>(null);
-  const [audioLevel, setAudioLevel] = useState<number>(0);
-
   const transcriptTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [micStatusText, setMicStatusText] = useState<string | null>(null);
   const [recordingTimeLeft, setRecordingTimeLeft] = useState<number>(10);
@@ -86,6 +80,7 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
   const hardStopTimeoutRef = useRef<any>(null);
   const isUserRecordingRef = useRef<boolean>(false);
   const finalTranscriptRef = useRef<string>("");
+  const latestTranscriptRef = useRef<string>("");
   const debounceMatchRef = useRef<any>(null);
 
   const clearTimers = () => {
@@ -103,23 +98,11 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
     }
   };
 
-  // Abort speech recognition and clean hardware/timers on unmount
+  // Abort speech recognition on unmount
   useEffect(() => {
     return () => {
       isUserRecordingRef.current = false;
       clearTimers();
-      if (animFrameRef.current) {
-        cancelAnimationFrame(animFrameRef.current);
-        animFrameRef.current = null;
-      }
-      if (audioContextRef.current) {
-        audioContextRef.current.close().catch(() => {});
-        audioContextRef.current = null;
-      }
-      if (mediaStreamRef.current) {
-        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-        mediaStreamRef.current = null;
-      }
       if (recognitionRef.current) {
         recognitionRef.current.abort();
       }
@@ -174,19 +157,6 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
     isUserRecordingRef.current = false;
     clearTimers();
 
-    if (animFrameRef.current) {
-      cancelAnimationFrame(animFrameRef.current);
-      animFrameRef.current = null;
-    }
-    if (audioContextRef.current) {
-      audioContextRef.current.close().catch(() => {});
-      audioContextRef.current = null;
-    }
-    if (mediaStreamRef.current) {
-      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
-      mediaStreamRef.current = null;
-    }
-
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
@@ -196,18 +166,29 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
       recognitionRef.current = null;
     }
     setIsRecording(false);
-    setAudioLevel(0);
     setRecordingTimeLeft(10);
-    setMicStatusText(null);
 
     // Commit finalized transcript and trigger final ISL matching function
-    const textToMatch = finalTranscriptRef.current.trim() || transcript.trim();
+    const textToMatch =
+      latestTranscriptRef.current.trim() ||
+      finalTranscriptRef.current.trim() ||
+      (transcriptTextareaRef.current?.value || "").trim() ||
+      transcript.trim();
+
     if (textToMatch) {
+      setTranscript(textToMatch);
+      if (transcriptTextareaRef.current) {
+        transcriptTextareaRef.current.value = textToMatch;
+        transcriptTextareaRef.current.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      setMicStatusText(null);
       matchAndPlayISL(textToMatch);
+    } else {
+      setMicStatusText("No speech recognized. You can speak again, select a quick test phrase, or type directly.");
     }
   };
 
-  // Fresh instance speech recognition runner (avoids dead instance / InvalidStateError)
+  // Fresh instance speech recognition runner (avoids dead instance / InvalidStateError & hardware locks)
   const startRecognitionLoop = () => {
     if (!isUserRecordingRef.current) return;
     const SpeechRecognition =
@@ -233,6 +214,14 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
         setIsRecording(true);
       };
 
+      rec.onaudiostart = () => {
+        setMicStatusText("Audio captured. Listening...");
+      };
+
+      rec.onspeechstart = () => {
+        setMicStatusText("Speech detected! Transcribing...");
+      };
+
       rec.onresult = (event: any) => {
         let interimTranscript = "";
         for (let i = event.resultIndex; i < event.results.length; ++i) {
@@ -245,11 +234,12 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
 
         const activeTranscript = (finalTranscriptRef.current + interimTranscript).trim();
         if (activeTranscript) {
+          latestTranscriptRef.current = activeTranscript;
+          setTranscript(activeTranscript);
           if (transcriptTextareaRef.current) {
             transcriptTextareaRef.current.value = activeTranscript;
             transcriptTextareaRef.current.dispatchEvent(new Event("input", { bubbles: true }));
           }
-          setTranscript(activeTranscript);
 
           if (debounceMatchRef.current) clearTimeout(debounceMatchRef.current);
           debounceMatchRef.current = setTimeout(() => {
@@ -264,14 +254,14 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
           return;
         }
         if (e.error === "network") {
-          setMicStatusText("Speech network error. Ensure internet connection is active.");
+          setMicStatusText("Speech network error: unable to reach speech service. Check internet.");
           return;
         }
-        if (e.error === "not-allowed") {
+        if (e.error === "not-allowed" || e.error === "permission-denied") {
           isUserRecordingRef.current = false;
           clearTimers();
           setIsRecording(false);
-          setMicStatusText("Microphone permission denied in browser.");
+          setMicStatusText("Microphone permission denied.");
           alert("Microphone permission was denied. Please allow microphone access in your browser settings.");
           return;
         }
@@ -279,23 +269,29 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
           isUserRecordingRef.current = false;
           clearTimers();
           setIsRecording(false);
-          setMicStatusText("Audio capture device unavailable.");
-          alert("No microphone audio device detected. Please connect a working microphone.");
+          setMicStatusText("Microphone audio device unavailable or in use.");
+          alert("No microphone audio device detected or another app is using it.");
+          return;
+        }
+        if (e.error === "service-not-allowed") {
+          isUserRecordingRef.current = false;
+          clearTimers();
+          setIsRecording(false);
+          setMicStatusText("Speech service not allowed by browser. Disable shields or use Chrome.");
           return;
         }
       };
 
       rec.onend = () => {
-        // If countdown timer is still active, spawn a fresh SpeechRecognition instance!
+        // If countdown timer is still active, restart SpeechRecognition gracefully
         if (isUserRecordingRef.current) {
           setTimeout(() => {
             if (isUserRecordingRef.current) {
               startRecognitionLoop();
             }
-          }, 60);
+          }, 100);
         } else {
           setIsRecording(false);
-          setMicStatusText(null);
         }
       };
 
@@ -306,7 +302,7 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
     }
   };
 
-  const startVoiceRecording = async () => {
+  const startVoiceRecording = () => {
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
@@ -318,48 +314,13 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
       return;
     }
 
-    // Step 1: Pre-request microphone stream to verify hardware & trigger browser permission prompt
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaStreamRef.current = stream;
-
-      // AudioContext level visualizer
-      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
-      if (AudioCtx) {
-        const audioCtx = new AudioCtx();
-        audioContextRef.current = audioCtx;
-        const analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 64;
-        analyserRef.current = analyser;
-        const source = audioCtx.createMediaStreamSource(stream);
-        source.connect(analyser);
-
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
-        const updateLevel = () => {
-          if (!isUserRecordingRef.current) return;
-          analyser.getByteFrequencyData(dataArray);
-          let sum = 0;
-          for (let i = 0; i < dataArray.length; i++) {
-            sum += dataArray[i];
-          }
-          const avg = sum / dataArray.length;
-          setAudioLevel(Math.min(100, Math.round((avg / 128) * 100)));
-          animFrameRef.current = requestAnimationFrame(updateLevel);
-        };
-        updateLevel();
-      }
-    } catch (permErr: any) {
-      console.warn("Microphone permission failed:", permErr);
-      alert("Microphone permission was denied. Please allow microphone access in your browser address bar.");
-      return;
-    }
-
     clearTimers();
     finalTranscriptRef.current = "";
+    latestTranscriptRef.current = "";
     isUserRecordingRef.current = true;
     setRecordingTimeLeft(10);
     setIsRecording(true);
-    setMicStatusText("Listening... 10s left");
+    setMicStatusText(null);
 
     // 1. Strict 10-second recording countdown timer
     const startTime = Date.now();
@@ -369,10 +330,7 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
       const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
       const remaining = Math.max(0, TOTAL_RECORDING_SECONDS - elapsedSec);
       setRecordingTimeLeft(remaining);
-      if (remaining > 0) {
-        setMicStatusText(`Listening... ${remaining}s left`);
-      } else {
-        setMicStatusText("10s recording window reached. Processing final transcript...");
+      if (remaining <= 0) {
         stopVoiceRecording();
       }
     }, 250);
@@ -383,7 +341,7 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
       }
     }, TOTAL_RECORDING_SECONDS * 1000);
 
-    // Launch speech recognition loop with auto-restart
+    // Launch speech recognition directly without audio device contention
     startRecognitionLoop();
   };
 
@@ -560,26 +518,26 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
                   <span>Listening... {recordingTimeLeft}s left</span>
                 </div>
 
-                <div className="mic-audio-level-container" title="Live Microphone Input Level">
-                  {[0.4, 0.7, 1.0, 0.7, 0.4].map((mult, idx) => (
-                    <div
-                      key={idx}
-                      className="mic-audio-bar"
-                      style={{
-                        height: `${Math.max(4, Math.min(24, Math.round((audioLevel * mult) / 3)))}px`,
-                        backgroundColor: audioLevel > 5 ? "#2DD4BF" : "#64748B"
-                      }}
-                    />
-                  ))}
+                <div className="mic-audio-level-container" title="Live Microphone Active">
+                  <div className="mic-audio-bar pulsing" />
+                  <div className="mic-audio-bar pulsing" />
+                  <div className="mic-audio-bar pulsing" />
+                  <div className="mic-audio-bar pulsing" />
+                  <div className="mic-audio-bar pulsing" />
                 </div>
               </>
             )}
 
             <p className="mic-hint">
-              {micStatusText ||
-                (isRecording
+              {micStatusText ? (
+                <span className={micStatusText.toLowerCase().includes("error") || micStatusText.toLowerCase().includes("denied") || micStatusText.toLowerCase().includes("blocked") ? "text-amber-400 font-medium" : "text-emerald-400 font-medium"}>
+                  {micStatusText}
+                </span>
+              ) : (
+                isRecording
                   ? `Listening... ${recordingTimeLeft}s left`
-                  : "Click microphone to speak (10-second active window) or select a quick test phrase below")}
+                  : "Click microphone to speak (10-second active window) or select a quick test phrase below"
+              )}
             </p>
           </div>
 

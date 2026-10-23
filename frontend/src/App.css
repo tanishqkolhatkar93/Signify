@@ -1160,9 +1160,23 @@ html, body, #root, .app-layout {
   width: 5px;
   background-color: #2DD4BF;
   border-radius: 9999px;
-  transition: height 0.08s ease;
   min-height: 4px;
   box-shadow: 0 0 8px rgba(45, 212, 191, 0.4);
+}
+
+.mic-audio-bar.pulsing {
+  animation: audioPulse 0.75s ease-in-out infinite alternate;
+}
+
+.mic-audio-bar.pulsing:nth-child(1) { animation-delay: 0.1s; height: 8px; }
+.mic-audio-bar.pulsing:nth-child(2) { animation-delay: 0.35s; height: 18px; }
+.mic-audio-bar.pulsing:nth-child(3) { animation-delay: 0.55s; height: 24px; }
+.mic-audio-bar.pulsing:nth-child(4) { animation-delay: 0.25s; height: 16px; }
+.mic-audio-bar.pulsing:nth-child(5) { animation-delay: 0.45s; height: 10px; }
+
+@keyframes audioPulse {
+  0% { transform: scaleY(0.4); opacity: 0.5; }
+  100% { transform: scaleY(1.2); opacity: 1; }
 }
 
 .active-sign-animation {
