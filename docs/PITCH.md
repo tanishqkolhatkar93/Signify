@@ -43,7 +43,7 @@ Existing AI sign language concepts fail in three critical ways:
 
 ### Pillar 2: Uncertainty-Aware Agent Orchestration
 - Finite State Machine with 12 explicit lifecycle states.
-- Calibrated confidence threshold (0.72) and margin gate.
+- Calibrated confidence threshold (0.65) and margin gate.
 - Temporal smoothing window (5 consecutive stable frames).
 - Explicit `UNCERTAIN` state: refuses to output false speech when a user scratches their chin or makes an unsupported movement.
 

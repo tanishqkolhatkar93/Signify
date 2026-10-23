@@ -161,7 +161,7 @@ class AcceptanceTestRunner:
             confidence=ctx.confidence,
             model_version=self.model_version,
             evidence_ref=f"session:{test_session}",
-            notes=f"English TTS: {en_audio.status}; Hindi TTS: {hi_audio.status}; Stable frames: 5/5."
+            notes=f"English TTS: {en_audio.status}; Hindi TTS: {hi_audio.status}; Stable frames: {ctx.stability_count}/{settings.TEMPORAL_SMOOTHING_FRAMES}."
         )
 
     async def run_tc3(self) -> TestRunRecord:

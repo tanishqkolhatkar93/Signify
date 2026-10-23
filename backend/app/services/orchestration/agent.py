@@ -14,6 +14,7 @@ from backend.app.schemas.orchestrator import (
 from backend.app.services.orchestration.tools import agent_tools
 from backend.app.services.vision.classifier import gesture_classifier
 from backend.app.core.database import SessionLocal, AuditEventRecord
+from backend.app.core.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -192,7 +193,7 @@ VALID_STATE_ACTIONS: Dict[WorkflowState, Set[WorkflowAction]] = {
 }
 
 # Confidence & Threshold Constants
-CONFIDENCE_HIGH_THRESHOLD = 0.72
+CONFIDENCE_HIGH_THRESHOLD = settings.CONFIDENCE_THRESHOLD
 CONFIDENCE_AMBIGUOUS_THRESHOLD = 0.50
 DEFAULT_MAX_RETRIES = 3
 
@@ -435,7 +436,7 @@ class CommunicationAgentOrchestrator:
                     ctx,
                     action,
                     WorkflowState.RECOGNIZING,
-                    f"Stabilizing gesture '{cand.display_name}' ({result.stability_count}/5 frames, confidence {cand.confidence:.2f}).",
+                    f"Stabilizing gesture '{cand.display_name}' ({result.stability_count}/{settings.TEMPORAL_SMOOTHING_FRAMES} frames, confidence {cand.confidence:.2f}).",
                     {"candidate": cand.display_name, "stability_count": result.stability_count, "confidence": cand.confidence},
                     tool_call=tool_record
                 )

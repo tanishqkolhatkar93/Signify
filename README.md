@@ -29,7 +29,7 @@
 | **1. Publish supported signs list** | 12 authenticated Indian Sign Language signs with full metadata, meaning, and source citations. | `data/sign_manifest.json`, Sign Dictionary UI, TC1 |
 | **2. Recognize sign & speak in 2 languages** | Local geometric normalizer outputs spoken audio in **English** and **Hindi (हिंदी)**. | `backend/app/services/speech/`, Sign to Speech UI, TC2 |
 | **3. Speech-to-text & verified reverse route** | Editable transcript field with keyword matching to verified ISL clips or honest text fallback. | `SpeechView.tsx`, `manifest_service.py`, TC3 |
-| **4. Report unrecognized/uncertain signs** | Calibrated rejection threshold ($< 0.72$) and margin separation trigger `UNCERTAIN` state. | `classifier.py`, `SignToSpeechView.tsx`, TC4 |
+| **4. Report unrecognized/uncertain signs** | Calibrated rejection threshold ($< 0.65$) and margin separation trigger `UNCERTAIN` state. | `classifier.py`, `SignToSpeechView.tsx`, TC4 |
 | **5. Name the sign language supported** | Explicitly named and grounded: **Indian Sign Language (ISL)** (`ins`). | UI header, manifest, `ARCHITECTURE.md` |
 | **6. Obtain consent from anyone filmed** | Affirmative Consent Gate modal blocks camera activation until explicitly approved. | `ConsentModal.tsx`, `agent.py`, TC4 |
 | **7. Appropriate vision & speech stack** | MediaPipe 21 3D landmarks + VerbX / Vocaline speech integration architecture. | `landmarks.py`, `provider.py` |
@@ -46,7 +46,7 @@
 ```mermaid
 flowchart LR
     A["Webcam / MediaPipe<br/>(21 3D Landmarks)"] --> B["Normalizer &<br/>Classifier (0.17ms)"]
-    B --> C{"Confidence & Margin<br/>Threshold (>= 0.72)"}
+    B --> C{"Confidence & Margin<br/>Threshold (>= 0.65)"}
     C -- "Uncertain / Noise" --> D["State: UNCERTAIN<br/>(No False Speech)"]
     C -- "Stable (>=5 frames)" --> E["State: TRANSLATING<br/>(ISL Verified)"]
     E --> F["Bilingual Speech<br/>(English + Hindi)"]

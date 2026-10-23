@@ -21,7 +21,7 @@ flowchart TB
         
         subgraph Orchestrator ["Bounded Agent Orchestrator"]
             FSM["Typed Finite State Machine (12 States, 10 Actions)"]
-            Thresholds["Confidence Thresholds (>= 0.72) & Retry Budget (3)"]
+            Thresholds["Confidence Thresholds (>= 0.65) & Retry Budget (3)"]
             EventLogger["Structured Audit & Event Logger"]
         end
 
@@ -70,8 +70,8 @@ stateDiagram-v2
     CONSENT_REQUIRED --> IDLE: Consent Declined
 
     CAPTURING --> RECOGNIZING: Landmarks Extracted (Candidate Stabilizing)
-    CAPTURING --> UNCERTAIN: Confidence < 0.72 or Distractor (retry_count < 3)
-    CAPTURING --> TRANSLATING: Sign Recognized (Confidence >= 0.72, Stable >= 5 frames)
+    CAPTURING --> UNCERTAIN: Confidence < 0.65 or Distractor (retry_count < 3)
+    CAPTURING --> TRANSLATING: Sign Recognized (Confidence >= 0.65, Stable >= 3 frames)
     
     RECOGNIZING --> RECOGNIZING: Accumulating 5 Consecutive Frames
     RECOGNIZING --> TRANSLATING: Threshold Reached (Resets Retry Counter)
@@ -117,7 +117,7 @@ All perception, linguistic, and acoustic capabilities are encapsulated as typed 
 2. MediaPipe detects 21 hand landmarks per hand locally in browser WASM.
 3. Coordinates are normalized relative to wrist origin and palm span.
 4. Feature vector evaluated against ISL gesture signatures with Random Forest and finger flexion vectors.
-5. If confidence $\ge 0.72$ across 5 consecutive frames, gesture is verified.
+5. If confidence $\ge 0.65$ across 3 consecutive frames, gesture is verified.
 6. System maps gesture ID to English meaning (e.g., "Good / Well") and Hindi translation ("अच्छा / बहुत अच्छा").
 7. Dual audio synthesizers output bilingual speech via VerbX TTS.
 

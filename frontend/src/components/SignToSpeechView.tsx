@@ -504,7 +504,7 @@ export const SignToSpeechView: React.FC<SignToSpeechViewProps> = ({
 
               <div className="alert alert-warning">
                 <strong>Safety Guardrail Active:</strong>
-                <p>{recognition.rejection_reason || "Confidence is below the reliable threshold (72%). False speech generation prevented."}</p>
+                <p>{recognition.rejection_reason || "Confidence is below the calibrated threshold (65%). False speech generation prevented."}</p>
               </div>
 
               <div className="uncertain-guidance">

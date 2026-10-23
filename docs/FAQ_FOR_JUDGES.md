@@ -44,7 +44,7 @@ This document prepares concise, honest, and technically accurate responses to li
 
 ### Q7: How do you reject unknown gestures?
 **Answer:** Signify enforces two rejection criteria:
-1. **Confidence Threshold:** If the highest candidate score is below $0.72$, the system rejects it.
+1. **Confidence Threshold:** If the highest candidate score is below $0.65$, the system rejects it.
 2. **Margin Separation:** If the top score is below $0.85$ and the runner-up margin is $< 0.08$, the sign is classified as ambiguous.
 When rejected, the orchestrator enters the `UNCERTAIN` state, resets the temporal stability buffer, and informs the user: *"Unrecognized sign — please hold steady in clear lighting."* It strictly prevents false speech synthesis.
 
@@ -61,7 +61,7 @@ When rejected, the orchestrator enters the `UNCERTAIN` state, resets the tempora
 ---
 
 ### Q10: How do you prevent a wrong gesture from producing misleading speech?
-**Answer:** Through our Temporal Smoothing Window: single random frames or transitional hand twitches cannot trigger speech. The system requires $N=5$ consecutive stable frames of the same recognized gesture above $0.72$ confidence before transitioning to `GENERATING_SPEECH`.
+**Answer:** Through our Temporal Smoothing Window: single random frames or transitional hand twitches cannot trigger speech. The system requires $N=3$ consecutive stable frames of the same recognized gesture above $0.65$ confidence before transitioning to `GENERATING_SPEECH`.
 
 ---
 

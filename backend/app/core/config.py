@@ -42,8 +42,8 @@ class Settings(BaseSettings):
     VERBX_API_BASE_URL: str = "https://api.verbxeco.com"
     
     # Vision & Uncertainty Thresholds
-    CONFIDENCE_THRESHOLD: float = 0.72
-    TEMPORAL_SMOOTHING_FRAMES: int = 5
+    CONFIDENCE_THRESHOLD: float = 0.65
+    TEMPORAL_SMOOTHING_FRAMES: int = 3
     UNKNOWN_SIGN_STABILITY_FRAMES: int = 3
     
     # Safety and Privacy

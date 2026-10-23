@@ -58,7 +58,7 @@ This document establishes the architectural principles and technical decisions b
 * **Options Considered:**
   1. Argmax over softmax probabilities without rejection.
   2. Calibrated confidence thresholding with cosine distance margins and an explicit `UNKNOWN_SIGN` rejection state.
-* **Chosen Approach:** Multi-tier rejection threshold (minimum confidence 0.72 + temporal stability over 5 consecutive frames).
+* **Chosen Approach:** Multi-tier rejection threshold (minimum confidence 0.65 + temporal stability over 3 consecutive frames).
 * **Rationale:** Rejects erratic movements, transitions, and unsupported gestures. Explicitly reports "Unrecognized sign — please retry" rather than speaking false words.
 * **Trade-offs:** Slightly higher false-negative rate for imperfect hand gestures; user may need to hold sign for 200–300ms.
 * **Revisit Criteria:** Empirical calibration against larger negative/distractor datasets.
@@ -131,7 +131,7 @@ This document establishes the architectural principles and technical decisions b
   - Evaluated on normalized landmark vectors with geometric angles and distance metrics.
   - Threshold set at $0.72$ based on empirical separation between supported sign clusters (intra-class similarity $>0.82$) and random noise/non-sign poses (similarity $<0.65$).
   - Temporal smoothing window: $N=5$ consecutive frames required to confirm a sign.
-  - If top prediction has confidence $<0.72$ or second-best margin $<0.15$, trigger `UNCERTAIN` state.
+  - If top prediction has confidence $<0.65$ or second-best margin $<0.15$, trigger `UNCERTAIN` state.
 * **Trade-offs:** Users must hold sign steadily for ~200ms; eliminates rapid twitch false positives.
 
 ---
