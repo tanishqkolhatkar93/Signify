@@ -404,6 +404,7 @@ class CommunicationAgentOrchestrator:
             # Route A: High Confidence & Temporally Stable -> Successful Recognition
             if result.status == "RECOGNIZED" and result.is_stable and result.sign_id:
                 ctx.retry_count = 0  # Verified success resets retry budget
+                ctx.stability_count = result.stability_count
                 ctx.current_sign_id = result.sign_id
                 ctx.recognized_meaning = result.meaning
                 ctx.english_text = result.english_text
@@ -432,6 +433,7 @@ class CommunicationAgentOrchestrator:
             # Route B: Gesture candidate is actively stabilizing (e.g. frame 2 of 5)
             elif result.stability_count > 0 and result.candidates:
                 cand = result.candidates[0]
+                ctx.stability_count = result.stability_count
                 self._record_event(
                     ctx,
                     action,
@@ -444,6 +446,7 @@ class CommunicationAgentOrchestrator:
 
             # Route C: Uncertain / Ambiguous Gesture -> Bounded Retry Handling
             elif result.status == "UNCERTAIN":
+                ctx.stability_count = 0
                 ctx.retry_count += 1
                 if ctx.retry_count >= ctx.max_retries:
                     ctx.last_error = f"Exceeded maximum consecutive uncertainty retries ({ctx.max_retries})."

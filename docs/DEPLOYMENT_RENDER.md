@@ -28,7 +28,7 @@ git push origin master
 
 ### Step 4: Configure Secrets
 When prompted for environment variables:
-- **`VERBX_API_KEY`**: Paste your VerbX key (`vx_api_uo5a3oirolWRUBDp0t3A8zTN7GRRvQzY` or your own key).
+- **`VERBX_API_KEY`**: Paste your authenticated VerbX API key from your IvishAI account.
 - Render will automatically generate `JWT_SECRET` and link `VITE_API_URL` to your backend's live URL.
 
 Render will now build and deploy both services!
@@ -55,7 +55,7 @@ If you prefer to configure the services manually in the Render dashboard:
    - `PYTHON_VERSION`: `3.11.7`
    - `ENVIRONMENT`: `production`
    - `PROVIDER_MODE`: `verbx`
-   - `VERBX_API_KEY`: `vx_api_uo5a3oirolWRUBDp0t3A8zTN7GRRvQzY`
+   - `VERBX_API_KEY`: *(paste your private VerbX key)*
    - `VERBX_API_BASE_URL`: `https://api.verbxeco.com`
    - `CORS_ORIGINS`: `*`
    - `JWT_SECRET`: *(generate any random 32-character string)*

@@ -73,6 +73,7 @@ class OrchestratorContext(BaseModel):
     last_error: Optional[str] = None
     retry_count: int = 0
     max_retries: int = 3
+    stability_count: int = 0
     last_tool_call: Optional[ToolCallRecord] = None
     tool_history: List[ToolCallRecord] = Field(default_factory=list)
     event_history: List[OrchestratorEvent] = Field(default_factory=list)

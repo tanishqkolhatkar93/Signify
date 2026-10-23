@@ -113,7 +113,8 @@ class VerbXSpeechProvider(BaseSpeechProvider):
             return resp
 
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            timeout_cfg = httpx.Timeout(2.5, connect=1.0)
+            async with httpx.AsyncClient(timeout=timeout_cfg) as client:
                 headers = {
                     "x-api-key": self.api_key,
                     "X-VerbX-Shell": "saas",
@@ -155,7 +156,8 @@ class VerbXSpeechProvider(BaseSpeechProvider):
         clean_text = sanitize_text_for_speech(request.text, request.language or "en")
 
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            timeout_cfg = httpx.Timeout(2.5, connect=1.0)
+            async with httpx.AsyncClient(timeout=timeout_cfg) as client:
                 headers = {
                     "x-api-key": self.api_key,
                     "X-VerbX-Shell": "saas",

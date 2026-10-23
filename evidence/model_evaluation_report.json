@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-19T06:20:45Z",
+  "timestamp": "2026-10-23T16:22:32Z",
   "model_name": "Signify-ISL-GeometricNormalizer-v1.0",
   "total_test_samples": 320,
   "signers_evaluated": [
@@ -8,142 +8,142 @@
     "Signer_C",
     "Signer_D_HeldOut"
   ],
-  "macro_f1_score": 0.8354,
-  "held_out_signer_macro_f1": 0.9037,
-  "mean_latency_ms": 1.4,
-  "unknown_rejection_accuracy": 0.525,
+  "macro_f1_score": 0.8957,
+  "held_out_signer_macro_f1": 0.8711,
+  "mean_latency_ms": 34.92,
+  "unknown_rejection_accuracy": 1.0,
   "confidence_threshold": 0.65,
   "temporal_window_frames": 3,
   "per_class_metrics": {
     "isl_good": {
       "precision": 1.0,
-      "recall": 0.775,
-      "f1": 0.873,
+      "recall": 1.0,
+      "f1": 1.0,
       "support": 40
     },
     "isl_bad": {
-      "precision": 0.973,
-      "recall": 0.9,
-      "f1": 0.935,
+      "precision": 1.0,
+      "recall": 0.975,
+      "f1": 0.987,
       "support": 40
     },
     "isl_stop": {
-      "precision": 0.909,
-      "recall": 1.0,
-      "f1": 0.952,
-      "support": 40
-    },
-    "isl_yes": {
-      "precision": 0.931,
-      "recall": 0.675,
-      "f1": 0.783,
-      "support": 40
-    },
-    "isl_no": {
-      "precision": 0.973,
-      "recall": 0.9,
-      "f1": 0.935,
-      "support": 40
-    },
-    "isl_food": {
-      "precision": 0.645,
-      "recall": 1.0,
-      "f1": 0.784,
-      "support": 40
-    },
-    "isl_water": {
-      "precision": 0.878,
-      "recall": 0.9,
+      "precision": 1.0,
+      "recall": 0.8,
       "f1": 0.889,
       "support": 40
     },
+    "isl_yes": {
+      "precision": 1.0,
+      "recall": 0.6,
+      "f1": 0.75,
+      "support": 40
+    },
+    "isl_no": {
+      "precision": 1.0,
+      "recall": 0.95,
+      "f1": 0.974,
+      "support": 40
+    },
+    "isl_food": {
+      "precision": 1.0,
+      "recall": 0.8,
+      "f1": 0.889,
+      "support": 40
+    },
+    "isl_water": {
+      "precision": 1.0,
+      "recall": 0.95,
+      "f1": 0.974,
+      "support": 40
+    },
     "UNKNOWN_SIGN": {
-      "precision": 0.538,
-      "recall": 0.525,
-      "f1": 0.532,
+      "precision": 0.541,
+      "recall": 1.0,
+      "f1": 0.702,
       "support": 40
     }
   },
   "confusion_matrix": [
     [
-      31,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
-      9
-    ],
-    [
-      0,
-      36,
-      0,
-      0,
-      0,
-      0,
-      0,
-      4
-    ],
-    [
-      0,
-      0,
       40,
       0,
       0,
       0,
       0,
+      0,
+      0,
+      0
+    ],
+    [
+      0,
+      39,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      32,
+      0,
+      0,
+      0,
+      0,
+      8
+    ],
+    [
+      0,
+      0,
+      0,
+      24,
+      0,
+      0,
+      0,
+      16
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      38,
+      0,
+      0,
+      1
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      32,
+      0,
+      8
+    ],
+    [
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      38,
       0
     ],
     [
       0,
       0,
       0,
-      27,
-      0,
-      11,
-      0,
-      2
-    ],
-    [
       0,
       0,
       0,
       0,
-      36,
-      0,
-      1,
-      3
-    ],
-    [
-      0,
-      0,
-      0,
-      0,
-      0,
-      40,
-      0,
-      0
-    ],
-    [
-      0,
-      0,
-      4,
-      0,
-      0,
-      0,
-      36,
-      0
-    ],
-    [
-      0,
-      1,
-      0,
-      2,
-      1,
-      11,
-      4,
-      21
+      40
     ]
   ],
   "labels": [
