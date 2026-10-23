@@ -291,35 +291,67 @@ class SignDictionaryService:
                         explanation=f"Exact match ('{p}') found for '{phrase}'. ISL Grammar: {s.isl_grammar_structure or 'Standard ISL syntax'}."
                     )
 
-        # 2. Multi-word phrase containment in speech (e.g. "I want to ask how are you" -> "how are you")
+        # 2. Multi-word phrase containment in speech (longest phrase match takes precedence)
+        multi_candidates = []
         for s in all_signs:
             phrases = extract_phrases(s)
             for p in phrases:
                 p_clean = re.sub(r"[^\w\s]", "", p.lower()).strip()
                 p_tokens = p_clean.split()
                 if len(p_tokens) >= 2 and p_clean in cleaned:
-                    return ReverseMatchResponse(
-                        matched=True,
-                        query_phrase=phrase,
-                        matched_sign=s,
-                        isl_grammar_note=s.isl_grammar_structure,
-                        explanation=f"Recognized key conversational phrase '{p}' in input. ISL Grammar: {s.isl_grammar_structure or 'Standard ISL syntax'}."
-                    )
+                    multi_candidates.append((len(p_clean), s, p))
+        if multi_candidates:
+            multi_candidates.sort(key=lambda x: x[0], reverse=True)
+            best_len, best_sign, best_phrase = multi_candidates[0]
+            return ReverseMatchResponse(
+                matched=True,
+                query_phrase=phrase,
+                matched_sign=best_sign,
+                isl_grammar_note=best_sign.isl_grammar_structure,
+                explanation=f"Recognized key conversational phrase '{best_phrase}' in input. ISL Grammar: {best_sign.isl_grammar_structure or 'Standard ISL syntax'}."
+            )
 
         # 3. Keyword / Single token match for high-signal nouns/verbs (English and Hindi)
+        # Exclude common grammatical auxiliary particles so they don't shadow substantive domain words
+        COMMON_STOP_WORDS = {
+            "is", "am", "are", "was", "were", "be", "been", "being",
+            "the", "a", "an", "and", "but", "if", "or", "because", "as",
+            "until", "while", "of", "at", "by", "for", "with", "about",
+            "into", "through", "during", "before", "after", "to", "from",
+            "in", "out", "on", "off", "over", "under", "then", "once",
+            "here", "there", "all", "any", "both", "each", "few",
+            "other", "some", "such", "no", "nor", "not", "only",
+            "own", "same", "so", "than", "too", "very", "can", "will",
+            "just", "should", "now", "i", "you", "he", "she", "it", "we",
+            "they", "me", "him", "her", "us", "them", "my", "your", "his",
+            "their", "see", "doing", "today", "please", "some",
+            "है", "हैं", "हो", "था", "थी", "थे", "का", "की", "के", "में", "पर", "से", "को", "और", "चाहिए", "मुझे"
+        }
+
+        single_candidates = []
         for s in all_signs:
             phrases = extract_phrases(s)
             for p in phrases:
                 for word in p.split():
                     word_clean = re.sub(r"[^\w\s]", "", word.lower()).strip()
-                    if len(word_clean) >= 2 and (word_clean in tokens or word_clean == cleaned):
-                        return ReverseMatchResponse(
-                            matched=True,
-                            query_phrase=phrase,
-                            matched_sign=s,
-                            isl_grammar_note=s.isl_grammar_structure,
-                            explanation=f"Keyword '{word}' matches verified ISL sign '{s.display_name}'. ISL Grammar: {s.isl_grammar_structure or 'Standard ISL syntax'}."
-                        )
+                    if (
+                        len(word_clean) >= 3
+                        and word_clean not in COMMON_STOP_WORDS
+                        and (word_clean in tokens or word_clean == cleaned)
+                    ):
+                        single_candidates.append((len(word_clean), s, word_clean))
+
+        if single_candidates:
+            # Sort by keyword specificity (longer keyword first, e.g. "doctor" > "need")
+            single_candidates.sort(key=lambda x: x[0], reverse=True)
+            best_len, best_sign, best_word = single_candidates[0]
+            return ReverseMatchResponse(
+                matched=True,
+                query_phrase=phrase,
+                matched_sign=best_sign,
+                isl_grammar_note=best_sign.isl_grammar_structure,
+                explanation=f"Keyword '{best_word}' matches verified ISL sign '{best_sign.display_name}'. ISL Grammar: {best_sign.isl_grammar_structure or 'Standard ISL syntax'}."
+            )
 
         # 4. No verified match found: explicit honest rejection
         return ReverseMatchResponse(

@@ -71,13 +71,14 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
   const [savingDialogue, setSavingDialogue] = useState(false);
   const [saveToast, setSaveToast] = useState<string | null>(null);
 
-  // Live browser SpeechRecognition refs & 15s recording window state
+  // Live browser SpeechRecognition refs & 10s recording window state
   const recognitionRef = useRef<any>(null);
+  const transcriptTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [micStatusText, setMicStatusText] = useState<string | null>(null);
-  const [recordingTimeLeft, setRecordingTimeLeft] = useState<number>(15);
+  const [recordingTimeLeft, setRecordingTimeLeft] = useState<number>(10);
   const timerIntervalRef = useRef<any>(null);
   const hardStopTimeoutRef = useRef<any>(null);
-  const isRecordingActiveRef = useRef<boolean>(false);
+  const isUserRecordingRef = useRef<boolean>(false);
   const finalTranscriptRef = useRef<string>("");
   const debounceMatchRef = useRef<any>(null);
 
@@ -99,7 +100,7 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
   // Abort speech recognition and clean timers on unmount
   useEffect(() => {
     return () => {
-      isRecordingActiveRef.current = false;
+      isUserRecordingRef.current = false;
       clearTimers();
       if (recognitionRef.current) {
         recognitionRef.current.abort();
@@ -107,8 +108,52 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
     };
   }, []);
 
+  // Unified phrase-matcher & ISL clip player function
+  const matchAndPlayISL = async (rawText: string) => {
+    if (!rawText || !rawText.trim()) {
+      setReverseResult(null);
+      return;
+    }
+
+    // 1. Clean transcript (lowercase, strip extraneous punctuation)
+    const cleaned = rawText
+      .toLowerCase()
+      .replace(/[^\w\s\u0900-\u097F]/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+
+    // Ensure transcript textarea and state reflect the input
+    setTranscript(rawText);
+    if (transcriptTextareaRef.current && transcriptTextareaRef.current.value !== rawText) {
+      transcriptTextareaRef.current.value = rawText;
+    }
+    translateTranscript(rawText);
+
+    try {
+      // 2. Query reverse phrase match against 28 ISL signs and conversational keys
+      const match = await api.matchReversePhrase(cleaned || rawText);
+      setReverseResult(match);
+
+      // Transition session state in orchestrator
+      await api.orchestratorTransition("CONFIRM_TRANSCRIPT", { transcript: rawText }, "speech-session");
+
+      // 3 & 4. Play matching ISL video or animated element immediately
+      if (match.matched && match.matched_sign) {
+        setTimeout(() => {
+          const videoEl = document.querySelector<HTMLVideoElement>(".sign-video-player");
+          if (videoEl) {
+            videoEl.currentTime = 0;
+            videoEl.play().catch(() => {});
+          }
+        }, 50);
+      }
+    } catch (e) {
+      console.error("matchAndPlayISL error:", e);
+    }
+  };
+
   const stopVoiceRecording = () => {
-    isRecordingActiveRef.current = false;
+    isUserRecordingRef.current = false;
     clearTimers();
     if (recognitionRef.current) {
       try {
@@ -119,12 +164,13 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
       recognitionRef.current = null;
     }
     setIsRecording(false);
-    setRecordingTimeLeft(15);
+    setRecordingTimeLeft(10);
     setMicStatusText(null);
 
-    // Commit any finalized transcript upon session completion
-    if (finalTranscriptRef.current.trim()) {
-      handleManualTranscriptChange(finalTranscriptRef.current.trim());
+    // Commit finalized transcript and trigger final ISL matching function
+    const textToMatch = finalTranscriptRef.current.trim() || transcript.trim();
+    if (textToMatch) {
+      matchAndPlayISL(textToMatch);
     }
   };
 
@@ -147,98 +193,104 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
       clearTimers();
 
       finalTranscriptRef.current = "";
-      isRecordingActiveRef.current = true;
-      setRecordingTimeLeft(15);
+      isUserRecordingRef.current = true;
+      setRecordingTimeLeft(10);
       setIsRecording(true);
-      setMicStatusText("Recording live... 15s window active. Speak clearly.");
+      setMicStatusText("Listening... 10s left");
 
       const rec = new SpeechRecognition();
-      // Dynamically bind recognition language to the selected UI toggle:
-      // When EN is active: recognition.lang = 'en-IN' (or 'en-US')
-      // When HI (हिंदी) is active: recognition.lang = 'hi-IN'
-      rec.lang = sourceLang === "hi" ? "hi-IN" : "en-IN";
       rec.continuous = true;
       rec.interimResults = true;
       rec.maxAlternatives = 1;
+      // Dynamically bind recognition language to selected toggle:
+      // When EN is active: en-US; When HI is active: hi-IN
+      rec.lang = (selectedLanguage === "HI" || sourceLang === "hi") ? "hi-IN" : "en-US";
 
-      // 15-second persistent countdown window
+      // 1. Strict 10-second recording countdown timer
       const startTime = Date.now();
-      const WINDOW_DURATION_SEC = 15;
+      const TOTAL_RECORDING_SECONDS = 10;
 
       timerIntervalRef.current = setInterval(() => {
         const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
-        const remaining = Math.max(0, WINDOW_DURATION_SEC - elapsedSec);
+        const remaining = Math.max(0, TOTAL_RECORDING_SECONDS - elapsedSec);
         setRecordingTimeLeft(remaining);
         if (remaining > 0) {
-          setMicStatusText(`Listening... ${remaining}s remaining in recording window.`);
+          setMicStatusText(`Listening... ${remaining}s left`);
         } else {
-          setMicStatusText("15s recording window reached. Processing final transcript...");
+          setMicStatusText("10s recording window reached. Processing final transcript...");
           stopVoiceRecording();
         }
       }, 250);
 
       hardStopTimeoutRef.current = setTimeout(() => {
-        if (isRecordingActiveRef.current) {
+        if (isUserRecordingRef.current) {
           stopVoiceRecording();
         }
-      }, WINDOW_DURATION_SEC * 1000);
+      }, TOTAL_RECORDING_SECONDS * 1000);
 
       rec.onstart = () => {
         setIsRecording(true);
       };
 
-      // Real-time live transcript rendering & keyword-to-ISL clip routing
+      // 2. Fix live transcript rendering in editable textarea
+      let finalTranscript = "";
       rec.onresult = (event: any) => {
-        let interimText = "";
+        let interimTranscript = "";
 
         for (let i = event.resultIndex; i < event.results.length; ++i) {
-          const res = event.results[i];
-          if (res.isFinal) {
-            const piece = res[0].transcript.trim();
-            if (piece) {
-              finalTranscriptRef.current = finalTranscriptRef.current
-                ? `${finalTranscriptRef.current} ${piece}`
-                : piece;
-            }
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript + " ";
+            finalTranscriptRef.current = finalTranscript;
           } else {
-            interimText += res[0].transcript;
+            interimTranscript += event.results[i][0].transcript;
           }
         }
 
-        const liveText = (finalTranscriptRef.current + (interimText ? ` ${interimText}` : "")).trim();
-        if (liveText) {
-          // Stream interim and committed text into transcript container in real time
-          setTranscript(liveText);
+        const activeTranscript = (finalTranscript + interimTranscript).trim();
 
-          // Route transcribed phrase/keywords immediately to ISL sign clip
-          if (debounceMatchRef.current) clearTimeout(debounceMatchRef.current);
-          debounceMatchRef.current = setTimeout(() => {
-            checkReverseSignMatch(liveText);
-          }, 150);
+        // Update live transcript container instantly
+        if (transcriptTextareaRef.current) {
+          transcriptTextareaRef.current.value = activeTranscript;
+          transcriptTextareaRef.current.dispatchEvent(new Event("input", { bubbles: true }));
         }
+        setTranscript(activeTranscript);
 
-        if (finalTranscriptRef.current) {
-          translateTranscript(finalTranscriptRef.current);
-        }
+        // Debounced live ISL sign routing during active speech
+        if (debounceMatchRef.current) clearTimeout(debounceMatchRef.current);
+        debounceMatchRef.current = setTimeout(() => {
+          if (activeTranscript) {
+            matchAndPlayISL(activeTranscript);
+          }
+        }, 350);
       };
 
+      // 4. Robust error handling
       rec.onerror = (e: any) => {
         console.warn("Speech recognition error:", e.error);
         if (e.error === "no-speech") {
-          // Ambient pause: do not terminate the 15-second window
+          // Ambient pause: do not terminate 10s window early
           return;
         }
 
-        if (e.error === "not-allowed" || e.error === "audio-capture") {
-          isRecordingActiveRef.current = false;
+        if (e.error === "not-allowed") {
+          isUserRecordingRef.current = false;
           clearTimers();
           setIsRecording(false);
-          setMicStatusText(null);
-          alert("Microphone permission was denied or audio device not found. Please verify browser permissions.");
+          setMicStatusText("Microphone permission denied. Please allow microphone access in browser settings.");
+          alert("Microphone permission was denied. Please allow microphone access in your browser settings to use speech recognition.");
           return;
         }
 
-        if (!isRecordingActiveRef.current) {
+        if (e.error === "audio-capture") {
+          isUserRecordingRef.current = false;
+          clearTimers();
+          setIsRecording(false);
+          setMicStatusText("Audio capture device unavailable. Check your microphone.");
+          alert("No microphone audio device detected. Please connect a working microphone.");
+          return;
+        }
+
+        if (!isUserRecordingRef.current) {
           setIsRecording(false);
           setMicStatusText(null);
         }
@@ -249,11 +301,11 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
         setMicStatusText("Spoken phrase not recognized. Please speak closer to microphone.");
       };
 
+      // If 10-second countdown has not finished and isUserRecording is true, restart immediately
       rec.onend = () => {
-        // If the 15-second timer has not elapsed, automatically restart recognition so ambient pauses do not terminate prematurely
-        if (isRecordingActiveRef.current) {
+        if (isUserRecordingRef.current) {
           setTimeout(() => {
-            if (isRecordingActiveRef.current && recognitionRef.current) {
+            if (isUserRecordingRef.current && recognitionRef.current) {
               try {
                 recognitionRef.current.start();
               } catch (err: any) {
@@ -262,7 +314,7 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
                 }
               }
             }
-          }, 60);
+          }, 50);
         } else {
           setIsRecording(false);
           setMicStatusText(null);
@@ -309,21 +361,11 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
   }, [currentUser]);
 
   const handleSimulateSpeech = async (spokenText: string) => {
+    if (transcriptTextareaRef.current) {
+      transcriptTextareaRef.current.value = spokenText;
+    }
     setTranscript(spokenText);
-    setReverseResult(null);
-
-    // Call STT endpoint
-    const res = await api.transcribeSpeech({
-      mockInputText: spokenText,
-      language: sourceLang
-    });
-    setTranscript(res.transcript);
-
-    // Auto-translate
-    translateTranscript(res.transcript);
-
-    // Evaluate Reverse Sign Route
-    checkReverseSignMatch(res.transcript);
+    await matchAndPlayISL(spokenText);
   };
 
   const translateTranscript = async (text: string) => {
@@ -340,27 +382,13 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
     }
   };
 
-  const checkReverseSignMatch = async (text: string) => {
-    if (!text || !text.trim()) return;
-    try {
-      // Normalize transcript text: lowercase and strip punctuation
-      const normalized = text
-        .toLowerCase()
-        .replace(/[\/\\#,+()$~%.'":*?<>{}[\]_`^=!?]/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-      const match = await api.matchReversePhrase(normalized || text);
-      setReverseResult(match);
-      await api.orchestratorTransition("CONFIRM_TRANSCRIPT", { transcript: text }, "speech-session");
-    } catch (e) {
-      console.error("Reverse match error:", e);
-    }
-  };
-
   const handleManualTranscriptChange = (newText: string) => {
     setTranscript(newText);
     translateTranscript(newText);
-    checkReverseSignMatch(newText);
+    if (debounceMatchRef.current) clearTimeout(debounceMatchRef.current);
+    debounceMatchRef.current = setTimeout(() => {
+      matchAndPlayISL(newText);
+    }, 350);
   };
 
   const copyTranscript = () => {
@@ -464,7 +492,7 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
                   startVoiceRecording();
                 }
               }}
-              title={isRecording ? "Stop recording speech" : "Click to speak via microphone"}
+              title={isRecording ? "Stop recording speech" : "Click to speak via microphone (10s active window)"}
             >
               {isRecording ? <MicOff size={32} /> : <Mic size={32} />}
             </button>
@@ -472,15 +500,15 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
             {isRecording && (
               <div className="recording-countdown-badge">
                 <span className="recording-pulse-dot" />
-                <span>Recording Live ({recordingTimeLeft}s remaining)</span>
+                <span>Listening... {recordingTimeLeft}s left</span>
               </div>
             )}
 
             <p className="mic-hint">
               {micStatusText ||
                 (isRecording
-                  ? `Listening to audio stream (${recordingTimeLeft}s remaining)...`
-                  : "Click microphone to speak (or select a quick test phrase below)")}
+                  ? `Listening... ${recordingTimeLeft}s left`
+                  : "Click microphone to speak (10-second active window) or select a quick test phrase below")}
             </p>
           </div>
 
@@ -508,6 +536,15 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
                 Live Speech Transcript (Editable):
               </label>
               <div className="flex items-center gap-2">
+                <button
+                  className="btn-primary flex items-center gap-1 text-xs py-1 px-2.5"
+                  onClick={() => matchAndPlayISL(transcript)}
+                  title="Translate transcript and match Indian Sign Language clip"
+                >
+                  <Sparkles size={13} />
+                  <span>Translate & Match ISL</span>
+                </button>
+
                 {transcript && (
                   <button
                     className="btn-secondary flex items-center gap-1 text-xs py-1 px-2"
@@ -528,11 +565,18 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
             </div>
 
             <textarea
+              ref={transcriptTextareaRef}
               id="transcript-input"
               rows={3}
               value={transcript}
               onChange={(e) => handleManualTranscriptChange(e.target.value)}
-              placeholder="Spoken words will appear here. Deaf or hearing users can edit or type corrections directly..."
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  matchAndPlayISL(transcript);
+                }
+              }}
+              placeholder="Spoken words will appear here in real time. Edit or type corrections directly (Press Enter or click Translate & Match ISL)..."
               className="transcript-textarea"
             />
 
@@ -688,7 +732,7 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
             <div className="unsupported-reverse-container">
               <div className="unsupported-banner">
                 <AlertCircle size={20} className="text-amber" />
-                <span>Text-Only Fallback (No Hallucinated Signs)</span>
+                <span>Unsupported Sign Alert: Text-Only Fallback (No Hallucinated Signs)</span>
               </div>
 
               <div className="unsupported-content">
