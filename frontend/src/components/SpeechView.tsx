@@ -78,6 +78,7 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
   const [recordingTimeLeft, setRecordingTimeLeft] = useState<number>(10);
   const timerIntervalRef = useRef<any>(null);
   const hardStopTimeoutRef = useRef<any>(null);
+  const restartTimeoutRef = useRef<any>(null);
   const isUserRecordingRef = useRef<boolean>(false);
   const finalTranscriptRef = useRef<string>("");
   const latestTranscriptRef = useRef<string>("");
@@ -91,6 +92,10 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
     if (hardStopTimeoutRef.current) {
       clearTimeout(hardStopTimeoutRef.current);
       hardStopTimeoutRef.current = null;
+    }
+    if (restartTimeoutRef.current) {
+      clearTimeout(restartTimeoutRef.current);
+      restartTimeoutRef.current = null;
     }
     if (debounceMatchRef.current) {
       clearTimeout(debounceMatchRef.current);
@@ -159,6 +164,8 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
 
     if (recognitionRef.current) {
       try {
+        recognitionRef.current.onend = null;
+        recognitionRef.current.onerror = null;
         recognitionRef.current.stop();
       } catch (err) {
         console.warn("Could not stop recognition cleanly:", err);
@@ -188,7 +195,7 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
     }
   };
 
-  // Fresh instance speech recognition runner (avoids dead instance / InvalidStateError & hardware locks)
+  // Single-instance speech recognition runner with recursion guard
   const startRecognitionLoop = () => {
     if (!isUserRecordingRef.current) return;
     const SpeechRecognition =
@@ -197,6 +204,9 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
 
     if (recognitionRef.current) {
       try {
+        recognitionRef.current.onend = null;
+        recognitionRef.current.onerror = null;
+        recognitionRef.current.onresult = null;
         recognitionRef.current.abort();
       } catch (e) {}
       recognitionRef.current = null;
@@ -209,6 +219,8 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
       rec.maxAlternatives = 1;
       const isHindi = selectedLanguage === "HI" || sourceLang === "hi";
       rec.lang = isHindi ? "hi-IN" : "en-US";
+
+      let hasErrorOccurred = false;
 
       rec.onstart = () => {
         setIsRecording(true);
@@ -253,43 +265,47 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
         if (e.error === "no-speech") {
           return;
         }
+
+        hasErrorOccurred = true;
+        isUserRecordingRef.current = false;
+        clearTimers();
+        setIsRecording(false);
+
         if (e.error === "network") {
-          setMicStatusText("Speech network error: unable to reach speech service. Check internet.");
+          setMicStatusText(
+            "Speech network error: Google Speech server unreachable. (If using Brave/VPN, disable shields or use test phrases below)."
+          );
           return;
         }
         if (e.error === "not-allowed" || e.error === "permission-denied") {
-          isUserRecordingRef.current = false;
-          clearTimers();
-          setIsRecording(false);
-          setMicStatusText("Microphone permission denied.");
+          setMicStatusText("Microphone permission denied. Click the site tune/lock icon in address bar to Allow.");
           alert("Microphone permission was denied. Please allow microphone access in your browser settings.");
           return;
         }
         if (e.error === "audio-capture") {
-          isUserRecordingRef.current = false;
-          clearTimers();
-          setIsRecording(false);
-          setMicStatusText("Microphone audio device unavailable or in use.");
+          setMicStatusText("Microphone audio device unavailable or in use by another application.");
           alert("No microphone audio device detected or another app is using it.");
           return;
         }
         if (e.error === "service-not-allowed") {
-          isUserRecordingRef.current = false;
-          clearTimers();
-          setIsRecording(false);
-          setMicStatusText("Speech service not allowed by browser. Disable shields or use Chrome.");
+          setMicStatusText("Speech service not allowed by browser. Disable shields or use Google Chrome.");
           return;
         }
+        setMicStatusText(`Speech recognition error (${e.error}). Use quick test phrases or type directly.`);
       };
 
       rec.onend = () => {
-        // If countdown timer is still active, restart SpeechRecognition gracefully
+        if (hasErrorOccurred) {
+          setIsRecording(false);
+          return;
+        }
+        // If countdown timer is still active and no error, gently reconnect after pause
         if (isUserRecordingRef.current) {
-          setTimeout(() => {
-            if (isUserRecordingRef.current) {
+          restartTimeoutRef.current = setTimeout(() => {
+            if (isUserRecordingRef.current && !hasErrorOccurred) {
               startRecognitionLoop();
             }
-          }, 100);
+          }, 400);
         } else {
           setIsRecording(false);
         }
