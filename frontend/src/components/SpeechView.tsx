@@ -73,6 +73,12 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
 
   // Live browser SpeechRecognition refs & 10s recording window state
   const recognitionRef = useRef<any>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const animFrameRef = useRef<number | null>(null);
+  const [audioLevel, setAudioLevel] = useState<number>(0);
+
   const transcriptTextareaRef = useRef<HTMLTextAreaElement>(null);
   const [micStatusText, setMicStatusText] = useState<string | null>(null);
   const [recordingTimeLeft, setRecordingTimeLeft] = useState<number>(10);
@@ -97,11 +103,23 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
     }
   };
 
-  // Abort speech recognition and clean timers on unmount
+  // Abort speech recognition and clean hardware/timers on unmount
   useEffect(() => {
     return () => {
       isUserRecordingRef.current = false;
       clearTimers();
+      if (animFrameRef.current) {
+        cancelAnimationFrame(animFrameRef.current);
+        animFrameRef.current = null;
+      }
+      if (audioContextRef.current) {
+        audioContextRef.current.close().catch(() => {});
+        audioContextRef.current = null;
+      }
+      if (mediaStreamRef.current) {
+        mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+        mediaStreamRef.current = null;
+      }
       if (recognitionRef.current) {
         recognitionRef.current.abort();
       }
@@ -155,6 +173,20 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
   const stopVoiceRecording = () => {
     isUserRecordingRef.current = false;
     clearTimers();
+
+    if (animFrameRef.current) {
+      cancelAnimationFrame(animFrameRef.current);
+      animFrameRef.current = null;
+    }
+    if (audioContextRef.current) {
+      audioContextRef.current.close().catch(() => {});
+      audioContextRef.current = null;
+    }
+    if (mediaStreamRef.current) {
+      mediaStreamRef.current.getTracks().forEach((track) => track.stop());
+      mediaStreamRef.current = null;
+    }
+
     if (recognitionRef.current) {
       try {
         recognitionRef.current.stop();
@@ -164,6 +196,7 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
       recognitionRef.current = null;
     }
     setIsRecording(false);
+    setAudioLevel(0);
     setRecordingTimeLeft(10);
     setMicStatusText(null);
 
@@ -174,7 +207,106 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
     }
   };
 
-  const startVoiceRecording = () => {
+  // Fresh instance speech recognition runner (avoids dead instance / InvalidStateError)
+  const startRecognitionLoop = () => {
+    if (!isUserRecordingRef.current) return;
+    const SpeechRecognition =
+      (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    if (!SpeechRecognition) return;
+
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch (e) {}
+      recognitionRef.current = null;
+    }
+
+    try {
+      const rec = new SpeechRecognition();
+      rec.continuous = true;
+      rec.interimResults = true;
+      rec.maxAlternatives = 1;
+      const isHindi = selectedLanguage === "HI" || sourceLang === "hi";
+      rec.lang = isHindi ? "hi-IN" : "en-US";
+
+      rec.onstart = () => {
+        setIsRecording(true);
+      };
+
+      rec.onresult = (event: any) => {
+        let interimTranscript = "";
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscriptRef.current += event.results[i][0].transcript + " ";
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+
+        const activeTranscript = (finalTranscriptRef.current + interimTranscript).trim();
+        if (activeTranscript) {
+          if (transcriptTextareaRef.current) {
+            transcriptTextareaRef.current.value = activeTranscript;
+            transcriptTextareaRef.current.dispatchEvent(new Event("input", { bubbles: true }));
+          }
+          setTranscript(activeTranscript);
+
+          if (debounceMatchRef.current) clearTimeout(debounceMatchRef.current);
+          debounceMatchRef.current = setTimeout(() => {
+            matchAndPlayISL(activeTranscript);
+          }, 350);
+        }
+      };
+
+      rec.onerror = (e: any) => {
+        console.warn("Speech recognition error:", e.error);
+        if (e.error === "no-speech") {
+          return;
+        }
+        if (e.error === "network") {
+          setMicStatusText("Speech network error. Ensure internet connection is active.");
+          return;
+        }
+        if (e.error === "not-allowed") {
+          isUserRecordingRef.current = false;
+          clearTimers();
+          setIsRecording(false);
+          setMicStatusText("Microphone permission denied in browser.");
+          alert("Microphone permission was denied. Please allow microphone access in your browser settings.");
+          return;
+        }
+        if (e.error === "audio-capture") {
+          isUserRecordingRef.current = false;
+          clearTimers();
+          setIsRecording(false);
+          setMicStatusText("Audio capture device unavailable.");
+          alert("No microphone audio device detected. Please connect a working microphone.");
+          return;
+        }
+      };
+
+      rec.onend = () => {
+        // If countdown timer is still active, spawn a fresh SpeechRecognition instance!
+        if (isUserRecordingRef.current) {
+          setTimeout(() => {
+            if (isUserRecordingRef.current) {
+              startRecognitionLoop();
+            }
+          }, 60);
+        } else {
+          setIsRecording(false);
+          setMicStatusText(null);
+        }
+      };
+
+      rec.start();
+      recognitionRef.current = rec;
+    } catch (err) {
+      console.warn("Could not start SpeechRecognition instance:", err);
+    }
+  };
+
+  const startVoiceRecording = async () => {
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
@@ -186,149 +318,73 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
       return;
     }
 
+    // Step 1: Pre-request microphone stream to verify hardware & trigger browser permission prompt
     try {
-      if (recognitionRef.current) {
-        recognitionRef.current.abort();
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+
+      // AudioContext level visualizer
+      const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtx) {
+        const audioCtx = new AudioCtx();
+        audioContextRef.current = audioCtx;
+        const analyser = audioCtx.createAnalyser();
+        analyser.fftSize = 64;
+        analyserRef.current = analyser;
+        const source = audioCtx.createMediaStreamSource(stream);
+        source.connect(analyser);
+
+        const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        const updateLevel = () => {
+          if (!isUserRecordingRef.current) return;
+          analyser.getByteFrequencyData(dataArray);
+          let sum = 0;
+          for (let i = 0; i < dataArray.length; i++) {
+            sum += dataArray[i];
+          }
+          const avg = sum / dataArray.length;
+          setAudioLevel(Math.min(100, Math.round((avg / 128) * 100)));
+          animFrameRef.current = requestAnimationFrame(updateLevel);
+        };
+        updateLevel();
       }
-      clearTimers();
-
-      finalTranscriptRef.current = "";
-      isUserRecordingRef.current = true;
-      setRecordingTimeLeft(10);
-      setIsRecording(true);
-      setMicStatusText("Listening... 10s left");
-
-      const rec = new SpeechRecognition();
-      rec.continuous = true;
-      rec.interimResults = true;
-      rec.maxAlternatives = 1;
-      // Dynamically bind recognition language to selected toggle:
-      // When EN is active: en-US; When HI is active: hi-IN
-      rec.lang = (selectedLanguage === "HI" || sourceLang === "hi") ? "hi-IN" : "en-US";
-
-      // 1. Strict 10-second recording countdown timer
-      const startTime = Date.now();
-      const TOTAL_RECORDING_SECONDS = 10;
-
-      timerIntervalRef.current = setInterval(() => {
-        const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
-        const remaining = Math.max(0, TOTAL_RECORDING_SECONDS - elapsedSec);
-        setRecordingTimeLeft(remaining);
-        if (remaining > 0) {
-          setMicStatusText(`Listening... ${remaining}s left`);
-        } else {
-          setMicStatusText("10s recording window reached. Processing final transcript...");
-          stopVoiceRecording();
-        }
-      }, 250);
-
-      hardStopTimeoutRef.current = setTimeout(() => {
-        if (isUserRecordingRef.current) {
-          stopVoiceRecording();
-        }
-      }, TOTAL_RECORDING_SECONDS * 1000);
-
-      rec.onstart = () => {
-        setIsRecording(true);
-      };
-
-      // 2. Fix live transcript rendering in editable textarea
-      let finalTranscript = "";
-      rec.onresult = (event: any) => {
-        let interimTranscript = "";
-
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) {
-            finalTranscript += event.results[i][0].transcript + " ";
-            finalTranscriptRef.current = finalTranscript;
-          } else {
-            interimTranscript += event.results[i][0].transcript;
-          }
-        }
-
-        const activeTranscript = (finalTranscript + interimTranscript).trim();
-
-        // Update live transcript container instantly
-        if (transcriptTextareaRef.current) {
-          transcriptTextareaRef.current.value = activeTranscript;
-          transcriptTextareaRef.current.dispatchEvent(new Event("input", { bubbles: true }));
-        }
-        setTranscript(activeTranscript);
-
-        // Debounced live ISL sign routing during active speech
-        if (debounceMatchRef.current) clearTimeout(debounceMatchRef.current);
-        debounceMatchRef.current = setTimeout(() => {
-          if (activeTranscript) {
-            matchAndPlayISL(activeTranscript);
-          }
-        }, 350);
-      };
-
-      // 4. Robust error handling
-      rec.onerror = (e: any) => {
-        console.warn("Speech recognition error:", e.error);
-        if (e.error === "no-speech") {
-          // Ambient pause: do not terminate 10s window early
-          return;
-        }
-
-        if (e.error === "not-allowed") {
-          isUserRecordingRef.current = false;
-          clearTimers();
-          setIsRecording(false);
-          setMicStatusText("Microphone permission denied. Please allow microphone access in browser settings.");
-          alert("Microphone permission was denied. Please allow microphone access in your browser settings to use speech recognition.");
-          return;
-        }
-
-        if (e.error === "audio-capture") {
-          isUserRecordingRef.current = false;
-          clearTimers();
-          setIsRecording(false);
-          setMicStatusText("Audio capture device unavailable. Check your microphone.");
-          alert("No microphone audio device detected. Please connect a working microphone.");
-          return;
-        }
-
-        if (!isUserRecordingRef.current) {
-          setIsRecording(false);
-          setMicStatusText(null);
-        }
-      };
-
-      rec.onnomatch = () => {
-        console.info("Speech recognition onnomatch event.");
-        setMicStatusText("Spoken phrase not recognized. Please speak closer to microphone.");
-      };
-
-      // If 10-second countdown has not finished and isUserRecording is true, restart immediately
-      rec.onend = () => {
-        if (isUserRecordingRef.current) {
-          setTimeout(() => {
-            if (isUserRecordingRef.current && recognitionRef.current) {
-              try {
-                recognitionRef.current.start();
-              } catch (err: any) {
-                if (err.name !== "InvalidStateError") {
-                  console.warn("Auto-restart recognition attempt:", err);
-                }
-              }
-            }
-          }, 50);
-        } else {
-          setIsRecording(false);
-          setMicStatusText(null);
-        }
-      };
-
-      rec.start();
-      recognitionRef.current = rec;
-    } catch (err) {
-      console.warn("Could not start SpeechRecognition:", err);
-      setIsRecording(false);
-      clearTimers();
-      setMicStatusText(null);
+    } catch (permErr: any) {
+      console.warn("Microphone permission failed:", permErr);
+      alert("Microphone permission was denied. Please allow microphone access in your browser address bar.");
+      return;
     }
+
+    clearTimers();
+    finalTranscriptRef.current = "";
+    isUserRecordingRef.current = true;
+    setRecordingTimeLeft(10);
+    setIsRecording(true);
+    setMicStatusText("Listening... 10s left");
+
+    // 1. Strict 10-second recording countdown timer
+    const startTime = Date.now();
+    const TOTAL_RECORDING_SECONDS = 10;
+
+    timerIntervalRef.current = setInterval(() => {
+      const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
+      const remaining = Math.max(0, TOTAL_RECORDING_SECONDS - elapsedSec);
+      setRecordingTimeLeft(remaining);
+      if (remaining > 0) {
+        setMicStatusText(`Listening... ${remaining}s left`);
+      } else {
+        setMicStatusText("10s recording window reached. Processing final transcript...");
+        stopVoiceRecording();
+      }
+    }, 250);
+
+    hardStopTimeoutRef.current = setTimeout(() => {
+      if (isUserRecordingRef.current) {
+        stopVoiceRecording();
+      }
+    }, TOTAL_RECORDING_SECONDS * 1000);
+
+    // Launch speech recognition loop with auto-restart
+    startRecognitionLoop();
   };
 
   const samplePhrases = [
@@ -498,10 +554,25 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
             </button>
 
             {isRecording && (
-              <div className="recording-countdown-badge">
-                <span className="recording-pulse-dot" />
-                <span>Listening... {recordingTimeLeft}s left</span>
-              </div>
+              <>
+                <div className="recording-countdown-badge">
+                  <span className="recording-pulse-dot" />
+                  <span>Listening... {recordingTimeLeft}s left</span>
+                </div>
+
+                <div className="mic-audio-level-container" title="Live Microphone Input Level">
+                  {[0.4, 0.7, 1.0, 0.7, 0.4].map((mult, idx) => (
+                    <div
+                      key={idx}
+                      className="mic-audio-bar"
+                      style={{
+                        height: `${Math.max(4, Math.min(24, Math.round((audioLevel * mult) / 3)))}px`,
+                        backgroundColor: audioLevel > 5 ? "#2DD4BF" : "#64748B"
+                      }}
+                    />
+                  ))}
+                </div>
+              </>
             )}
 
             <p className="mic-hint">

@@ -1147,6 +1147,24 @@ html, body, #root, .app-layout {
   to { opacity: 1; transform: scale(1.15); }
 }
 
+.mic-audio-level-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  height: 24px;
+  margin-top: 0.5rem;
+}
+
+.mic-audio-bar {
+  width: 5px;
+  background-color: #2DD4BF;
+  border-radius: 9999px;
+  transition: height 0.08s ease;
+  min-height: 4px;
+  box-shadow: 0 0 8px rgba(45, 212, 191, 0.4);
+}
+
 .active-sign-animation {
   animation: signEnter 0.4s ease-out;
 }
