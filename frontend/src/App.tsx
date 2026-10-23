@@ -181,8 +181,8 @@ export const App: React.FC = () => {
 
       {/* Language Feedback Toast */}
       {languageToast && (
-        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] border border-teal-500/50 shadow-2xl text-xs font-semibold text-teal-300 backdrop-blur-xl animate-bounce">
-          <Languages size={15} className="text-teal-400" />
+        <div className="fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--bg-card)] border border-teal-500/50 shadow-2xl text-xs font-semibold text-teal-700 dark:text-teal-300 backdrop-blur-xl animate-bounce">
+          <Languages size={15} className="text-teal-600 dark:text-teal-400" />
           <span>{languageToast}</span>
         </div>
       )}

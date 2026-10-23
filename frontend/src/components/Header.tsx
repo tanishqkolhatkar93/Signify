@@ -123,7 +123,7 @@ export const Header: React.FC<HeaderProps> = ({
                 <ShieldAlert size={14} className="text-amber-400" />
               </div>
               <span className="consent-message">
-                <strong className="text-amber-300">Camera Consent Required:</strong> Real-time ISL recognition processes video 100% locally on your device. Zero frames are uploaded.
+                <strong className="text-amber-700 dark:text-amber-300">Camera Consent Required:</strong> Real-time ISL recognition processes video 100% locally on your device. Zero frames are uploaded.
               </span>
             </div>
             {onRequestConsent && (
