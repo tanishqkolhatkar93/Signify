@@ -154,24 +154,24 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
       <div className="relative">
         <button
           onClick={() => setDropdownOpen(!dropdownOpen)}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all text-xs font-medium text-slate-200"
+          className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 transition-all text-xs font-medium text-slate-800 dark:text-slate-200 shadow-sm"
           title="Google Account Menu"
         >
           {currentUser.picture ? (
             <img
               src={currentUser.picture}
               alt={currentUser.name}
-              className="w-5 h-5 rounded-full object-cover border border-emerald-400"
+              className="w-5 h-5 rounded-full object-cover border border-emerald-500"
               referrerPolicy="no-referrer"
             />
           ) : (
-            <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-[10px]">
+            <div className="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold text-[10px]">
               {currentUser.name.charAt(0).toUpperCase()}
             </div>
           )}
-          <span className="font-semibold text-white max-w-[120px] truncate">{currentUser.name}</span>
-          <CheckCircle2 size={13} className="text-emerald-400" />
-          <ChevronDown size={13} className="text-slate-400" />
+          <span className="font-semibold text-slate-900 dark:text-white max-w-[120px] truncate">{currentUser.name}</span>
+          <CheckCircle2 size={13} className="text-emerald-600 dark:text-emerald-400" />
+          <ChevronDown size={13} className="text-slate-500 dark:text-slate-400" />
         </button>
 
         {dropdownOpen && (

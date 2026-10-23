@@ -500,6 +500,12 @@ html, body, #root, .app-layout {
   -webkit-text-fill-color: transparent;
 }
 
+:root[data-theme="light"] .hero-title {
+  background: linear-gradient(135deg, #0F172A 0%, #1E293B 70%, #0F766E 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 .hero-subtitle {
   font-size: 1rem;
   color: var(--text-muted);
@@ -2204,12 +2210,17 @@ html, body, #root, .app-layout {
 /* Footer */
 .site-footer {
   background-color: var(--bg-card);
-  color: var(--text-dim);
+  color: var(--text-muted);
   border-top: 1px solid var(--navy-border);
-  padding: 2rem 1.75rem;
+  padding: 2.25rem 1.75rem;
   font-size: 0.875rem;
   text-align: center;
   margin-top: auto;
+}
+
+.site-footer p strong {
+  color: var(--text-light);
+  font-weight: 800;
 }
 
 .footer-container {

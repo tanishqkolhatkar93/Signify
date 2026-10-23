@@ -84,29 +84,29 @@
   /* Pristine Editorial Light Surfaces */
   --bg-page: #F8FAFC;
   --bg-surface: #FFFFFF;
-  --bg-card: rgba(255, 255, 255, 0.95);
+  --bg-card: rgba(255, 255, 255, 0.98);
   --bg-card-hover: #FFFFFF;
   --bg-card-solid: #FFFFFF;
-  --header-bg: rgba(255, 255, 255, 0.88);
+  --header-bg: rgba(255, 255, 255, 0.94);
   --input-bg: #FFFFFF;
 
   /* Structural Light Borders & Insets */
   --navy-dark: #0F172A;
-  --navy-border: rgba(15, 23, 42, 0.08);
+  --navy-border: rgba(15, 23, 42, 0.12);
   --navy-border-hover: #0D9488;
-  --card-bevel: inset 0 1px 0 0 #FFFFFF;
-  --card-bevel-hover: inset 0 1px 0 0 #FFFFFF, 0 0 0 1px rgba(13, 148, 136, 0.2);
+  --card-bevel: inset 0 1px 0 0 #FFFFFF, 0 1px 3px rgba(15, 23, 42, 0.05);
+  --card-bevel-hover: inset 0 1px 0 0 #FFFFFF, 0 0 0 1px rgba(13, 148, 136, 0.3);
 
-  /* High-Contrast Light Typography */
+  /* High-Contrast Light Typography (WCAG AAA Compliant) */
   --text-main: #0F172A;
-  --text-muted: #475569;
-  --text-dim: #94A3B8;
+  --text-muted: #334155;
+  --text-dim: #64748B;
   --text-light: #0F172A;
 
   /* Crisp Jewel Accents */
   --teal-primary: #0D9488;
   --teal-accent: #0F766E;
-  --teal-light: #0D9488;
+  --teal-light: #0F766E;
   --teal-bg: #F0FDFA;
   --teal-border: #99F6E4;
 

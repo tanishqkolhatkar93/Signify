@@ -309,27 +309,26 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
           onClick={() => setShowImportModal(false)}
         >
           <div
-            className="bg-slate-900 border border-slate-700 rounded-xl max-w-lg w-full p-6 shadow-2xl relative my-auto"
-            style={{ backgroundColor: "#0f172a", color: "#f8fafc" }}
+            className="bg-[var(--bg-card-solid)] border border-[var(--navy-border)] rounded-2xl max-w-lg w-full p-6 shadow-2xl relative my-auto text-[var(--text-main)]"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setShowImportModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-light)] p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
             >
               <X size={20} />
             </button>
-            <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
-              <PlusCircle size={18} className="text-emerald-400" />
+            <h3 className="text-lg font-bold text-[var(--text-light)] mb-2 flex items-center gap-2">
+              <PlusCircle size={18} className="text-emerald-600 dark:text-emerald-400" />
               Import Reviewed Vocabulary Entry
             </h3>
-            <p className="text-xs text-slate-400 mb-3">
+            <p className="text-xs text-[var(--text-muted)] mb-3">
               Paste a validated ISL sign specification in JSON format to dynamically register it into the SQLite dictionary database without modifying code.
             </p>
 
             {currentUser && (
-              <div className="flex items-center gap-2 mb-4 px-3 py-2 bg-indigo-950/40 border border-indigo-500/30 rounded text-xs text-indigo-300">
-                <User size={14} className="text-indigo-400" />
+              <div className="flex items-center gap-2 mb-4 px-3 py-2 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-500/30 rounded text-xs text-indigo-800 dark:text-indigo-300">
+                <User size={14} className="text-indigo-600 dark:text-indigo-400" />
                 <span>Authenticated Contributor: <strong>{currentUser.name}</strong> ({currentUser.email})</span>
               </div>
             )}
@@ -337,7 +336,7 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
             <form onSubmit={handleImportSubmit}>
               <textarea
                 rows={10}
-                className="w-full font-mono text-xs bg-slate-950 border border-slate-800 rounded p-3 text-slate-200 focus:outline-none focus:border-indigo-500 mb-4"
+                className="w-full font-mono text-xs bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded p-3 text-slate-900 dark:text-slate-200 focus:outline-none focus:border-indigo-500 mb-4"
                 placeholder={`{
   "id": "isl_custom_greeting",
   "display_name": "Welcome",
@@ -363,10 +362,10 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
 
               {importStatus && (
                 <div
-                  className={`p-3 rounded text-xs mb-3 ${
+                  className={`p-3 rounded text-xs mb-3 font-medium ${
                     importStatus.startsWith("Success")
-                      ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                      : "bg-red-500/20 text-red-300 border border-red-500/40"
+                      ? "bg-emerald-50 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/40"
+                      : "bg-red-50 dark:bg-red-500/20 text-red-800 dark:text-red-300 border border-red-200 dark:border-red-500/40"
                   }`}
                 >
                   {importStatus}
@@ -404,13 +403,12 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
           onClick={() => setSelectedSignForModal(null)}
         >
           <div
-            className="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative overflow-hidden flex flex-col gap-4 max-h-[90vh] overflow-y-auto my-auto"
-            style={{ backgroundColor: "#0f172a", color: "#f8fafc" }}
+            className="bg-[var(--bg-card-solid)] border border-[var(--navy-border)] rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative overflow-hidden flex flex-col gap-4 max-h-[90vh] overflow-y-auto my-auto text-[var(--text-main)]"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setSelectedSignForModal(null)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white bg-slate-800/80 p-1.5 rounded-full z-10 transition-colors"
+              className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-light)] bg-slate-100 dark:bg-slate-800 p-1.5 rounded-full z-10 transition-colors"
               title="Close Guide"
             >
               <X size={20} />
@@ -418,29 +416,29 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
 
             {/* Header */}
             <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-teal-500/20 text-teal-300 border border-teal-500/30">
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-teal-50 dark:bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-200 dark:border-teal-500/30">
                   {selectedSignForModal.category}
                 </span>
                 {selectedSignForModal.sign_type && (
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
+                  <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700">
                     {selectedSignForModal.sign_type}
                   </span>
                 )}
-                <span className="text-xs text-slate-400 ml-auto mr-8 font-mono">
+                <span className="text-xs text-[var(--text-dim)] ml-auto mr-8 font-mono">
                   {selectedSignForModal.id}
                 </span>
               </div>
-              <h3 className="text-2xl font-black text-white">
+              <h3 className="text-2xl font-black text-[var(--text-light)]">
                 {selectedSignForModal.display_name}
               </h3>
-              <p className="text-sm text-slate-300 mt-1">
+              <p className="text-sm text-[var(--text-muted)] mt-1 font-medium">
                 {selectedSignForModal.meaning}
               </p>
             </div>
 
             {/* High-Res SVG Graphic Display */}
-            <div className="bg-slate-950/90 rounded-xl border border-slate-800 p-2 flex items-center justify-center aspect-[4/3] max-h-[320px] overflow-hidden shadow-inner">
+            <div className="bg-slate-950 rounded-xl border border-slate-800 p-2 flex items-center justify-center aspect-[4/3] max-h-[320px] overflow-hidden shadow-inner">
               <img
                 src={selectedSignForModal.media.asset_url}
                 alt={selectedSignForModal.display_name}
@@ -449,11 +447,11 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
             </div>
 
             {/* Step-by-Step Anatomical Instructions */}
-            <div className="bg-slate-800/60 border border-sky-500/30 rounded-xl p-4">
-              <div className="flex items-center gap-2 text-sky-300 font-bold text-xs uppercase tracking-wider mb-2">
+            <div className="bg-sky-50 dark:bg-slate-800/60 border border-sky-200 dark:border-sky-500/30 rounded-xl p-4">
+              <div className="flex items-center gap-2 text-sky-800 dark:text-sky-300 font-bold text-xs uppercase tracking-wider mb-1.5">
                 <span>🖐️ Step-by-Step Hand & Finger Placement:</span>
               </div>
-              <p className="text-sm text-slate-100 font-medium leading-relaxed">
+              <p className="text-sm text-slate-800 dark:text-slate-100 font-medium leading-relaxed">
                 {selectedSignForModal.hand_configuration}
               </p>
             </div>
@@ -475,35 +473,35 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
             )}
 
             {/* Bilingual Translation Buttons */}
-            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-800">
+            <div className="grid grid-cols-2 gap-3 pt-2 border-t border-slate-200 dark:border-slate-800">
               <button
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 transition-all text-left"
+                className="flex items-center justify-between p-3.5 rounded-xl bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 transition-all text-left shadow-sm group"
                 onClick={() => speak(selectedSignForModal.english_text, "en")}
               >
                 <div>
-                  <span className="text-[10px] font-bold text-teal-400 uppercase tracking-wider block">
-                    English
+                  <span className="text-[10px] font-bold text-teal-700 dark:text-teal-400 uppercase tracking-wider block">
+                    English Audio
                   </span>
-                  <span className="text-sm font-semibold text-white">
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">
                     {selectedSignForModal.english_text}
                   </span>
                 </div>
-                <Volume2 size={16} className="text-teal-400 shrink-0" />
+                <Volume2 size={16} className="text-teal-600 dark:text-teal-400 shrink-0 group-hover:scale-110 transition-transform" />
               </button>
 
               <button
-                className="flex items-center justify-between p-3 rounded-xl bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 transition-all text-left"
+                className="flex items-center justify-between p-3.5 rounded-xl bg-white dark:bg-slate-800/80 hover:bg-slate-50 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 transition-all text-left shadow-sm group"
                 onClick={() => speak(selectedSignForModal.hindi_text, "hi")}
               >
                 <div>
-                  <span className="text-[10px] font-bold text-teal-400 uppercase tracking-wider block">
-                    Hindi (हिंदी)
+                  <span className="text-[10px] font-bold text-teal-700 dark:text-teal-400 uppercase tracking-wider block">
+                    Hindi Audio (हिंदी)
                   </span>
-                  <span className="text-sm font-semibold text-white">
+                  <span className="text-sm font-bold text-slate-900 dark:text-white">
                     {selectedSignForModal.hindi_text}
                   </span>
                 </div>
-                <Volume2 size={16} className="text-teal-400 shrink-0" />
+                <Volume2 size={16} className="text-teal-600 dark:text-teal-400 shrink-0 group-hover:scale-110 transition-transform" />
               </button>
             </div>
           </div>

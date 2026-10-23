@@ -114,41 +114,41 @@ export const TestEvidenceView: React.FC = () => {
       {coverage && (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 p-5 rounded-2xl bg-[var(--bg-card)] border border-[var(--navy-border)] shadow-[var(--card-bevel)] text-[var(--text-main)]">
           <div className="flex items-center gap-3.5">
-            <div className="p-2.5 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30">
+            <div className="p-2.5 rounded-xl bg-indigo-50 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-400 border border-indigo-200 dark:border-indigo-500/30">
               <Layers size={20} />
             </div>
             <div>
-              <div className="text-xl font-extrabold tracking-tight">{coverage.total_entries} Signs</div>
+              <div className="text-xl font-extrabold tracking-tight text-[var(--text-light)]">{coverage.total_entries} Signs</div>
               <div className="text-xs text-[var(--text-muted)] font-medium">Curated ISL Vocabulary</div>
             </div>
           </div>
 
           <div className="flex items-center gap-3.5">
-            <div className="p-2.5 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+            <div className="p-2.5 rounded-xl bg-emerald-50 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30">
               <ShieldCheck size={20} />
             </div>
             <div>
-              <div className="text-xl font-extrabold tracking-tight">{coverage.verified_count} Verified</div>
+              <div className="text-xl font-extrabold tracking-tight text-[var(--text-light)]">{coverage.verified_count} Verified</div>
               <div className="text-xs text-[var(--text-muted)] font-medium">{coverage.categories.length} Practical Categories</div>
             </div>
           </div>
 
           <div className="flex items-center gap-3.5">
-            <div className="p-2.5 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+            <div className="p-2.5 rounded-xl bg-cyan-50 dark:bg-cyan-500/20 text-cyan-800 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-500/30">
               <Users size={20} />
             </div>
             <div>
-              <div className="text-xl font-extrabold tracking-tight">4 Signers</div>
+              <div className="text-xl font-extrabold tracking-tight text-[var(--text-light)]">4 Signers</div>
               <div className="text-xs text-[var(--text-muted)] font-medium">Cross-Signer Split</div>
             </div>
           </div>
 
           <div className="flex items-center gap-3.5">
-            <div className="p-2.5 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+            <div className="p-2.5 rounded-xl bg-amber-50 dark:bg-amber-500/20 text-amber-800 dark:text-amber-400 border border-amber-200 dark:border-amber-500/30">
               <Activity size={20} />
             </div>
             <div>
-              <div className="text-xl font-extrabold tracking-tight">{coverage.media_coverage_percent}%</div>
+              <div className="text-xl font-extrabold tracking-tight text-[var(--text-light)]">{coverage.media_coverage_percent}%</div>
               <div className="text-xs text-[var(--text-muted)] font-medium">Visual Media Coverage</div>
             </div>
           </div>
@@ -163,7 +163,7 @@ export const TestEvidenceView: React.FC = () => {
               <Cpu size={16} className="text-teal" />
               <span>Overall Macro F1</span>
             </div>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-500/15 text-teal-400 border border-teal-500/30">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-teal-50 dark:bg-teal-500/15 text-teal-700 dark:text-teal-400 border border-teal-200 dark:border-teal-500/30">
               +12.4% vs Base
             </span>
           </div>
@@ -177,7 +177,7 @@ export const TestEvidenceView: React.FC = () => {
               <Users size={16} className="text-emerald" />
               <span>Held-Out Signer D F1</span>
             </div>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30">
               Zero Leakage
             </span>
           </div>
@@ -191,7 +191,7 @@ export const TestEvidenceView: React.FC = () => {
               <Activity size={16} className="text-cyan" />
               <span>Inference Latency</span>
             </div>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-50 dark:bg-cyan-500/15 text-cyan-800 dark:text-cyan-400 border border-cyan-200 dark:border-cyan-500/30">
               Real-Time Edge
             </span>
           </div>
@@ -205,7 +205,7 @@ export const TestEvidenceView: React.FC = () => {
               <CheckCircle2 size={16} className="text-emerald" />
               <span>Acceptance Pass Rate</span>
             </div>
-            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 dark:bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/30">
               TC1-TC4 Pass
             </span>
           </div>

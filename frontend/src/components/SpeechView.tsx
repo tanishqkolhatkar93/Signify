@@ -547,7 +547,7 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
 
             <p className="mic-hint">
               {micStatusText ? (
-                <span className={micStatusText.toLowerCase().includes("error") || micStatusText.toLowerCase().includes("denied") || micStatusText.toLowerCase().includes("blocked") ? "text-amber-400 font-medium" : "text-emerald-400 font-medium"}>
+                <span className={micStatusText.toLowerCase().includes("error") || micStatusText.toLowerCase().includes("denied") || micStatusText.toLowerCase().includes("blocked") ? "text-amber-700 dark:text-amber-400 font-semibold" : "text-emerald-700 dark:text-emerald-400 font-semibold"}>
                   {micStatusText}
                 </span>
               ) : (
@@ -627,8 +627,8 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
             />
 
             {saveToast && (
-              <div className="p-2 my-2 text-xs bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded flex items-center gap-2">
-                <Check size={14} />
+              <div className="p-2 my-2 text-xs bg-emerald-50 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/40 rounded flex items-center gap-2">
+                <Check size={14} className="text-emerald-600 dark:text-emerald-400" />
                 <span>{saveToast}</span>
               </div>
             )}
@@ -808,52 +808,53 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
           onClick={() => setShowHistoryModal(false)}
         >
           <div
-            className="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative text-slate-200 max-h-[85vh] flex flex-col my-auto"
+            className="bg-[var(--bg-card-solid)] border border-[var(--navy-border)] rounded-2xl max-w-xl w-full p-6 shadow-2xl relative text-[var(--text-main)] max-h-[85vh] flex flex-col my-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <button
               onClick={() => setShowHistoryModal(false)}
-              className="absolute top-4 right-4 text-slate-400 hover:text-white"
+              className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-light)] p-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              title="Close"
             >
               <X size={20} />
             </button>
 
-            <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-              <History size={18} className="text-emerald-400" />
+            <h3 className="text-lg font-bold text-[var(--text-light)] mb-1 flex items-center gap-2">
+              <History size={18} className="text-emerald-600 dark:text-emerald-400" />
               Saved Private Conversation History
             </h3>
-            <p className="text-xs text-slate-400 mb-4">
+            <p className="text-xs text-[var(--text-muted)] mb-4">
               Stored securely under your Google account ({currentUser?.email}) in SQLite database.
             </p>
 
             <div className="overflow-y-auto flex-1 space-y-3 pr-1">
               {savedConversations.length === 0 ? (
-                <div className="text-center py-8 text-slate-500 text-xs">
+                <div className="text-center py-8 text-[var(--text-muted)] text-xs">
                   No saved conversations found. Use "Save Dialogue" in the Speech view to preserve critical discussions.
                 </div>
               ) : (
                 savedConversations.map((item) => (
-                  <div key={item.id} className="p-3 rounded-lg bg-slate-950 border border-slate-800 relative group">
-                    <div className="flex justify-between items-start gap-2 mb-1">
-                      <span className="text-xs font-semibold text-white">{item.title}</span>
+                  <div key={item.id} className="p-3.5 rounded-xl bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 relative group shadow-sm">
+                    <div className="flex justify-between items-start gap-2 mb-1.5">
+                      <span className="text-xs font-bold text-[var(--text-light)]">{item.title}</span>
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-slate-500">
+                        <span className="text-[10px] text-[var(--text-dim)] font-medium">
                           {new Date(item.created_at).toLocaleDateString()}
                         </span>
                         <button
                           onClick={() => handleDeleteConversation(item.id)}
-                          className="text-slate-500 hover:text-red-400"
+                          className="text-slate-400 hover:text-red-500 transition-colors"
                           title="Delete entry"
                         >
                           <Trash2 size={13} />
                         </button>
                       </div>
                     </div>
-                    <p className="text-xs text-slate-300 font-mono bg-slate-900/60 p-2 rounded mb-1">
+                    <p className="text-xs text-slate-800 dark:text-slate-300 font-mono bg-slate-50 dark:bg-slate-900/60 border border-slate-100 dark:border-slate-800/60 p-2.5 rounded-lg mb-1.5">
                       {item.transcript}
                     </p>
                     {item.translation && (
-                      <p className="text-xs text-teal-300 font-mono bg-teal-950/40 p-2 rounded">
+                      <p className="text-xs text-teal-800 dark:text-teal-300 font-mono bg-teal-50/70 dark:bg-teal-950/40 border border-teal-200/60 dark:border-teal-900/40 p-2.5 rounded-lg">
                         Translation: {item.translation}
                       </p>
                     )}
@@ -862,7 +863,7 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
               )}
             </div>
 
-            <div className="pt-4 border-t border-slate-800 flex justify-end">
+            <div className="pt-4 border-t border-slate-200 dark:border-slate-800 flex justify-end">
               <button
                 className="btn btn-secondary text-xs"
                 onClick={() => setShowHistoryModal(false)}

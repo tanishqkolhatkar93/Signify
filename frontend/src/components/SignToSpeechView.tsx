@@ -335,14 +335,14 @@ export const SignToSpeechView: React.FC<SignToSpeechViewProps> = ({
             </div>
             <div className="flex items-center gap-2">
               {modelLoading && (
-                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                  <RefreshCw size={11} className="animate-spin" />
+                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] bg-amber-50 dark:bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-200 dark:border-amber-500/30 font-medium">
+                  <RefreshCw size={11} className="animate-spin text-amber-600 dark:text-amber-400" />
                   <span>Loading MediaPipe...</span>
                 </div>
               )}
               {trackingActive && (
-                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                  <CheckCircle size={11} />
+                <div className="flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] bg-emerald-50 dark:bg-emerald-500/20 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-500/30 font-medium">
+                  <CheckCircle size={11} className="text-emerald-600 dark:text-emerald-400" />
                   <span>MediaPipe 3D Live</span>
                 </div>
               )}
@@ -461,7 +461,7 @@ export const SignToSpeechView: React.FC<SignToSpeechViewProps> = ({
               <div className="speech-actions-box">
                 <div className="flex items-center justify-between mb-2">
                   <h4>Bilingual Speech Synthesizer</h4>
-                  <span className="text-[11px] font-bold text-teal-300 bg-teal-500/10 px-2 py-0.5 rounded-full border border-teal-500/30">
+                  <span className="text-[11px] font-bold text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-500/10 px-2 py-0.5 rounded-full border border-teal-200 dark:border-teal-500/30">
                     Target: {selectedLanguage === "HI" ? "Hindi (हिंदी)" : selectedLanguage === "EN" ? "English" : "ISL Dual"}
                   </span>
                 </div>
