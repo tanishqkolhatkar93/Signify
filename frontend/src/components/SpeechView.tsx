@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import {
   Mic,
   MicOff,
@@ -800,9 +801,16 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
       </div>
 
       {/* Saved Dialogues History Modal */}
-      {showHistoryModal && (
-        <div className="fixed inset-0 bg-black/75 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative text-slate-200 max-h-[85vh] flex flex-col">
+      {showHistoryModal && typeof document !== "undefined" && createPortal(
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
+          style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 99999 }}
+          onClick={() => setShowHistoryModal(false)}
+        >
+          <div
+            className="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative text-slate-200 max-h-[85vh] flex flex-col my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setShowHistoryModal(false)}
               className="absolute top-4 right-4 text-slate-400 hover:text-white"
@@ -863,7 +871,8 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

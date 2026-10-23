@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { LogOut, CheckCircle2, ChevronDown, AlertCircle, Settings, X, Hand, Zap, Languages } from "lucide-react";
 import type { UserProfile } from "../types";
 import { api } from "../services/api";
@@ -221,9 +222,16 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
         )}
 
         {/* Signer Calibration Modal */}
-        {calibrationModalOpen && (
-          <div className="fixed inset-0 bg-black/75 backdrop-blur-md z-50 flex items-center justify-center p-4">
-            <div className="bg-[var(--bg-card-solid)] border border-[var(--navy-border)] rounded-2xl max-w-md w-full p-6 shadow-2xl relative text-[var(--text-main)] shadow-[var(--card-bevel)]">
+        {calibrationModalOpen && typeof document !== "undefined" && createPortal(
+          <div
+            className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
+            style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 99999 }}
+            onClick={() => setCalibrationModalOpen(false)}
+          >
+            <div
+              className="bg-[var(--bg-card-solid)] border border-[var(--navy-border)] rounded-2xl max-w-md w-full p-6 shadow-2xl relative text-[var(--text-main)] shadow-[var(--card-bevel)] my-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
               <button
                 onClick={() => setCalibrationModalOpen(false)}
                 className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-light)]"
@@ -347,7 +355,8 @@ export const GoogleAuthButton: React.FC<GoogleAuthButtonProps> = ({ currentUser,
                 </div>
               </form>
             </div>
-          </div>
+          </div>,
+          document.body
         )}
       </div>
     );

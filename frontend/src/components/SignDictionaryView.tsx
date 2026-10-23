@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Search, Volume2, ShieldCheck, BookOpen, PlusCircle, CheckCircle2, X, User, Info, Maximize2 } from "lucide-react";
 import type { SignItem, SignManifest, UserProfile } from "../types";
 import { speechService } from "../services/speech";
@@ -40,6 +41,17 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
   const [importJson, setImportJson] = useState("");
   const [importStatus, setImportStatus] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (selectedSignForModal || showImportModal) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [selectedSignForModal, showImportModal]);
 
   const categories = ["all", ...Array.from(new Set(signs.map((s) => s.category)))];
   const types = ["all", "word", "phrase", "number", "fingerspelling"];
@@ -290,9 +302,17 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
       </div>
 
       {/* Zero-Code Vocabulary Import Modal */}
-      {showImportModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-xl max-w-lg w-full p-6 shadow-2xl relative">
+      {showImportModal && typeof document !== "undefined" && createPortal(
+        <div
+          className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
+          style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 99999 }}
+          onClick={() => setShowImportModal(false)}
+        >
+          <div
+            className="bg-slate-900 border border-slate-700 rounded-xl max-w-lg w-full p-6 shadow-2xl relative my-auto"
+            style={{ backgroundColor: "#0f172a", color: "#f8fafc" }}
+            onClick={(e) => e.stopPropagation()}
+          >
             <button
               onClick={() => setShowImportModal(false)}
               className="absolute top-4 right-4 text-slate-400 hover:text-white"
@@ -372,17 +392,20 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
               </div>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Anatomical Sign Detail Modal (High-Res Illustration & Finger Breakdown) */}
-      {selectedSignForModal && (
+      {selectedSignForModal && typeof document !== "undefined" && createPortal(
         <div
-          className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto"
+          style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 99999 }}
           onClick={() => setSelectedSignForModal(null)}
         >
           <div
-            className="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative overflow-hidden flex flex-col gap-4 max-h-[90vh] overflow-y-auto"
+            className="bg-slate-900 border border-slate-700/80 rounded-2xl max-w-2xl w-full p-6 shadow-2xl relative overflow-hidden flex flex-col gap-4 max-h-[90vh] overflow-y-auto my-auto"
+            style={{ backgroundColor: "#0f172a", color: "#f8fafc" }}
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -484,7 +507,8 @@ export const SignDictionaryView: React.FC<SignDictionaryViewProps> = ({ manifest
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
