@@ -214,8 +214,8 @@ An **Agentic AI** is like an **autonomous assistant**: it perceives its environm
 
 ### 1. Geometric Hand Landmark Normalization
 To make hand gesture recognition invariant to how far the user stands from the camera:
-- **Wrist Origin Translation**: The wrist landmark ($\#0$) is shifted to $(0, 0, 0)$.
-- **Palm Scale Normalization**: All coordinates are divided by the distance between the wrist and the middle finger base joint ($\#9$). This ensures that a child's hand close to the camera and an adult's hand far away produce the exact same spatial vector.
+- **Wrist Origin Translation**: The wrist landmark  is shifted to (0, 0, 0).
+- **Palm Scale Normalization**: All coordinates are divided by the distance between the wrist and the middle finger base joint . This ensures that a child's hand close to the camera and an adult's hand far away produce the exact same spatial vector.
 - **Finger Extension Angles**: The system computes dot products across joints to measure exact finger flexion states (curled vs. extended).
 
 ### 2. Micro-Tool Registry (`AgentToolRegistry`)
