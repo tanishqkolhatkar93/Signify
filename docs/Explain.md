@@ -214,14 +214,13 @@ An **Agentic AI** is like an **autonomous assistant**: it perceives its environm
 
 ### 1. Geometric Hand Landmark Normalization
 To make hand gesture recognition invariant to how far the user stands from the camera:
-$$\vec{p}_{normalized} = \frac{\vec{p}_i - \vec{p}_{wrist}}{\|\vec{p}_{middle\_mcp} - \vec{p}_{wrist}\|}$$
 - **Wrist Origin Translation**: The wrist landmark ($\#0$) is shifted to $(0, 0, 0)$.
 - **Palm Scale Normalization**: All coordinates are divided by the distance between the wrist and the middle finger base joint ($\#9$). This ensures that a child's hand close to the camera and an adult's hand far away produce the exact same spatial vector.
 - **Finger Extension Angles**: The system computes dot products across joints to measure exact finger flexion states (curled vs. extended).
 
 ### 2. Micro-Tool Registry (`AgentToolRegistry`)
 Every tool execution generates a metered, structured record:
-- **`VisionLandmarkClassifier`**: Evaluates normalized coordinates in $< 3\text{ms}$ on standard CPU.
+- **`VisionLandmarkClassifier`**: Evaluates normalized coordinates x,y,z on standard CPU.
 - **`VerbXSpeechSynthesizer`**: Synthesizes clean Devanagari Hindi (`hi-IN`) and English (`en-US`) audio waveforms without vocalizing literal punctuation marks.
 - **`VerbXSpeechTranscriber`**: Converts speech audio into normalized text with confidence scores.
 - **`VerbXTranslationEngine`**: Performs cross-lingual alignment between Hindi and English phrases.
