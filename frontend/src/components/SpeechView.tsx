@@ -403,8 +403,11 @@ export const SpeechView: React.FC<SpeechViewProps> = ({ currentUser, selectedLan
     if (!text.trim()) return;
     setIsTranslating(true);
     try {
-      const targetLang = sourceLang === "en" ? "hi" : "en";
-      const res = await api.translateText(text, sourceLang, targetLang);
+      // Automatic script detection: if input contains Devanagari (Hindi), translate to English!
+      const hasDevanagari = /[\u0900-\u097F]/.test(text);
+      const effectiveSource = hasDevanagari ? "hi" : sourceLang;
+      const targetLang = effectiveSource === "en" ? "hi" : "en";
+      const res = await api.translateText(text, effectiveSource, targetLang);
       setTranslation(res.translated_text);
     } catch (e) {
       console.error("Translation error:", e);
