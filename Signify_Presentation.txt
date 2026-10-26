@@ -1,0 +1,75 @@
+“Imagine having something important to say… but the person standing right in front of you cannot understand your language.
+
+
+For millions of Deaf people, this communication barrier is part of everyday life.
+
+Communication is a human right.
+
+
+The World Health Organization estimates that 430 million people worldwide having hearing loss.
+
+In India, government sources have cited an estimate of approximately 63 million people with significant hearing impairment.
+
+So we asked one question: What if technology could help bridge that communication gap?”
+
+“I build Signify — our AI-powered sign-language communication platform.
+
+Our goal is simple: help Deaf and hearing people communicate more easily, with less dependence on someone else to interpret every interaction.”
+
+Let me show you how it works.
+
+First, Signify makes its supported vocabulary visible. We’re demonstrating Indian Sign Language.
+
+Before enabling the camera, the application asks for consent.
+
+Now, when I perform a supported sign, computer vision extracts hand landmarks. Our recognition logic evaluates those landmarks and checks whether the result is reliable enough to use.
+
+Watch what happens next.
+
+The recognized meaning appears as text, and Signify can speak the corresponding phrase in English and Hindi.”
+
+
+demo 2-  Now lets see Speech to text and supported signs
+
+“Communication cannot be a one-way street.
+
+Now let’s reverse the interaction.
+
+A hearing person speaks. Signify converts that speech into text, 
+
+When the phrase matches our supported vocabulary, the application can display the corresponding verified ISL sign media.
+
+This creates a practical, two-way communication workflow, while making the boundary between supported and unsupported phrases clear.”
+
+demo 3 - Technical innovation 
+
+What makes Signify technically meaningful is how we combine these capabilities into one System.
+
+Our React and TypeScript frontend handles the user experience. MediaPipe extracts hand landmarks, our gesture classifier identifies supported signs, and a Python FastAPI backend coordinates processing and language-service integrations.
+
+A bounded orchestration layer routes tasks, validates results, and handles uncertain predictions.
+
+We are not simply adding a chatbot to a camera. We are building a system with defined actions, testable decisions, and explicit failure handling.”
+
+
+
+demo 4 - Now lets talk about Trust and Safety .
+
+“In accessibility technology, an incorrect answer can be worse than no answer.
+
+That’s why Signify includes an explicit unrecognized-sign state, makes its supported vocabulary visible, and asks for consent before recording or using a person’s camera input.
+
+We believe responsible AI starts with being transparent about what a system can—and cannot—do.
+
+
+demo 5 Emotional Ending - 
+
+Signify is more than a technical experiment
+
+It is the step toward a world where deaf people can communicate easily .
+
+The opportunity ahead is to work with Deaf communities and ISL experts, and evaluate the system through real-world usability testing.
+
+I'd especially love feedback from Deaf and hard-of-hearing people, ISL educators, accessibility practitioners, and developers.
+
+Thank You 

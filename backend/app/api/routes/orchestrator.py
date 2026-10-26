@@ -1,11 +1,16 @@
-from fastapi import APIRouter, Header
-from typing import Optional
+from fastapi import APIRouter, Header, Body
+from typing import Optional, List, Dict, Any
 from backend.app.schemas.orchestrator import (
     OrchestratorContext,
     TransitionRequest,
-    WorkflowAction
+    WorkflowAction,
+    ToolCapability,
+    ExecutionPlan,
+    GoalPlanRequest,
+    GoalExecutionResponse,
 )
 from backend.app.services.orchestration.agent import agent_orchestrator
+from backend.app.services.orchestration.planner import goal_planner
 from backend.app.services.auth.google_auth import google_auth_service
 
 router = APIRouter(prefix="/orchestrator", tags=["Agent Orchestrator"])
@@ -33,3 +38,39 @@ async def transition_state(
 async def reset_session(session_id: str = "default-session"):
     req = TransitionRequest(session_id=session_id, action=WorkflowAction.RESET)
     return await agent_orchestrator.handle_transition(req)
+
+# =====================================================================
+# Autonomous Dynamic Multi-Step Planning & Tool Discovery Endpoints
+# =====================================================================
+
+@router.get("/tools", response_model=List[ToolCapability])
+def discover_agent_tools():
+    """
+    Autonomous Tool Discovery Endpoint: Returns all introspected micro-tools,
+    contracts, latency estimations, and security boundaries.
+    """
+    return goal_planner.discover_tools()
+
+@router.post("/plan", response_model=ExecutionPlan)
+def generate_goal_plan(req: GoalPlanRequest):
+    """
+    Autonomous Goal Planning Endpoint: Synthesizes a directed acyclic execution plan (DAG)
+    to achieve the specified high-level communication goal.
+    """
+    return goal_planner.create_plan(
+        goal=req.goal,
+        session_id=req.session_id,
+        context=req.context_overrides
+    )
+
+@router.post("/execute-plan/{plan_id}", response_model=GoalExecutionResponse)
+async def execute_goal_plan(
+    plan_id: str,
+    inputs: Optional[Dict[str, Any]] = Body(default_factory=dict)
+):
+    """
+    Autonomous Plan Execution & Adaptive Replanning Endpoint:
+    Executes the generated DAG step-by-step, evaluating output confidence
+    and dynamically adapting the plan upon environmental uncertainty.
+    """
+    return await goal_planner.execute_plan(plan_id, inputs)

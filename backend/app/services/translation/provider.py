@@ -2,8 +2,10 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Optional, Dict
 import httpx
+import uuid
 from backend.app.schemas.translation import TranslationRequest, TranslationResponse
 from backend.app.core.config import settings
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +63,6 @@ class MockTranslationProvider(BaseTranslationProvider):
 
         translated = None
         if src == "en" and tgt == "hi":
-            # Lookup exact or partial phrase
             if text_clean in GLOSSARY_EN_TO_HI:
                 translated = GLOSSARY_EN_TO_HI[text_clean]
             else:
@@ -91,26 +92,26 @@ class MockTranslationProvider(BaseTranslationProvider):
             status="SUCCESS"
         )
 
-import uuid
-
 class VerbXTranslationProvider(BaseTranslationProvider):
     """
     Official VerbX Multilingual Translation Integration (api.verbxeco.com).
     Uses verbx-langshift model supporting English, Hindi, and 76 languages.
+    Equipped with a circuit breaker for instant local fallback when offline.
     """
     def __init__(self, api_key: str = settings.VERBX_API_KEY, base_url: str = settings.VERBX_API_BASE_URL):
         self.api_key = api_key
         self.base_url = base_url.rstrip("/")
         self.fallback = MockTranslationProvider()
         self.provider_name = "VerbX-Langshift (api.verbxeco.com)"
+        self._offline = False
 
     async def translate(self, request: TranslationRequest) -> TranslationResponse:
-        if not self.api_key or self.api_key == "your_verbx_api_key_here":
-            logger.info("VerbX API key not configured; using local translation fallback.")
+        if self._offline or os.environ.get("PROVIDER_MODE") == "mock" or getattr(settings, "PROVIDER_MODE", "mock") == "mock" or not self.api_key or self.api_key == "your_verbx_api_key_here":
             return await self.fallback.translate(request)
 
         try:
-            async with httpx.AsyncClient(timeout=10.0) as client:
+            timeout_cfg = httpx.Timeout(2.0, connect=0.5)
+            async with httpx.AsyncClient(timeout=timeout_cfg) as client:
                 headers = {
                     "x-api-key": self.api_key,
                     "X-VerbX-Shell": "saas",
@@ -136,10 +137,11 @@ class VerbXTranslationProvider(BaseTranslationProvider):
                         status="SUCCESS"
                     )
                 else:
-                    logger.warning(f"VerbX Translation HTTP {res.status_code}: {res.text}. Using fallback.")
+                    logger.warning(f"VerbX Translation HTTP {res.status_code}. Using fallback.")
                     return await self.fallback.translate(request)
         except Exception as e:
-            logger.error(f"Error reaching VerbX Translation: {e}. Using fallback.")
+            self._offline = True
+            logger.info(f"VerbX Translation unavailable ({e}). Switched to local fallback.")
             return await self.fallback.translate(request)
 
 def get_translation_provider() -> BaseTranslationProvider:
@@ -148,4 +150,3 @@ def get_translation_provider() -> BaseTranslationProvider:
     return MockTranslationProvider()
 
 translation_provider = get_translation_provider()
-

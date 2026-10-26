@@ -13,8 +13,9 @@ class TranscribeResponse(BaseModel):
     language: str
     confidence: float
     provider_name: str
-    is_mock: bool
+    is_mock: bool = True
     status: str = "SUCCESS"
+    error_message: Optional[str] = None
     notes: Optional[str] = None
 
 class SynthesizeRequest(BaseModel):
@@ -30,6 +31,7 @@ class SynthesizeResponse(BaseModel):
     audio_url: Optional[str] = None
     audio_mime: str = "audio/wav"
     provider_name: str
-    is_mock: bool
+    is_mock: bool = True
     status: str = "SUCCESS"
+    error_message: Optional[str] = None
 

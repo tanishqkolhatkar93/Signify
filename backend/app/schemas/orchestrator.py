@@ -85,3 +85,51 @@ class TransitionRequest(BaseModel):
     user_consented: Optional[bool] = None
     user_id: Optional[str] = None
     user_email: Optional[str] = None
+
+
+class ToolCapability(BaseModel):
+    name: str
+    description: str
+    category: str  # vision, speech, translation, dictionary, reasoning
+    requires_consent: bool = False
+    parameters_schema: Dict[str, Any] = Field(default_factory=dict)
+    estimated_latency_ms: float = 0.0
+    reliability_score: float = 1.0
+
+class PlanStep(BaseModel):
+    step_id: int
+    name: str
+    tool_name: str
+    action: str
+    rationale: str
+    parameters: Dict[str, Any] = Field(default_factory=dict)
+    depends_on: List[int] = Field(default_factory=list)
+    status: str = 'PENDING'  # PENDING, RUNNING, COMPLETED, SKIPPED, FAILED, REPLANNED
+    output: Optional[Dict[str, Any]] = None
+    execution_time_ms: float = 0.0
+
+class ExecutionPlan(BaseModel):
+    plan_id: str
+    goal: str
+    session_id: str
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    steps: List[PlanStep] = Field(default_factory=list)
+    status: str = 'INITIALIZED'  # INITIALIZED, IN_PROGRESS, COMPLETED, FAILED, ADAPTED
+    replan_count: int = 0
+    adaptation_log: List[str] = Field(default_factory=list)
+
+class GoalPlanRequest(BaseModel):
+    goal: str
+    session_id: str = 'default-session'
+    context_overrides: Optional[Dict[str, Any]] = None
+    allow_adaptive_replanning: bool = True
+
+class GoalExecutionResponse(BaseModel):
+    plan_id: str
+    goal: str
+    status: str
+    steps_executed: int
+    total_latency_ms: float
+    replan_occurred: bool
+    final_output: Dict[str, Any]
+    plan: ExecutionPlan

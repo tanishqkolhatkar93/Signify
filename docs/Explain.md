@@ -267,3 +267,4 @@ If asked: **"Why should Signify win this hackathon?"**, answer with these 4 poin
 2. **"It's bidirectional and linguistically authentic"**: It translates Indian Sign Language to English/Hindi speech, and translates speech back into authentic ISL signs grounded in official ISLRTC standards.
 3. **"It protects user privacy completely"**: Hand landmarks are extracted 100% locally on the device; zero camera video is ever uploaded to the cloud.
 4. **"It is uncertainty-aware and production-ready"**: It refuses to hallucinate signs or speech when confidence is below 65%, logs all decisions to an SQLite audit ledger, and has passed 100% of official acceptance tests.
+
