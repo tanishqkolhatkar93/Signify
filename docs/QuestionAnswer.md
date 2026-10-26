@@ -114,9 +114,8 @@ VerbX is an enterprise voice and language intelligence platform providing STT (V
 ### Q10: How do you recognize hand gestures without huge neural networks?
 **Answer:**  
 We use a **Scale-Invariant Normalized Geometric Classifier**:
-1. **Wrist Origin Translation:** We shift the wrist point ($\#0$) to the origin $(0, 0, 0)$.
-2. **Palm Scale Normalization:** We divide all coordinates by the Euclidean distance between the wrist and the middle finger base joint ($\#9$):
-   $$\vec{p}_{normalized} = \frac{\vec{p}_i - \vec{p}_{wrist}}{\|\vec{p}_{middle\_mcp} - \vec{p}_{wrist}\|}$$
+1. **Wrist Origin Translation:** We shift the wrist point to the origin $(0, 0, 0)$.
+2. **Palm Scale Normalization:** We divide all coordinates by the Euclidean distance between the wrist and the middle finger base joint .
 3. **Why this is powerful:** Whether an adult sits 2 meters away or a child holds their hand 30 cm from the webcam, the normalized coordinate vector is **mathematically identical**.
 4. **Sub-3ms Execution:** Evaluating finger flexion angles and vector distances takes less than 3 milliseconds on a standard CPU, enabling ultra-smooth 60+ FPS performance without an expensive GPU.
 
