@@ -1,0 +1,24 @@
+{
+  "id": "isl_custom_sorry",
+  "canonical_phrase": "sorry",
+  "display_name": "Sorry / Apology",
+  "category": "Courtesy",
+  "sign_type": "word",
+  "is_dynamic": true,
+  "validation_status": "verified",
+  "meaning": "Expressing regret, apology, or request for pardon.",
+  "english_text": "Sorry",
+  "hindi_text": "माफ़ कीजिए / क्षमा करें",
+  "phonetic_transcription": "maaf kee-ji-ye",
+  "hand_configuration": "Dominant hand forms an 'A' closed fist making circular rubbing motion clockwise over center of chest with contrite facial expression.",
+  "isl_grammar_structure": "Polite discourse interjection; placed initial or final in remedial communication.",
+  "cultural_linguistic_notes": "Chest contact signifies remorse originating from the heart in Indian sign linguistics.",
+  "approved_synonyms": ["sorry", "apologies", "apology", "forgive me", "maaf kijiye", "kshama"],
+  "media": {
+    "type": "svg_illustration",
+    "asset_url": "/assets/signs/isl_sorry.svg",
+    "description": "Fist rubbing circularly on center of chest in apology."
+  },
+  "source": "ISLRTC Section 2: Courtesy & Social Etiquette",
+  "license": "CC-BY-4.0"
+}

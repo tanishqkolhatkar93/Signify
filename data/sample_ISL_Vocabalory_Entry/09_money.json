@@ -1,0 +1,24 @@
+{
+  "id": "isl_custom_money",
+  "canonical_phrase": "money",
+  "display_name": "Money / Cash",
+  "category": "Daily Living",
+  "sign_type": "word",
+  "is_dynamic": true,
+  "validation_status": "verified",
+  "meaning": "Currency, cash, currency notes, or financial payment.",
+  "english_text": "Money / Rupees",
+  "hindi_text": "पैसे / रुपए / धन",
+  "phonetic_transcription": "pay-say",
+  "hand_configuration": "Dominant thumb rubs repeatedly against the tips of the index and middle fingers in a cash counting / banknote rubbing gesture.",
+  "isl_grammar_structure": "Quantitative / Transactional noun; used in counter questions (e.g. MONEY HOW-MUCH?).",
+  "cultural_linguistic_notes": "Standard transactional sign across Indian retail, banks, and post offices.",
+  "approved_synonyms": ["money", "cash", "rupees", "rupee", "paise", "payment", "cost"],
+  "media": {
+    "type": "svg_illustration",
+    "asset_url": "/assets/signs/isl_food.svg",
+    "description": "Thumb rubbing index and middle fingers in banknote transaction gesture."
+  },
+  "source": "ISLRTC Section 5: Banking, Trade & Commerce",
+  "license": "CC-BY-4.0"
+}

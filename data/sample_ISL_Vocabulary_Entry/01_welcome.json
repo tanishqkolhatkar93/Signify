@@ -1,0 +1,24 @@
+{
+  "id": "isl_custom_welcome",
+  "canonical_phrase": "welcome",
+  "display_name": "Welcome",
+  "category": "Greetings",
+  "sign_type": "word",
+  "is_dynamic": false,
+  "validation_status": "verified",
+  "meaning": "Friendly welcoming gesture to invite someone in or express hospitality.",
+  "english_text": "Welcome",
+  "hindi_text": "स्वागत है / पधारिए",
+  "phonetic_transcription": "swaa-gut hai",
+  "hand_configuration": "Both open palms facing upward, sweeping gently inward toward the chest with welcoming facial expression.",
+  "isl_grammar_structure": "Social discourse opening / polite greeting marker (Topic-Comment lexical sign).",
+  "cultural_linguistic_notes": "Widely used in public reception counters, hospitals, and educational sign discourse across India.",
+  "approved_synonyms": ["welcome", "you are welcome", "swagat hai", "padhariye"],
+  "media": {
+    "type": "svg_illustration",
+    "asset_url": "/assets/signs/isl_welcome.svg",
+    "description": "Both open palms sweeping toward chest in hospitality."
+  },
+  "source": "ISLRTC Supplementary Vocabulary - Conversational Social Signs",
+  "license": "CC-BY-4.0"
+}

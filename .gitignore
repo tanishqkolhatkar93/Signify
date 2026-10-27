@@ -61,3 +61,5 @@ evidence/recordings/*
 recordings/
 uploads/
 
+~$*
+*.tmp

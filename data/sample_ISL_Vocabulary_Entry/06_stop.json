@@ -1,0 +1,24 @@
+{
+  "id": "isl_custom_stop",
+  "canonical_phrase": "stop",
+  "display_name": "Stop / Halt",
+  "category": "Emergency",
+  "sign_type": "word",
+  "is_dynamic": true,
+  "validation_status": "verified",
+  "meaning": "Immediate cessation of motion, activity, or dangerous action.",
+  "english_text": "Stop",
+  "hindi_text": "रुको / बंद करो / थमो",
+  "phonetic_transcription": "roo-ko",
+  "hand_configuration": "Dominant flat open hand comes down sharply, pinky-edge first, onto flat horizontal non-dominant palm, halting abruptly.",
+  "isl_grammar_structure": "Imperative directive; marked by sudden spatial deceleration and alert facial non-manual marker.",
+  "cultural_linguistic_notes": "Critical safety sign in transit, public spaces, and emergency evacuation.",
+  "approved_synonyms": ["stop", "halt", "pause", "ruko", "band karo"],
+  "media": {
+    "type": "svg_illustration",
+    "asset_url": "/assets/signs/isl_stop.svg",
+    "description": "Dominant hand striking downward into open palm to signal an immediate halt."
+  },
+  "source": "ISLRTC Section 9: Safety & Public Directives",
+  "license": "CC-BY-4.0"
+}

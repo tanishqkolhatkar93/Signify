@@ -1,0 +1,24 @@
+{
+  "id": "isl_custom_medicine",
+  "canonical_phrase": "medicine",
+  "display_name": "Medicine / Tablets",
+  "category": "Medical / Emergency",
+  "sign_type": "word",
+  "is_dynamic": true,
+  "validation_status": "verified",
+  "meaning": "Pharmaceutical tablet, prescription pills, or therapeutic medication.",
+  "english_text": "Medicine",
+  "hindi_text": "दवाई / औषधि",
+  "phonetic_transcription": "duh-vaa-ee",
+  "hand_configuration": "Dominant middle finger tip grinds circularly in the center of the non-dominant open flat palm (mortar and pestle grinding motion).",
+  "isl_grammar_structure": "Medical lexical noun; used in imperative triage requests (e.g. MEDICINE NEED).",
+  "cultural_linguistic_notes": "Essential medical sign recognized across Indian hospitals and health clinics.",
+  "approved_synonyms": ["medicine", "medicines", "pills", "tablets", "dawai", "aushadhi", "medication"],
+  "media": {
+    "type": "svg_illustration",
+    "asset_url": "/assets/signs/isl_hospital.svg",
+    "description": "Middle finger circular grinding on flat open palm mimicking preparation of medicine."
+  },
+  "source": "ISLRTC Section 8: Healthcare & Clinical Emergency",
+  "license": "CC-BY-4.0"
+}

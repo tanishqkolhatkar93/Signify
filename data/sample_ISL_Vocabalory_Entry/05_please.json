@@ -1,0 +1,24 @@
+{
+  "id": "isl_custom_please",
+  "canonical_phrase": "please",
+  "display_name": "Please",
+  "category": "Courtesy",
+  "sign_type": "word",
+  "is_dynamic": false,
+  "validation_status": "verified",
+  "meaning": "Polite particle used to make a respectful request.",
+  "english_text": "Please",
+  "hindi_text": "कृपया / मेहरबानी करके",
+  "phonetic_transcription": "krip-yaa",
+  "hand_configuration": "Flat open dominant palm placed flat on upper chest, stroking downward gently with slight forward head bow.",
+  "isl_grammar_structure": "Modality marker: attaches before or after request predicate (e.g. HELP PLEASE).",
+  "cultural_linguistic_notes": "Essential social register marker used when requesting aid or services at public counters.",
+  "approved_synonyms": ["please", "kripya", "kindly", "meherbani"],
+  "media": {
+    "type": "svg_illustration",
+    "asset_url": "/assets/signs/isl_please.svg",
+    "description": "Flat palm smoothing downward on chest in courteous plea."
+  },
+  "source": "ISLRTC Section 2: Courtesy & Social Etiquette",
+  "license": "CC-BY-4.0"
+}

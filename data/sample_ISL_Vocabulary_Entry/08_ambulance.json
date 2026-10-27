@@ -1,0 +1,24 @@
+{
+  "id": "isl_custom_ambulance",
+  "canonical_phrase": "ambulance",
+  "display_name": "Ambulance",
+  "category": "Medical / Emergency",
+  "sign_type": "word",
+  "is_dynamic": true,
+  "validation_status": "verified",
+  "meaning": "Emergency medical transport vehicle with flashing siren.",
+  "english_text": "Ambulance",
+  "hindi_text": "एम्बुलेंस / रोगी वाहन",
+  "phonetic_transcription": "am-byoo-luns",
+  "hand_configuration": "Curved open dominant hand positioned above head rotating circularly, mimicking flashing beacon light, combined with driving motion.",
+  "isl_grammar_structure": "Urgent noun topic; triggers priority hospital dispatch syntax in triage.",
+  "cultural_linguistic_notes": "Recognized nationwide by emergency response teams and deaf dispatchers.",
+  "approved_synonyms": ["ambulance", "emergency vehicle", "paramedic", "rogi vahan"],
+  "media": {
+    "type": "svg_illustration",
+    "asset_url": "/assets/signs/isl_hospital.svg",
+    "description": "Rotating open palm over head representing flashing emergency beacon."
+  },
+  "source": "ISLRTC Section 8: Healthcare & Clinical Emergency",
+  "license": "CC-BY-4.0"
+}

@@ -1,0 +1,24 @@
+{
+  "id": "isl_custom_nice_to_meet_you",
+  "canonical_phrase": "nice to meet you",
+  "display_name": "Nice to meet you",
+  "category": "Greetings",
+  "sign_type": "phrase",
+  "is_dynamic": true,
+  "validation_status": "verified",
+  "meaning": "Polite introductory conversational pleasantry.",
+  "english_text": "Nice to meet you",
+  "hindi_text": "आपसे मिलकर खुशी हुई",
+  "phonetic_transcription": "aap-se mil-kar khoo-shee hoo-ee",
+  "hand_configuration": "Both index fingers pointing upwards facing each other, brought together until index knuckles touch (MEET), followed by thumbs up (GOOD / HAPPY).",
+  "isl_grammar_structure": "Compound idiom: [MEET] [GOOD] with reciprocal spatial directionality.",
+  "cultural_linguistic_notes": "Standard respectful opening during new introductions among signers in India.",
+  "approved_synonyms": ["nice to meet you", "pleased to meet you", "glad to meet you", "milkar khushi hui"],
+  "media": {
+    "type": "svg_illustration",
+    "asset_url": "/assets/signs/isl_nice_to_meet_you.svg",
+    "description": "Two index fingers converging together to represent two people meeting, followed by approval."
+  },
+  "source": "ISLRTC Section 1: Common Greetings & Social Conversational Idioms",
+  "license": "CC-BY-4.0"
+}

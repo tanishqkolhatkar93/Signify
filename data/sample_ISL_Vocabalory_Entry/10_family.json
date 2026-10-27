@@ -1,0 +1,24 @@
+{
+  "id": "isl_custom_family",
+  "canonical_phrase": "family",
+  "display_name": "Family",
+  "category": "Daily Living",
+  "sign_type": "word",
+  "is_dynamic": true,
+  "validation_status": "verified",
+  "meaning": "Household, parents and children family unit.",
+  "english_text": "Family",
+  "hindi_text": "परिवार / कुटुंब",
+  "phonetic_transcription": "puh-ri-vaar",
+  "hand_configuration": "Both hands form 'F' or cupped handshapes with fingertips touching at midline, then circling outward and touching wrists together to represent a complete household circle.",
+  "isl_grammar_structure": "Collective noun; acts as discourse topic in social introductions (e.g. MY FAMILY BIG).",
+  "cultural_linguistic_notes": "Central concept in Indian social communication; implies deep community and familial bonds.",
+  "approved_synonyms": ["family", "relatives", "household", "parivar", "kutumb"],
+  "media": {
+    "type": "svg_illustration",
+    "asset_url": "/assets/signs/isl_family.svg",
+    "description": "Both hands tracing an outward circle touching fingertips and wrists representing an enclosed family unit."
+  },
+  "source": "ISLRTC Section 3: Family & Relationships",
+  "license": "CC-BY-4.0"
+}

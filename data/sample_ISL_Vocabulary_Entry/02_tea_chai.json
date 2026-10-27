@@ -1,0 +1,24 @@
+{
+  "id": "isl_custom_tea",
+  "canonical_phrase": "tea",
+  "display_name": "Tea / Chai",
+  "category": "Daily Living",
+  "sign_type": "word",
+  "is_dynamic": true,
+  "validation_status": "verified",
+  "meaning": "Hot brewed tea beverage.",
+  "english_text": "Tea / Chai",
+  "hindi_text": "चाय",
+  "phonetic_transcription": "chaa-ee",
+  "hand_configuration": "Dominant hand forms an 'F' or pinched 'O' shape holding imaginary cup handle, moving to mouth with sipping head motion.",
+  "isl_grammar_structure": "Noun: acts as direct object in food/drink desire expressions (e.g. ME TEA WANT).",
+  "cultural_linguistic_notes": "Chai is a universal cultural fixture in Indian daily life; commonly used at hospitality counters and offices.",
+  "approved_synonyms": ["tea", "chai", "hot tea", "chai chahiye"],
+  "media": {
+    "type": "svg_illustration",
+    "asset_url": "/assets/signs/isl_tea.svg",
+    "description": "Hand miming holding teacup handle moving toward mouth."
+  },
+  "source": "ISLRTC Section 4: Daily Food & Beverages",
+  "license": "CC-BY-4.0"
+}
